@@ -1,0 +1,131 @@
+@use "sass:map";
+@import "./src/styles/pages/theme.scss";
+@import "./src/styles/pages/all.scss";
+
+.login {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f2f4f8;  // Background nhẹ nhàng và tinh tế
+
+    &_container {
+        background: #fff;
+        padding: 50px 70px;
+        border-radius: 12px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);  // Shadow nhẹ cho cảm giác nổi bật
+        max-width: 400px;
+        width: 100%;
+        transition: all 0.3s ease;
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    &_title {
+        font-weight: 700;
+        color: map.get($theme-colors, "main");
+        text-align: center;
+        margin-bottom: 24px;
+        display: flex;
+        justify-content: flex-start !important; 
+        align-items: center; /* Canh giữa dọc */
+        position: relative; /* Để căn chỉnh icon */
+        gap: 121px;
+
+        &_home-icon {
+            position: absolute;
+            
+            left: 20px; /* Căn lề trái cho icon */
+            font-size: 28px;
+            color: map.get($theme-colors, "main");
+            cursor: pointer;
+            transition: color 0.3s ease;
+        
+            &:hover {
+                color: #ff7e5f; /* Màu khi hover */
+            }
+        }
+        h2 {
+            font-size: 24px;
+            font-weight: 600;
+            color: map.get($theme-colors, "main");
+            text-align: center;
+        }
+    }
+
+    &_form {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    &_form_group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    &_label {
+        font-size: 16px;
+        font-weight: 600;
+        color: map.get($theme-colors, "normal-text");
+    }
+
+    &_button {
+        height: 48px;
+        font-size: 16px;
+        font-weight: 600;
+        color: #fff;
+        background: map.get($theme-colors, "main");
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: background 0.3s ease, transform 0.3s ease;
+        margin-left: 10px;
+
+        &:hover {
+            background: map.get($theme-colors, "main-dark");
+            transform: translateY(-2px);
+        }
+
+        &:active {
+            transform: translateY(0);
+        }
+    }
+
+    &_text {
+        text-align: center;
+        margin-top: 15px;
+        font-size: 14px;
+
+        a {
+            color: map.get($theme-colors, "main");
+            text-decoration: none;
+            font-weight: 600;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+}
+
+// Animations
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// Add media queries for responsiveness
+@media screen and (max-width: 600px) {
+    .login {
+        ._container {
+            padding: 40px 30px;
+        }
+    }
+}

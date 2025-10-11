@@ -1,0 +1,369 @@
+@use "sass:map";
+@import "./src/styles/pages/all.scss";
+
+.about-page {
+  padding: 4rem 2rem;
+  font-family: 'Poppins', sans-serif;
+  background-color: #fafafa;
+  color: #222;
+  margin-top: 10px;
+
+  h1, h2, h4, h5 {
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  p {
+    font-size: 1rem;
+    color: #555;
+  }
+
+  a {
+    text-decoration: none;
+    color: #111;
+    font-weight: 500;
+    margin-top: 0.5rem;
+    display: inline-block;
+    transition: all 0.3s ease;
+  }
+
+  // ================== Collection Section ==================
+  .collection-section {
+    text-align: center;
+    margin-bottom: 3rem;
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+    .shop_intro_wrapper {
+        width: 100%;
+        background-color: #fdfdfd; // tuỳ bạn, hoặc bỏ nếu muốn trong suốt
+        margin-top: -60px;
+
+        h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        .shop_intro {
+            width: 100%;
+            max-width: 100%;
+            font-size: 17px;
+            line-height: 1.8;
+            color: #333;
+            text-align: justify; // hoặc left nếu muốn đều trái
+            padding: 0 2rem;
+      }
+      
+      
+    }
+    
+    h1 {
+      font-size: 2.75rem;
+      margin-bottom: 1rem;
+      color: #111;
+    }
+
+    p {
+      max-width: 640px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .collection-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+
+      .collection-card {
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 16px;
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.04);
+        text-align: left;
+        opacity: 1;
+        transition: opacity 0.5s ease-in-out;
+      }
+
+      img {
+        width: 100%;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+      }
+
+      h4 {
+        font-size: 1.2rem;
+        margin: 0.5rem 0;
+      }
+
+      p {
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+    }
+  }
+
+  // ================== Features Section ==================
+  .features-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    text-align: center;
+    margin-bottom: 5rem;
+
+    .feature {
+      padding: 1.5rem;
+      background: linear-gradient(to bottom right, #fff, #f9f9f9);
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+      opacity: 1;
+      transition: opacity 0.5s ease-in-out;
+    }
+
+    i {
+      font-size: 2.2rem;
+      margin-bottom: 0.5rem;
+      color: #d10024;
+    }
+
+    h5 {
+      font-size: 1.05rem;
+      margin: 0.5rem 0;
+    }
+
+    p {
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+  }
+
+  // ================== Shop Categories ==================
+  .shop-category-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 2rem;
+    margin-bottom: 5rem;
+
+    .category-card {
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
+      text-align: center;
+      opacity: 1;
+      transition: opacity 0.5s ease-in-out;
+    }
+
+    img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    p {
+      padding: 1rem 0;
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: #222;
+      background-color: #fafafa;
+    }
+  }
+
+  // ================== Cosmetics Section ==================
+  .cosmetics-section {
+    margin-bottom: 5rem;
+    text-align: center;
+
+    h2 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: #111;
+    }
+
+    .tab-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+
+      button {
+        padding: 0.8rem 1.5rem;
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 30px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &.active {
+          background: #d10024;
+          color: #fff;
+        }
+
+        &:hover {
+          background: #f4f4f4;
+        }
+      }
+    }
+
+    .cosmetic-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+      opacity: 1;
+      transition: opacity 0.5s ease-in-out;
+
+      .cosmetic-card {
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 16px;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.05);
+        text-align: center;
+        opacity: 1;
+        transition: opacity 0.5s ease-in-out;
+
+        img {
+          width: 100%;
+          border-radius: 10px;
+          margin-bottom: 1rem;
+        }
+
+        h4 {
+          font-size: 1.1rem;
+          margin-bottom: 0.5rem;
+        }
+
+        p {
+          font-size: 0.95rem;
+          color: #555;
+        }
+      }
+    }
+  }
+  .skincare-section {
+    background-color: #f8f8f8; /* Màu nền sáng */
+    padding: 50px 20px;
+    text-align: center;
+
+    h2 {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 30px;
+        text-transform: uppercase;
+    }
+
+    .skincare-list {
+        list-style-type: none; /* Bỏ dấu chấm của list */
+        padding: 0;
+
+        li {
+            font-size: 1.1rem;
+            color: #555;
+            margin: 15px 0;
+            padding-left: 30px;
+            position: relative;
+            font-family: 'Arial', sans-serif;
+        }
+
+       
+
+        
+    }
+}
+
+
+  // ================== Testimonials ==================
+  .testimonial-section {
+    margin-bottom: 5rem;
+    text-align: center;
+
+    h2 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: #111;
+    }
+
+    .testimonial-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+
+    .testimonial-card {
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 14px;
+      font-style: italic;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    p {
+      margin-bottom: 1rem;
+      color: #333;
+    }
+
+    span {
+      display: block;
+      font-weight: 600;
+      color: #d10024;
+    }
+  }
+
+  // ================== CTA Banner ==================
+  .cta-banner {
+    text-align: center;
+    background: #d10024;
+    color: #fff;
+    padding: 3rem 0;
+    border-radius: 12px;
+
+    h2 {
+      font-size: 2.2rem;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    form {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+
+      input {
+        padding: 0.8rem 1rem;
+        border-radius: 25px;
+        border: none;
+        width: 300px;
+      }
+
+      button {
+        padding: 0.8rem 1.5rem;
+        background: #fff;
+        color: #d10024;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+      }
+    }
+  }
+
+  // ================== Responsive ==================
+  @media (max-width: 768px) {
+    .collection-section h1 {
+      font-size: 2rem;
+    }
+
+    .cosmetic-grid,
+    .collection-grid,
+    .shop-category-section,
+    .testimonial-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .tab-buttons {
+      flex-direction: column;
+    }
+  }
+}

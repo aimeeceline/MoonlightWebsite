@@ -1,0 +1,143 @@
+@use "sass:map";
+@import "./src/styles/pages/theme.scss";
+@import "./src/styles/pages/all.scss";
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: #1E1E2D; // 🌙 Màu tối cho header
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    width: 98%;
+    z-index: 1000;
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+
+        .menu-icon {
+            font-size: 22px;
+            cursor: pointer;
+            color: #ffffff; // 🌟 Icon trắng cho dễ nhìn
+            margin-left: 34px;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffffff; // 🌟 Logo trắng nổi bật trên nền tối
+
+            span {
+                color: map.get($theme-colors, "main");
+            }
+        }
+
+        .nav-search {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #2a2d3a; // 🌙 Nền tìm kiếm tối hơn để đồng bộ
+            padding: 5px 15px;
+            border-radius: 25px;
+            border: 1px solid #555;
+            transition: 0.3s;
+            margin-left: 59px;
+            width: 550px;
+
+            &:hover {
+                border-color: map.get($theme-colors, "main");
+            }
+
+            input {
+                border: none;
+                outline: none;
+                background: transparent;
+                padding: 10px;
+                width: 100%;
+                font-size: 16px;
+                color: white; // 🌟 Chữ trắng trên nền tối
+
+                &::placeholder {
+                    color: #bbb;
+                }
+            }
+
+            .search-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: map.get($theme-colors, "main");
+                color: white;
+                border: none;
+                padding: 10px;
+                border-radius: 50%;
+                cursor: pointer;
+                transition: 0.3s;
+
+                svg {
+                    width: 20px;
+                    height: 20px;
+                }
+
+                &:hover {
+                    background: #0056b3;
+                }
+            }
+        }        
+    }
+
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+
+        .icon {
+            font-size: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+            color: #ffffff; // 🌟 Icon trắng để nổi bật trên nền tối
+
+            &:hover {
+                color: map.get($theme-colors, "main");
+            }
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px; // khoảng cách giữa icon và tên
+          }
+          
+          .user-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: #555; // màu nền avatar, có thể thay bằng màu bạn thích
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+          
+            .icon {
+              font-size: 20px;
+            }
+          }
+          .error-message {
+            color: white;
+            font-weight: 500;
+          }
+          .user-name {
+            color: white;
+            font-weight: 500;
+          }
+    }          
+}
+@include Responsive($MEDIUM_DEVICE){
+    .header {
+        width: 540px !important;
+    }
+}

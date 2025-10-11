@@ -1,0 +1,465 @@
+@use "sass:map";
+@use "header.scss";
+@import "./src/styles/pages/all.scss";
+
+
+
+// $bannerImg: "./assets/User/images/banner/BaeBeauty.png"; 
+
+
+.header_top {
+    background-color: #f5f5f5; /* Màu mặc định */
+    //background-color: red; /* Màu ghi đè */
+}
+
+.header_top_left{
+    ul {
+        display: flex; // căn về một dòng
+        align-items: center;
+        list-style: none;
+        padding:10px 0 13px ;
+        column-gap: 30px;
+
+        li {
+            font-size: 14px;
+            display: inline-block;
+            color:  map.get($theme-colors, "normal-text");
+            display: flex;
+            align-items: center;
+            column-gap: 2px;
+        }
+        li:first-child {
+            position: relative;
+            &::after {
+                position: absolute;
+                right: -15px; // Căn thanh | ra giữa
+                top: 1px;
+                height: 20px;
+                width: 1px;
+                background: black;
+                opacity: 0.1;
+                content: "";
+            }
+        }
+
+    }
+}
+
+
+.header_top_right {
+    //background: red;
+    display: grid;
+    justify-content: flex-end;
+    align-items: center;
+    padding:10px 0 13px ;
+
+    
+    ul {
+        display: flex;
+        column-gap: 10px;
+        list-style: none; // Bỏ danh scahs các dấu chấmchấm
+
+        
+
+
+        a {
+            font-size: 14px;
+            display: inline-block;
+            color:  map.get($theme-colors, "normal-text");
+        }
+
+        
+        
+        li:last-child {
+            cursor: pointer;
+            margin-left: 10px;
+            
+            
+            span {
+                font-size: 14px;
+                margin-left: 2px;
+            }
+        }
+
+        
+    }
+}
+
+.marquee-wrapper {
+  overflow: hidden;
+  white-space: nowrap;
+  background: #414c62;
+  color: #ffffff;
+  padding: 5px 0;
+}
+
+.marquee {
+  display: inline-block;
+  padding-left: 100%;
+  animation: marquee 15s linear infinite;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.header_logo{
+    padding: 10px 0;
+    color: #414c62;
+}
+
+.header_menu{
+    padding: 24px 0;
+
+    ul {
+        display: flex;
+        justify-content: space-between;
+
+        li {
+            list-style: none;
+            position: relative;
+            a {
+                text-decoration: none;
+                font-size: 12px;
+                color: map.get($theme-colors, "bold-text");
+                text-transform: uppercase;
+                font-weight: bold;
+                letter-spacing: 2px;
+                transition: all 0.3s;
+                padding: 5px 0;
+                display: block;
+            }
+        }
+        li:hover .header_menu_dropdown {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .active a {
+            color: map.get($theme-colors, "main");
+
+        }
+
+        .header_menu_dropdown {
+            background: #222222;
+            display: block;
+            position: absolute;
+            width: 180px;
+            z-index: 9;
+            padding: 5px 0;
+            transition: all, 0.3s;
+            opacity: 0;
+            visibility: hidden;
+
+            li {
+                a {
+                    text-transform: capitalize;
+                    color: #ffff;
+                    font-weight: 400;
+                    padding: 5px 15px;
+                }
+
+                :hover {
+                    color: map.get($theme-colors, "main");
+                }
+            }
+
+        }
+        
+    }
+}
+
+
+.header_cart {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px 0;
+
+    ul {
+        display: flex;
+        align-items: center; // Đảm bảo icon và giá tiền thẳng hàng
+        margin-right: 20px;
+
+        li {
+            display: flex; // Cần thêm để căn chỉnh icon và số tiền
+            align-items: center;
+            list-style: none;
+            position: relative;
+            margin-left: 20px;
+
+            svg {
+                font-size: 25px;
+                color: map.get($theme-colors, "normal-text");
+            }
+
+            .cart-price {
+                margin-left: 20px; // Tạo khoảng cách giữa icon và số tiền
+            }
+
+            span {
+                color: white;
+                background: map.get($theme-colors, "main");
+                position: absolute;
+                height: 20px;
+                width: 20px;
+                border-radius: 50%;
+                display: inline-block;
+                text-align: center;
+                line-height: 20px;
+                font-size: 13px;
+                font-weight: 500;
+                left: 15px;
+                top: -9px;
+            }
+        }
+    }
+}
+
+.here_categories {
+    position: relative;
+
+    .here_categories_all {
+        background: map.get($theme-colors, "main");
+        padding: 16px 21px 16px 33px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        color: #ffffff;
+        font-weight: 700;
+        min-width: max-content;
+        svg, 
+        span {
+            font-size: 16px;
+            margin-right: 5px;
+            
+        }
+        svg {
+            font-size: 20px;
+            font-weight: bold;
+        }
+    }
+
+    ul {
+        position: absolute;
+        opacity: 1;
+        border: 1px solid #ebebeb;
+        width: 99%;
+        background: #ffffff;
+        transition: all, 0.2s;
+
+        li {
+            list-style: none;
+
+            a {
+                text-decoration: none;
+                background-color: transparent;
+                font-size: 16px;
+                color: map.get($theme-colors, "normal-text");
+                line-height: 39px;
+                display: block;
+                padding-left: 40px;
+
+            }
+            &:hover {
+                background: #a8a7c5;
+
+            }
+
+            &.hidden {
+                opacity: 0;
+            } 
+        }
+    }
+}
+.here_search_container {
+    
+
+    .here_search_form {
+        width: 500px;
+        height: 50px;
+        float: left;
+        padding-left: 15px;
+        margin-bottom: 30px;
+
+        form {
+            display: flex;
+            align-items: center;
+        }
+
+        input {
+            border: none;
+            height: 48px;
+            font-size: 16px;
+            color: #b2b2b2;
+            padding-left: 20px;
+            border: 1px solid #b2b2b2;
+            width: 60%;
+            :focus {
+                outline: none;
+                border: non;
+            }
+        }
+    
+        button {
+            font-size: 14px;
+            color: #ffffff;
+            font-weight: 800;
+            text-transform: uppercase;
+            border: 1px solid #ebebeb;
+            display: inline-block;
+            padding: 16px 30px 17px;
+            background: map.get($theme-colors, "main");
+            height: 100%;
+        }
+    }
+    .here_search_phone {
+        display: flex;
+        align-items: center;
+
+        .here_search_phone_icon {
+            font-size: 25px;
+            padding: 10px;
+            background: #f5f5f5;
+            list-style: 50px;
+            text-align: center;
+            border-radius: 50%;
+            float: left;
+            margin-right: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: map.get($theme-colors, "main");
+        }
+
+        .here_search_phone_text {
+            display: inline-block;
+            min-width: max-content;
+             
+
+            p {
+                color: map.get($theme-colors, "normal-text");
+                font-weight: bold;
+                margin-bottom: 5px;
+            }
+            span {
+                color: #6f6f6f;
+                font-size: 14px;
+            }
+        }
+    }
+
+    .here_items {
+        margin-top: 2px;
+        margin-left: 15px;
+        background-image: url("/assets/User/images/banner/BaeBeauty (1).jpg");
+        background-size: cover;
+        height: 410px;
+        display: flex;
+        align-items: center;
+        // padding-left: 75px;
+        width: 100%;
+        .here_items_text {
+            padding-left: 30px;
+
+            span {
+                font-size: 14px;
+                text-transform: uppercase;
+                font-weight: 700;
+                letter-spacing: 4px;
+                color: map.get($theme-colors, "main");
+            }
+
+            h2 {
+                font-size: 14px;
+                text-transform: uppercase;
+                font-weight: 700;
+                line-height: 52px;
+                color: map.get($theme-colors, "bold-text");
+                margin: 10px 0;
+            }
+
+            p {
+                font-size: 16px;
+                color: #6f6f6f;
+                font-weight: 400;
+                line-height: 26px;
+                margin: 0 0 15px 0;
+            }
+
+            a {
+                display: inline-block;
+                font-size: 14px;
+                padding: 10px 28px 10px;
+                color: #ffffff;
+                text-transform: uppercase;
+                font-weight: 700;
+                background: map.get($theme-colors, "main");
+                letter-spacing: 2px;
+                text-decoration: none;
+            }
+        }
+    }
+    
+}
+
+.hamberger_menu_wrapper, .banner_open {
+    display: none;
+}
+
+@include Responsive($MEDIUM_DEVICE){
+    .here_search_form {
+        width: 530px !important;
+    }
+}
+
+@include Responsive($TABLET_DEVICE){
+    @include header.header-small-device;
+}
+
+
+@include Responsive($WIDE_MOBILE){
+    @include header.header-small-device;
+
+    .here_search {
+        display: grid;
+    }
+
+    .header_logo {
+        width: max-content;
+    }
+    .here_search_form {
+        width: 660px !important;
+    }
+    .here_search_phone_icon {
+        margin-top: -31px;
+    }
+    .here_search_phone_text {
+        margin-bottom: 30px;
+    }
+
+    .here_items {
+        margin-left: unset !important;
+    }
+} 
+@include Responsive($WIDE_MOBILE){
+    .here_search_form {
+        width: 655px !important;
+    }
+}
+@include Responsive($SMALL_DEVICES){
+    .here_search_form {
+        width: 350px !important;
+
+        button {
+            width: 150px;
+            height: 30px;
+        }
+    }
+}
+

@@ -1,0 +1,102 @@
+@use "sass:map";
+@import "./src/styles/pages/all.scss";
+
+.container {
+    padding: 30px;
+
+    .slidebar {
+        padding-right: 20px;
+
+        .slidebar_item {
+            margin-bottom: 20px;
+
+            h2 {
+                color: rgb (28, 28, 28);
+                font-weight: 700; // chữ đậm
+                margin-bottom: 16px;
+            }
+            .price-range-wrap {
+                display: flex;
+                flex-direction: column;
+                row-gap: 10px;
+            }
+            .tags {
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap; // Tràn thì sẽ tự xuống dòng
+
+                .tag {
+                    font-size: 12px;
+                    color: #6f6f6f;
+                    display: inline-block;
+                    padding: 8px 25px 6px;
+                    cursor: pointer;
+                    background: #f5f5f5;
+                    margin-bottom: 0;
+
+                    &:hover, &:active {
+                        color: #ffffff;
+                        background: map.get($theme-colors, "main");
+                        
+                    }
+                }
+            }
+            ul li {
+                list-style: none;
+
+                a {
+                    text-decoration: none;
+                    line-height: 30px;
+                    color: map.get($theme-colors, "normal-text");
+
+                    &:hover {
+                        color: map.get($theme-colors, "main");
+                    }
+                }
+            }
+        }
+    }
+    .product_footer {
+        display: flex;
+        justify-content: flex-start; /* căn trái thay vì giữa */
+        margin-left: 600px !important; /* đẩy sang phải một chút */
+        margin-top: 30px;
+        padding-bottom: 40px;
+    }
+    
+    .product_pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .product_page-number {
+        display: flex;
+        gap: 5px;
+    }
+    
+    .product_page-btn {
+        padding: 8px 14px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        background-color: #fff;
+        color: #111;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+    }
+    
+    .product_page-btn:hover {
+        background-color: #6d80a6;
+        border-color: #ccc;
+    }
+    
+    .product_page-btn--active {
+        background-color: #1f2937; // màu tối (xám đậm)
+        color: #fff;
+        border-color: #1f2937;
+        font-weight: 600;
+    }
+    
+
+}

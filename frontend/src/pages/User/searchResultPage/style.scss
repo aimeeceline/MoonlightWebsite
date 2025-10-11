@@ -1,0 +1,109 @@
+@use "sass:map";
+@import "./src/styles/pages/all.scss";
+
+
+.search_result {
+  padding: 40px 0;
+  text-align: start;
+  margin-bottom: 30px;
+  
+  .search_result_title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 30px;
+    animation: fadeSlide 0.6s ease-in-out;
+
+    strong.text-primary {
+      color: #ff4081;
+      background: rgba(255, 64, 129, 0.1);
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-style: italic;
+      transition: 0.3s;
+
+      &:hover {
+        background: rgba(255, 64, 129, 0.2);
+      }
+    }
+  }
+
+  .featured_item {
+    margin-bottom: 50px;
+    margin-left: 10px;
+    margin-right: 10px;
+
+    &:hover {
+        .featured_item_img_hover {
+            top: 70% !important;
+
+        }
+    }
+
+
+    .featured_item_img {
+        height: 250px;
+        position: relative;
+        overflow: hidden;
+        background-position: center;
+
+        .featured_item_img_hover {
+            position: absolute;
+            left: 0;
+            top: 130%;
+            width: 100%;
+            text-align: center;
+            transition: all, 0.5s;
+
+            li {
+                list-style: none;
+                display: inline-block;
+                margin-right: 10px;
+
+                &:hover {
+                    svg {
+                        
+                        background: #414c62;
+                        border-color: #414c62;
+                        color: #ffffff;
+                        transform: rotate(360deg) !important;
+                    }
+                }
+
+                svg {
+                    border-radius: 50%;
+                    padding: 10px;
+                    height: 20px;
+                    width: 20px;
+                    border: 1px solid #ebebeb;
+                    background: #ffffff;
+                    color: #565555;
+                    transition: all, 0.3s;
+                }
+            }
+        }
+    }
+
+    .featured_item_text {
+        text-align: center;
+        h6 {
+            margin-top: 10px;
+            font-size: 16px;
+            font-weight: 400;
+
+            a {
+                color: map.get($theme-colors, "normal-text");
+                text-decoration: none;
+            }
+        }
+
+        h5 {
+            color: map.get($theme-colors, "normal-text");
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 10px;
+        }
+    }
+  }
+}
+

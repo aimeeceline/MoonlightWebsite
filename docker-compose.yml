@@ -1,0 +1,67 @@
+version: "3.9"
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Lananhcute@123
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssqldata:/var/opt/mssql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/localhost/1433' || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:                       # CRA: biến môi trường nhúng lúc build
+        - REACT_APP_USER_API=http://localhost:7200
+        - REACT_APP_PRODUCT_API=http://localhost:7007
+        - REACT_APP_ORDER_API=http://localhost:7300
+    container_name: frontend
+    ports:
+      - "3000:80"                 # Nginx listen 80 -> host 3000
+    depends_on:
+      - userservice
+      - productservice
+
+  productservice:
+    build:
+      context: ./backend
+      dockerfile: ./ProductService/Dockerfile
+    container_name: productservice
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__Default=Server=sqlserver,1433;Database=ProductDB;User Id=sa;Password=Lananhcute@123;Encrypt=False;TrustServerCertificate=True;
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    ports:
+      - "7007:8080"
+    restart: unless-stopped
+
+  userservice:
+    build:
+      context: ./backend
+      dockerfile: ./UserService/Dockerfile
+    container_name: userservice
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__Default=Server=sqlserver,1433;Database=UserDB;User Id=sa;Password=Lananhcute@123;Encrypt=False;TrustServerCertificate=True;
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    ports:
+      - "7008:8080"
+    restart: unless-stopped
+
+volumes:
+  mssqldata:

@@ -1,0 +1,203 @@
+@use "sass:map";
+@import "./src/styles/pages/all.scss";
+
+.order-history-page {
+  padding: 32px;
+  background-color: #f4f6f8;
+  min-height: 100vh;
+
+  h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: #2c3e50;
+  }
+
+  .order-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 16px;
+
+    thead th {
+      background: transparent;
+      color: #7f8c8d;
+      font-size: 14px;
+      text-transform: uppercase;
+      padding: 12px 16px;
+      text-align: left;
+    }
+
+    tbody tr {
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+      transition: transform 0.2s ease;
+    }
+
+    tbody tr:hover {
+      transform: translateY(-4px);
+    }
+
+    td {
+      padding: 16px;
+      vertical-align: top;
+      font-size: 15px;
+      color: #2c3e50;
+    }
+
+    .product-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+
+      img {
+        width: 64px;
+        height: 64px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #e1e1e1;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+      }
+
+      .product-details {
+        display: flex;
+        flex-direction: column;
+
+        .product-name {
+          font-weight: 600;
+          font-size: 15px;
+          color: #34495e;
+          margin: 0;
+        }
+
+        .product-qty {
+          font-size: 13px;
+          color: #888;
+          margin-top: 4px;
+        }
+      }
+    }
+
+    .btn-primary,
+    .btn-outline {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.25s ease;
+      font-weight: 500;
+      display: inline-block;
+    }
+
+    .btn-primary {
+      background-color: #1abc9c;
+      color: white;
+      border: none;
+      box-shadow: 0 2px 4px rgba(26, 188, 156, 0.3);
+
+      &:hover {
+        background-color: #16a085;
+      }
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid #ccc;
+      color: #333;
+
+      &:hover {
+        background-color: #ecf0f1;
+      }
+    }
+
+    .ml-2 {
+      margin-left: 12px;
+    }
+  }
+}
+
+.qr-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+
+    .qr-popup-content {
+        background: #fff;
+        padding: 30px;
+        border-radius: 16px;
+        text-align: center;
+        width: 100%;
+        max-width: 400px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+
+        h3 {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .qr-image {
+            width: 200px;
+            height: 200px;
+            object-fit: contain;
+            margin-bottom: 16px;
+            border: 1px solid #ddd;
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .qr-expire {
+            color: #000;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+        }
+
+        .qr-popup-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+
+            .btn-outline {
+                flex: 1;
+                padding: 10px;
+                background: transparent;
+                border: 2px solid #ccc;
+                border-radius: 8px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+
+                &:hover {
+                    background: #eee;
+                }
+            }
+
+            .btn-primary {
+                flex: 1;
+                padding: 10px;
+                background: #007bff;
+                color: #fff;
+                border: none;
+                border-radius: 8px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+
+                &:hover {
+                    background: #0056b3;
+                }
+            }
+        }
+    }
+}

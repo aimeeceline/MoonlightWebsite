@@ -1,0 +1,203 @@
+@use "sass:map";
+@import "./src/styles/pages/theme.scss";
+@import "./src/styles/pages/all.scss";
+
+
+
+.orders {
+    background: #fff;
+    border-radius: 8px;
+
+    h2 {
+        margin-bottom: 30px;
+        color: map.get($theme-colors, "normail-text");
+    }
+
+    // css nút tạo mới
+    &_header {
+        display: flex;
+        justify-content: flex-start;
+        margin-bottom: 10px;
+
+
+        &_button-create {
+            height: 36px;
+            padding: 0 18px;
+            font-size: 14px;
+            color: #fff;
+            background: map.get($theme-colors, "main");
+            border: 1px solid #ebebeb;
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            margin-right: 10px;
+
+            span {
+                font-weight: 500;
+                text-align: center;
+                align-items: center;
+            }
+
+            &:hover {
+                background: #a8a7c5;
+            }
+
+            svg {
+                margin-right: 5px;
+            }
+        }
+    }
+    // css bảng
+    &_table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 10px;
+
+        th, td {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        tbody > tr > td {
+            padding: 12px;
+        }
+
+        
+        
+               
+        
+    }
+    &_orders_pagination {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    &_page-number {
+        display: flex;
+        gap: 5px;
+    }
+    &_page-btn {
+        height: 36px;
+        min-width: 36px;
+        padding: 0 12px;
+        font-size: 14px;
+        color: map.get($theme-colors, "normail-text");
+        background: #ffffff;
+        border: 1px solid #ebebeb;
+        border-radius: 4px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+
+        &:hover:not(&--active) {
+            color: #ffffff;
+            background: map.get($theme-colors, "main");
+        }
+
+        &--active {
+            color: #ffffff;
+            background: map.get($theme-colors, "main");
+            border-color: map.get($theme-colors, "main");
+        }
+    }
+
+    &_dropdown {
+        position: relative;
+        min-width: 150px;
+        display: flex;
+        justify-content: center;
+
+        &-menu {
+            position: absolute;
+            top: calc(100% + 4px);
+            right: 0;
+            background: #ffffff;
+            border: 1px solid #ebebeb;
+            border-radius: 4px;
+            min-width: 160px;
+            z-index: 1; // Hiển thị về phía trước 
+        }
+        &-item {
+            width: 100%;
+            padding: 10px 18px;
+            font-size: 14px;
+            color: map.get($theme-colors, "normail-text");
+            background: none;
+            border: none;
+            text-align: center;
+            cursor: pointer;
+            display: block;
+
+            &:hover {
+                background: #f5f5f5;
+            }
+            &--ganger {
+                color: red;
+
+                &:hover {
+                    background: #ffebee;
+                }
+            }
+        }
+    }
+    &_button {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        align-items: center; 
+
+        &-btn {
+            display: flex;
+            height: 36px;
+            min-width: 50px;
+            padding: 0 12px;
+            font-size: 14px;
+            color: #fff;
+            background: map.get($theme-colors, "main");
+            border: 1px solid #ebebeb;
+            border-radius: 50px;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+
+            &:hover {
+                background: #a8a7c5;
+            }
+        } 
+    }
+
+    &_action-button {
+        height: 36px;
+        padding: 0 18px;
+        font-size: 14px;
+        color: map.get($theme-colors, "normail-text");
+        background: #ffffff;
+        border: 1px solid #ebebeb;
+        border-radius: 4px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        gap: 8px;
+        min-width: 150px;
+        justify-content: center;
+
+
+        &:hover {
+            background: #f5f5f5;
+        }
+
+        //.arrow {
+        //    transform: rotate(180deg);
+        //}
+        .arrow {
+            font-size: 10px;
+            transition: transform 0.2s ease;
+        }
+    }
+}

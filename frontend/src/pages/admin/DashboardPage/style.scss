@@ -1,0 +1,220 @@
+.container_admin {
+  display: flex;
+  gap: 24px;
+  flex-wrap: nowrap; // NGĂN XUỐNG HÀNG
+  margin-bottom: 24px;
+  justify-content: space-between;
+}
+
+.card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  padding: 1rem 1.25rem;
+  flex: 1 1 0;
+  max-width: 50%; // ĐẢM BẢO 2 THẺ MỖI CÁI 50%
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+  }
+}
+
+.card-header {
+  border-bottom: 1px solid #f1f1f1;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+
+  h6 {
+    font-weight: 600;
+    font-size: 1.125rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #333;
+
+    .far.fa-question-circle {
+      color: #6c757d;
+      cursor: pointer;
+      transition: color 0.3s;
+
+      &:hover {
+        color: #007bff;
+      }
+    }
+  }
+}
+
+.card-body {
+  display: flex;
+  align-items: flex-end;
+  padding: 0;
+
+  .row.flex-grow-1 {
+    display: flex;
+    flex-grow: 1;
+    justify-content: space-between;
+  }
+
+  .col {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+
+    .fs-4 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #212529;
+      margin-bottom: 10px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.35em 0.75em;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 1rem;
+
+      &.badge-soft-success {
+        background-color: #e6f4ea;
+        color: #198754;
+      }
+    }
+  }
+
+  .col-auto.pl-0 {
+    padding-left: 0;
+    width: 100px;
+    height: 80px;
+
+    .echart-bar-weekly-sales {
+      width: 100%;
+      height: 100%;
+    }
+  }
+}
+
+.chart-row {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  align-items: flex-start;
+  flex-wrap: wrap; // Cho phép xuống dòng khi màn nhỏ
+}
+
+/* Biểu đồ */
+.chart-container {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-left: 0;
+  max-width: 630px;
+  width: 100%;
+
+  h6 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1rem;
+  }
+}
+
+.echart-full-width {
+  width: 100%;
+  height: 320px;
+}
+
+/* Danh sách khách hàng mới */
+.new-customers {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 360px;
+
+  h6 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #333;
+  }
+}
+
+.customer-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  .customer-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    gap: 12px;
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      background-color: #4e73df;
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      text-transform: uppercase;
+    }
+
+    .info {
+      flex: 1;
+
+      .name {
+        font-weight: 600;
+        color: #212529;
+        font-size: 0.95rem;
+      }
+
+      .desc {
+        font-size: 0.8rem;
+        color: #6c757d;
+      }
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      font-size: 0.95rem;
+      color: #6c757d;
+
+      span {
+        cursor: pointer;
+
+        &:hover {
+          color: #007bff;
+        }
+      }
+    }
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container_admin {
+    flex-direction: column;
+  }
+
+  .card {
+    max-width: 100%;
+  }
+
+  .chart-row {
+    flex-direction: column;
+  }
+
+  .chart-container,
+  .new-customers {
+    max-width: 100%;
+  }
+}

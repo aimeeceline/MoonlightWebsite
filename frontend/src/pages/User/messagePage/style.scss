@@ -1,0 +1,66 @@
+@use "sass:map";
+@import "./src/styles/pages/all.scss";
+
+
+.message_page {
+  border: 1px solid #ddd; /* đổi màu border thành xám nhạt */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 30vh;
+  background-color: #ffffff;
+  text-align: center;
+  padding: 2rem;
+  border-radius: 12px;
+  /* box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);  // bỏ đổ bóng */
+  /* bỏ transition vì không còn hover */
+}
+
+.message_page:hover {
+  /* Bỏ hết, không cần hover */
+  transform: none;
+  /* box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);  // bỏ đổ bóng */
+}
+
+.message_page h2 {
+  font-size: 2rem;
+  color: #00796b;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.message_page .divider {
+  width: 100%;
+  height: 1px;
+  background-color: #ddd;
+  margin: 1rem 0;
+}
+
+.message_page p {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.button-submit {
+  padding: 0.75rem 1.5rem;
+  background-color: #00796b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.button-submit:hover {
+  background-color: #004d40;
+  transform: scale(1.05);
+}
+.button-group {
+  display: flex;
+  gap: 12px; // khoảng cách giữa các nút
+  justify-content: center;
+  margin-top: 24px;
+}

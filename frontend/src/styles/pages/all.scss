@@ -1,0 +1,186 @@
+@use "sass:map";
+@import "theme.scss";
+@import "responsive.scss";
+@import "@fontsource/be-vietnam-pro";
+
+
+html,
+body{
+    margin: 0;
+    overflow-x: hidden;
+}
+
+* {
+    font-family: "Be Vietnam Pro";
+    padding: 0;
+    margin: 0;
+}
+ 
+/*Tạo một container*/
+.container {
+    max-width: 1100px;
+    width: 400% ;
+    padding-left: 10px;
+    padding-right: 10px;
+    //background: map.get($theme-colors, "main");
+    margin: auto; // Căn ra giữa
+}
+
+.section_title {
+    margin-bottom: 50px;
+    text-align: center;
+
+    h2 {
+        position: relative; /* Đảm bảo phần tử cha có position */
+        display: inline-block; /* Giữ kích thước nội dung */
+        padding-bottom: 20px; /* Tạo khoảng trống để thấy đường kẻ */
+        
+        &::after {
+            position: absolute; /* Đặt phần tử giả tuyệt đối */
+            left: 0;
+            bottom: 0; /* Kéo đường kẻ xuống dưới */
+            height: 4px;
+            width: 80px;
+            background: map-get($theme-colors, "main");
+            content: "";
+            margin: 0 auto;
+            right: 0;
+        }
+    }
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+}
+.col-6 {
+    flex: 0 0 50%;
+    min-width: 50%;
+}
+
+.col-lg-3 {
+    flex: 0 0 25%;
+    min-width: 25%;
+}
+.col-lg-4 {
+    flex: 0 0 33.3333333%;
+    min-width: 33.3333333%;
+}
+
+
+.col-lg-6 {
+    flex: 0 0 50%;
+    min-width: 50%;
+}
+
+.col-lg-9 {
+    flex: 0 0 75%;
+    min-width: 75%;
+}
+
+.button-submit {
+    font-size: 14px;
+    color: white;
+    font-weight: 800;
+    text-transform: uppercase;
+    display: block;
+    padding: 16px 30px 17px;
+    background: map.get($theme-colors, "main");
+    border: none;
+    height: 100%;
+}
+input, textarea {
+    width: 100%;
+    height: 35px;
+    border: 1px solid #ebebeb;
+    padding-left: 10px;
+    font-size: 14px;
+    color: #b2b2b2;
+    border-radius: 3px;
+
+    &:focus {
+        outline: none;
+    }
+}
+textarea {
+    padding-top: 10px;
+}
+
+.pl-pr-10 {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+@include Responsive($DESKTOP){
+    .col-xl-3 {
+        flex: 0 0 25%;
+        min-width: 25%;
+    }
+    .col-xl-6 {
+        flex: 0 0 50%;
+        min-width: 50%;
+    }
+    
+}
+
+@include Responsive($TABLET_DEVICE){
+    .container {
+        max-width: 720px !important;
+    }
+    .col-md-6 {
+        flex: 0 0 50%;
+        min-width: 50%;
+    }
+    .col-md-4 {
+        flex: 0 0 33.333333%;
+        min-width: 33.333333%;
+    }
+    .col-md-12 {
+        flex: 0 0 100%;
+        min-width: 100%;
+    }
+}
+
+@include Responsive($MEDIUM_DEVICE){
+
+    .container {
+        max-width: 950px !important;
+    }
+    .col-lg-3 {
+        flex: 0 0 25%;
+        min-width: 25%;
+    }
+    .col-lg-6 {
+        flex: 0 0 75%;
+        min-width: 75%;
+    }
+    .col-xl-12{
+        flex: 0 0 100%;
+        min-width: 100%;
+    }
+
+}
+@include Responsive($WIDE_MOBILE){
+    .container {
+        max-width: 540px !important;
+    }
+    .col-sm-6 {
+        flex: 0 0 50%;
+        min-width: 50%;
+    }
+    .col-sm-12 {
+        flex: 0 0 100%;
+        min-width: 100%;
+    }
+
+}
+
+@include Responsive($SMALL_DEVICES){
+    .container {
+        max-width: 350px !important;
+    }
+    .col-xs-12 {
+        flex: 0 0 100%;
+        min-width: 100%;
+    }
+}

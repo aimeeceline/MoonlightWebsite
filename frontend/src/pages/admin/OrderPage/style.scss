@@ -1,0 +1,240 @@
+@use "sass:map";
+@import "./src/styles/pages/theme.scss";
+@import "./src/styles/pages/all.scss";
+
+
+
+.orders {
+    background: #fff;
+    border-radius: 8px;
+
+    h2 {
+        margin-bottom: 30px;
+        color: map.get($theme-colors, "normail-text");
+    }
+
+    &_table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 10px;
+
+        th, td {
+            text-align: center;
+            vertical-align: middle;
+
+            .OrderID {
+                color: #73738f;
+            }
+        }
+
+        tbody > tr > td {
+            padding: 12px;
+            
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: map.get($theme-colors, "main");
+            cursor: pointer;
+            transition: all 0.2s ease;
+        
+        }
+        th:first-child,
+        td:first-child {
+            width: 40px;
+            text-align: center;
+        }
+        
+
+        
+        
+               
+        
+    }
+    &_orders_pagination {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    &_page-number {
+        display: flex;
+        gap: 5px;
+    }
+    &_page-btn {
+        height: 36px;
+        min-width: 36px;
+        padding: 0 12px;
+        font-size: 14px;
+        color: map.get($theme-colors, "normail-text");
+        background: #ffffff;
+        border: 1px solid #ebebeb;
+        border-radius: 4px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+
+        &:hover:not(&--active) {
+            color: #ffffff;
+            background: map.get($theme-colors, "main");
+        }
+
+        &--active {
+            color: #ffffff;
+            background: map.get($theme-colors, "main");
+            border-color: map.get($theme-colors, "main");
+        }
+    }
+
+    &_dropdown {
+        position: relative;
+        min-width: 150px;
+        display: flex;
+        justify-content: center;
+
+        &-menu {
+            position: absolute;
+            top: calc(100% + 4px);
+            right: 0;
+            background: #ffffff;
+            border: 1px solid #ebebeb;
+            border-radius: 4px;
+            min-width: 160px;
+            z-index: 1; // Hiển thị về phía trước 
+        }
+        &-item {
+            width: 100%;
+            padding: 10px 18px;
+            font-size: 14px;
+            color: map.get($theme-colors, "normail-text");
+            background: none;
+            border: none;
+            text-align: center;
+            cursor: pointer;
+            display: block;
+
+            &:hover {
+                background: #f5f5f5;
+            }
+            &--ganger {
+                color: red;
+
+                &:hover {
+                    background: #ffebee;
+                }
+            }
+        }
+    }
+    &_button {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        align-items: center; 
+
+        &-btn {
+            display: flex;
+            height: 36px;
+            min-width: 50px;
+            padding: 0 12px;
+            font-size: 14px;
+            color: #fff;
+            background: map.get($theme-colors, "main");
+            border: 1px solid #ebebeb;
+            border-radius: 50px;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+
+
+            &:hover {
+                background: #73738f;
+            }
+        } 
+    }
+
+    &_action-button {
+        height: 36px;
+        padding: 0 18px;
+        font-size: 14px;
+        color: map.get($theme-colors, "normail-text");
+        background: #ffffff;
+        border: 1px solid #ebebeb;
+        border-radius: 4px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        gap: 8px;
+        min-width: 150px;
+        justify-content: center;
+
+
+        &:hover {
+            background: #f5f5f5;
+        }
+
+        //.arrow {
+        //    transform: rotate(180deg);
+        //}
+        .arrow {
+            font-size: 10px;
+            transition: transform 0.2s ease;
+        }
+    }
+    /* Trạng thái cho đơn hàng */
+    .status-badge {
+        display: flex;
+        margin-top: 10px;
+        align-items: center;       /* Căn giữa theo chiều dọc */
+        justify-content: center;   /* Căn giữa theo chiều ngang */
+        height: 30px;
+        min-width: 80px;          /* Đảm bảo badge không quá nhỏ */
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 14px;
+        text-align: center;
+        gap: 5px;
+    }
+    
+    /* Trạng thái: Đã hủy */
+    .status-canceled {
+        color: #dc3545;
+        background-color: #f8d7da;
+    }
+    .status-canceled::before {
+        content: "❌";
+    }
+
+    /* Trạng thái: Đang giao */
+    .status-shipping {
+        color: #17a2b8;
+        background-color: #d1ecf1;
+    }
+    .status-shipping::before {
+        content: "🚚";
+    }
+
+    /* Trạng thái: Hoàn thành */
+    .status-completed {
+        color: #28a745;
+        background-color: #d4edda;
+    }
+    .status-completed::before {
+        content: "✅";
+    }
+
+    /* Trạng thái: Chờ xử lý */
+    .status-pending {
+        color: #ffc107;
+        background-color: #fff3cd;
+    }
+    .status-pending::before {
+        content: "⏳";
+    }
+    
+
+}

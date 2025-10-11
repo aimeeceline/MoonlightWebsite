@@ -1,0 +1,9 @@
+@use "sass:map";
+@import "./src/styles/pages/theme.scss";
+@import "./src/styles/pages/all.scss";
+
+.create_category {
+    margin-bottom: 10px;
+    display: flex;
+    gap: 20px;
+}

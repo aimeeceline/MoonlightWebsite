@@ -1,0 +1,8 @@
+D:\MoonlightWebsite\backend\OrdersService\obj\Debug\net8.0\OrdersService.csproj.AssemblyReference.cache
+D:\MoonlightWebsite\backend\OrdersService\obj\Debug\net8.0\rpswa.dswa.cache.json
+D:\MoonlightWebsite\backend\OrdersService\obj\Debug\net8.0\OrdersService.GeneratedMSBuildEditorConfig.editorconfig
+D:\MoonlightWebsite\backend\OrdersService\obj\Debug\net8.0\OrdersService.AssemblyInfoInputs.cache
+D:\MoonlightWebsite\backend\OrdersService\obj\Debug\net8.0\OrdersService.AssemblyInfo.cs
+D:\MoonlightWebsite\backend\OrdersService\obj\Debug\net8.0\OrdersService.csproj.CoreCompileInputs.cache
+D:\MoonlightWebsite\backend\OrdersService\obj\Debug\net8.0\OrdersService.MvcApplicationPartsAssemblyInfo.cs
+D:\MoonlightWebsite\backend\OrdersService\obj\Debug\net8.0\OrdersService.MvcApplicationPartsAssemblyInfo.cache

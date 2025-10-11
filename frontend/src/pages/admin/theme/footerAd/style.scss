@@ -1,0 +1,29 @@
+@use "sass:map";
+@import "./src/styles/pages/theme.scss";
+
+
+.footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+    font-size: 14px;
+    color: #6c757d;
+    width: 98%;
+  
+    a {
+      color: #794e88;
+      text-decoration: none;
+  
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  
+    .ms-auto {
+      margin-left: auto;
+    }
+  }
+  

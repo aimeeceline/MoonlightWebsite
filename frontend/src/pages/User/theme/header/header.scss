@@ -1,0 +1,188 @@
+@use "sass:map";
+@import "./src/styles/pages/all.scss";
+
+@mixin header-small-device {
+    .here_categories {
+        margin-bottom: 30px;
+    }
+    .here_search_form {
+        padding-left: unset !important;
+        width: 530px !important;
+    }
+
+    .header_top,
+    .header_menu,
+    .header_cart
+    {
+        display: none;
+    }
+
+    .banner_open {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end; // Cho thanh menu đưa về phía sau
+        height: 100%;
+
+        svg {
+            font-size: 30px;
+            color: map.get($theme-colors, "main");
+        }
+    }
+    .hamberger_menu_wrapper {
+        position: fixed; // Luôn luôn muốn cố định
+        width: 300px;
+        background: #ffffff;
+        height: 100%;
+        overflow-y: auto; // cụm dọc sẽ tự động
+        z-index: -9999;
+        padding: 30px;
+        padding-top: 10px;
+        opacity: 0;
+        display: block;
+        transition: all, 0.6s;
+
+        &.show {
+            opacity: 1;
+            z-index: 9999;
+        }
+    }
+    .hamberger_menu_overlay {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 100;
+        visibility: hidden;
+        transition: all, 0.2s;
+
+        &.active {
+            visibility: visible !important;
+        }
+    }
+    .hamberger_menu_cart {
+        display: flex;
+        margin-bottom: 25px;
+
+        .header_cart_price {
+            font-size: 14px;
+            color: #6f6f6f;
+
+            span {
+                color: map.get($theme-colors, "bold-text");
+                font-weight: 700;
+            }
+        }
+
+        ul {
+            list-style: none;
+            display: inline-block;
+            margin-right: 15px;
+
+            li:last-child {
+                margin-right: 0;
+            }
+            li {
+                position: relative;
+
+                a{
+                    font-size: 18px;
+                    color: map.get($theme-colors, "normal-text");
+
+                    span {
+                        color: #ffffff;
+                        background: map.get($theme-colors, "main");
+                        height: 20px;
+                        left: 10px;
+                        top: -10px;
+                        border-radius: 40px;
+                        display: inline-block;
+                        text-align: center;
+                        line-height:20px ;  // Khoảng cách giữa các dòng
+                        font-size: 13px;
+                        position: absolute;
+                        padding: 0px 7px;
+                        font-weight: 500;
+                    }
+                }
+            }
+        }
+    }
+    .hamberger_menu_widget {
+        margin-bottom: 20px;
+
+        .header_top_right_auth a {
+            display: block;
+            font-size: 14px;
+            color: map.get($theme-colors, "normal-text");
+            text-decoration: none;
+        }
+    }
+    .hamberger_menu_nav {
+        margin-bottom: 20px;
+
+        ul {
+            list-style: none;
+
+            li {
+                padding: 8px 0;
+                border-bottom: 1px solid #e1e1e1;
+
+                a {
+                    color: map.get($theme-colors, "normal-text");
+                    font-size: 16px;
+                    font-weight: 500;
+                    text-decoration: none;
+
+                    svg {
+                        vertical-align: middle;
+                        margin-left: 5px;
+                    }
+                }
+            }
+        }
+        .header_menu_dropdown {
+            display: none;
+            padding: 5px 0;
+            li {
+                margin-left: 10px;
+                display: block;
+                margin-right: 0;
+
+                &:last-child {
+                    border-bottom: unset;
+                }
+            }
+
+        }
+
+        .show_submenu {
+            display: block;
+        }
+    }
+    .header_top_right_social {
+        display: block;
+        margin-right: 0;
+        margin-bottom: 20px;
+
+        a {
+            font-size: 14px;
+            display: inline-block;
+            color: map.get($theme-colors, "normal-text");
+            margin-right: 25px;
+
+            svg {
+                font-size: 20px;
+            }
+        }
+    }
+    .hamberger_menu_context {
+        ul li {
+            font-size: 14px;
+            display: inline-block;
+            color: map.get($theme-colors, "normal-text");
+            margin-bottom: 10px;
+        }
+    }
+}

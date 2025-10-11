@@ -1,0 +1,35 @@
+.admin-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+
+    .main-layout {
+        display: flex;
+        flex: 1;
+    }
+
+    .sidebar {
+        width: 250px;
+        transition: width 0.3s ease;
+    }
+
+    .content {
+        flex: 1;
+        padding: 20px;
+        transition: margin-left 0.3s ease-in-out;
+    }
+
+    .with-sidebar {
+        margin-left: 250px;
+    }
+
+    .full-width {
+        margin-left: 0;
+    }
+
+    footer {
+        padding: 10px;
+        background: #f1f1f1;
+        position: relative;
+    }
+}

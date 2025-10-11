@@ -1,0 +1,27 @@
+@use "sass:map";
+@import "./src/styles/pages/theme.scss";
+@import "./src/styles/pages/all.scss";
+
+
+
+
+
+.create_category {
+    margin-bottom: 10px;
+    display: flex;
+    gap: 20px;
+}
+.checkout_input1 {
+    margin-top: 20px;
+    margin-left: 20px;
+    margin-bottom: 11px;
+    gap: 20px;
+
+
+    input, textarea {
+        margin: 10px 0;
+    }
+    .required {
+        color: red;
+    }
+}
