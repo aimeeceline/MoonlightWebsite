@@ -1,67 +1,107 @@
-version: "3.9"
-
 services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: sqlserver
     environment:
       - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=Lananhcute@123
+      - SA_PASSWORD=Lananh@123A
     ports:
       - "1433:1433"
     volumes:
       - mssqldata:/var/opt/mssql
-    restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "bash -c '</dev/tcp/localhost/1433' || exit 1"]
-      interval: 5s
-      timeout: 3s
+      test: ["CMD-SHELL", "bash -lc '</dev/tcp/localhost/1433' || exit 1"]
+      interval: 10s
+      timeout: 5s
       retries: 30
-    
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:                       # CRA: biến môi trường nhúng lúc build
-        - REACT_APP_USER_API=http://localhost:7200
-        - REACT_APP_PRODUCT_API=http://localhost:7007
-        - REACT_APP_ORDER_API=http://localhost:7300
-    container_name: frontend
-    ports:
-      - "3000:80"                 # Nginx listen 80 -> host 3000
-    depends_on:
-      - userservice
-      - productservice
 
-  productservice:
-    build:
-      context: ./backend
-      dockerfile: ./ProductService/Dockerfile
-    container_name: productservice
+  # productservice:
+  #   container_name: productservice
+  #   build:
+  #     context: .
+  #     dockerfile: backend/ProductService/Dockerfile   # Đường dẫn Dockerfile của bạn
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Development            # hoặc Production nếu muốn
+  #     - ConnectionStrings__Default=Server=sqlserver,1433;Database=ProductDB;User Id=sa;Password=Lananh@123A;TrustServerCertificate=True
+  #   depends_on:
+  #     sqlserver:
+  #       condition: service_healthy
+  #   ports:
+  #     - "7007:8080"                                    # host:container
+  #   restart: unless-stopped
+
+  # frontend:
+  #   container_name: frontend
+  #   build:
+  #     context: .
+  #     dockerfile: frontend/Dockerfile
+  #   depends_on:
+  #     productservice:
+  #       condition: service_started
+  #   ports:
+  #     - "3000:80"   # mở FE ngoài host ở cổng 3000
+  #   restart: unless-stopped
+  
+  
+    # ===== ProductService (hot reload) =====
+  productservice-dev:
+    image: mcr.microsoft.com/dotnet/sdk:8.0
+    container_name: productservice-dev
+    working_dir: /src/ProductService               # 👈 đặt đúng thư mục có .csproj
+    volumes:
+      - ./backend:/src                             # 👈 mount gốc backend vào /src
+    command: >
+      bash -lc "dotnet restore &&
+              dotnet watch run --urls http://0.0.0.0:8080"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ConnectionStrings__Default=Server=sqlserver,1433;Database=ProductDB;User Id=sa;Password=Lananhcute@123;Encrypt=False;TrustServerCertificate=True;
-    depends_on:
-      sqlserver:
-        condition: service_healthy
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__ProductDB=Server=sqlserver,1433;Database=ProductDB;User ID=sa;Password=Lananh@123A;TrustServerCertificate=True;Encrypt=False
     ports:
       - "7007:8080"
-    restart: unless-stopped
-
-  userservice:
-    build:
-      context: ./backend
-      dockerfile: ./UserService/Dockerfile
-    container_name: userservice
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ConnectionStrings__Default=Server=sqlserver,1433;Database=UserDB;User Id=sa;Password=Lananhcute@123;Encrypt=False;TrustServerCertificate=True;
     depends_on:
       sqlserver:
-        condition: service_healthy
+        condition: service_started
+  #===== Userservice (hot reload) =====
+  userservice-dev:
+    image: mcr.microsoft.com/dotnet/sdk:8.0
+    container_name: userservice-dev
+    working_dir: /src/UserService
+    volumes:
+      - ./backend:/src            # folder chứa .csproj của UserService
+      - ./Shared:/src/Shared          # (nếu dùng project Shared)
+    command: bash -lc "dotnet restore && dotnet watch run --urls http://0.0.0.0:8080"
     ports:
-      - "7008:8080"
+      - "7200:8080"                   # FE hay gọi 7200 → map ra host 7200
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__UserDB=Server=sqlserver,1433;Database=UserDB;User ID=sa;Password=Lananh@123A;TrustServerCertificate=True;Encrypt=False
+    depends_on:
+      - sqlserver
+    # ===== Frontend DEV (hot reload CRA/Vite) =====
+  frontend-dev:
+    image: node:18-alpine
+    container_name: frontend-dev
+    working_dir: /app
+    volumes:
+      - ./frontend:/app                     # đảm bảo ./frontend chứa package.json
+      - node_modules_cache:/app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=3000
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - WDS_SOCKET_HOST=localhost
+      - WDS_SOCKET_PORT=3000
+      - BROWSER=none
+      - CI=true
+  # KHÔNG dùng healthcheck trong dev lúc này
+    command: ["sh","-lc","[ -x node_modules/.bin/react-scripts ] || (npm ci || npm install); npm run start"]
     restart: unless-stopped
 
 volumes:
-  mssqldata:
+    mssqldata:
+    node_modules_cache:

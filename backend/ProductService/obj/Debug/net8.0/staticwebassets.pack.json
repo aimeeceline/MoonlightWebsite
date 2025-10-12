@@ -1,0 +1,149 @@
+{
+  "Files": [
+    {
+      "Id": "/src/ProductService/wwwroot/images/1001_1.png",
+      "PackagePath": "staticwebassets/images/1001_1.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/1001_2.png",
+      "PackagePath": "staticwebassets/images/1001_2.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/1001_3.png",
+      "PackagePath": "staticwebassets/images/1001_3.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/1001_4.png",
+      "PackagePath": "staticwebassets/images/1001_4.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/1002_1.png",
+      "PackagePath": "staticwebassets/images/1002_1.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/1002_2.png",
+      "PackagePath": "staticwebassets/images/1002_2.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/1002_3.png",
+      "PackagePath": "staticwebassets/images/1002_3.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/1002_4.png",
+      "PackagePath": "staticwebassets/images/1002_4.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/1003_1.png",
+      "PackagePath": "staticwebassets/images/1003_1.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/1003_2.png",
+      "PackagePath": "staticwebassets/images/1003_2.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/1003_3.png",
+      "PackagePath": "staticwebassets/images/1003_3.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/1003_4.png",
+      "PackagePath": "staticwebassets/images/1003_4.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/1004_1.png",
+      "PackagePath": "staticwebassets/images/1004_1.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/1004_2.png",
+      "PackagePath": "staticwebassets/images/1004_2.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/1004_3.png",
+      "PackagePath": "staticwebassets/images/1004_3.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/1004_4.png",
+      "PackagePath": "staticwebassets/images/1004_4.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/2001_1.png",
+      "PackagePath": "staticwebassets/images/2001_1.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/2001_2.png",
+      "PackagePath": "staticwebassets/images/2001_2.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/2001_3.png",
+      "PackagePath": "staticwebassets/images/2001_3.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/2001_4.png",
+      "PackagePath": "staticwebassets/images/2001_4.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/2002_1.png",
+      "PackagePath": "staticwebassets/images/2002_1.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/2002_2.png",
+      "PackagePath": "staticwebassets/images/2002_2.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/2002_3.png",
+      "PackagePath": "staticwebassets/images/2002_3.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/2002_4.png",
+      "PackagePath": "staticwebassets/images/2002_4.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/2003_1.png",
+      "PackagePath": "staticwebassets/images/2003_1.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/2003_2.png",
+      "PackagePath": "staticwebassets/images/2003_2.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/2003_3.png",
+      "PackagePath": "staticwebassets/images/2003_3.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/2003_4.png",
+      "PackagePath": "staticwebassets/images/2003_4.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/3001_1.png",
+      "PackagePath": "staticwebassets/images/3001_1.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/3001_2.png",
+      "PackagePath": "staticwebassets/images/3001_2.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/3001_3.png",
+      "PackagePath": "staticwebassets/images/3001_3.png"
+    },
+    {
+      "Id": "/src/ProductService/wwwroot/images/3001_4.png",
+      "PackagePath": "staticwebassets/images/3001_4.png"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.ProductService.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.build.ProductService.props",
+      "PackagePath": "build\\ProductService.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.buildMultiTargeting.ProductService.props",
+      "PackagePath": "buildMultiTargeting\\ProductService.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.buildTransitive.ProductService.props",
+      "PackagePath": "buildTransitive\\ProductService.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

@@ -7,6 +7,7 @@ import { ROUTERS } from "utils/router";
 import axios from "axios";
 import { formatter } from "utils/fomatter";
 import { AiOutlineEye, AiOutlineShoppingCart } from "react-icons/ai";
+const PRODUCT_API = process.env.REACT_APP_PRODUCT_API || `http://${window.location.hostname}:7007`;
 
 const ProductCategoryPage = () => {
     const sorts = [
@@ -24,6 +25,8 @@ const ProductCategoryPage = () => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
+          const productApi = axios.create({ baseURL: PRODUCT_API });
+        
   let canceled = false;
 
   const fetchByCategory = async () => {
@@ -33,7 +36,8 @@ const ProductCategoryPage = () => {
     setLoading(true);
     try {
       // ✅ URL tương đối (đã có proxy trong package.json)
-      const res = await axios.get(`https://localhost:7007/api/Category/category/${categoryId}`);
+
+      const res = await productApi.get(`api/Category/category/${categoryId}`);
 
       // ✅ Chuẩn hoá shape trả về
       const raw =
@@ -115,7 +119,7 @@ const ProductCategoryPage = () => {
                                             <div
                                                 className="featured_item_img"
                                                 style={{
-                                                    backgroundImage: `url(https://localhost:7007/images/${item.image})`,
+                                                    backgroundImage: `url(/images/${encodeURIComponent(item?.image || '')})`,
                                                     backgroundSize: "cover",
                                                     backgroundPosition: "center",
                                                 }}

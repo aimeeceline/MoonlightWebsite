@@ -5,11 +5,11 @@ import { ROUTERS } from "utils/router";
 import { AiOutlineHome } from "react-icons/ai";
 import axios from "axios";
 
-// Đặt baseURL 1 lần
-axios.defaults.baseURL = "https://localhost:7200";
+const USER_API    = process.env.REACT_APP_USER_API    || `http://${window.location.hostname}:7200`;
 
 const RegisterPage = () => {
   const navigate = useNavigate();
+    const userApi = axios.create({ baseURL: USER_API });
 
   const [user, setUser] = useState({
     username: "",
@@ -35,7 +35,7 @@ const RegisterPage = () => {
     try {
       // Luôn ép role là "User" khi gửi
       const payload = { ...user, typeUser: "User" };
-      await axios.post("/api/User/Create", payload);
+      await userApi.post("/api/User/Create", payload);
 
       alert("Bạn đã đăng ký tài khoản thành công!");
       navigate(ROUTERS.ADMIN.LOGIN);

@@ -1,79 +1,79 @@
-﻿using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-// using ProductService.Repository; // đăng ký DI nếu dùng
-using ProductService.Model; // ProductDBContext
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using ProductService.Data;
+using ProductService.Model;
+using ProductService.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1) DB: ưu tiên ENV, fallback appsettings
-var conn = Environment.GetEnvironmentVariable("ConnectionStrings__Default")
-           ?? builder.Configuration.GetConnectionString("DefaultConnection")
-           ?? builder.Configuration.GetConnectionString("Default");
+// ===== 1) Kết nối DB =====
+var conn =
+    builder.Configuration.GetConnectionString("ProductDB")
+ ?? builder.Configuration.GetConnectionString("DefaultConnection")
+ ?? builder.Configuration.GetConnectionString("Default")
+ ?? "Server=sqlserver,1433;Database=ProductDB;User Id=sa;Password=Lananh@123A;TrustServerCertificate=True;";
+
+if (string.IsNullOrWhiteSpace(conn))
+    throw new InvalidOperationException("Missing connection string ProductDB/Default");
+
 builder.Services.AddDbContext<ProductDBContext>(o => o.UseSqlServer(conn));
 
-// 2) (tuỳ) DI repository/service của Product
-// builder.Services.AddScoped<ProcductRepository>();
-
+// ===== 2) MVC + Swagger =====
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "ProductService API", Version = "v1" });
+});
 
-// 3) JWT từ ENV (đồng bộ các service)
-var issuer   = builder.Configuration["Jwt:Issuer"]   ?? "http://userservice:8080";
-var audience = builder.Configuration["Jwt:Audience"] ?? "bae-beauty-api";
-var key      = builder.Configuration["Jwt:Key"]      ?? "SuperSecretKeyDontCommit";
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-  .AddJwtBearer(o => o.TokenValidationParameters = new()
-  {
-      ValidateIssuer = true, ValidIssuer = issuer,
-      ValidateAudience = true, ValidAudience = audience,
-      ValidateIssuerSigningKey = true, IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
-      ValidateLifetime = true
-  });
+// ===== 3) CORS cho FE (Dev) =====
+// Nếu bạn chắc FE luôn ở 3000 thì có thể giới hạn .WithOrigins("http://localhost:3000")
+builder.Services.AddCors(o => o.AddPolicy("web", p =>
+    p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()
+));
 
-builder.Services.AddAuthorization();
+// ===== 4) Đăng ký DI cho repository =====
+// Nếu Controller inject IProductRepository<Product>
+builder.Services.AddScoped<IProductRepository<Product>, ProductRepository>();
+// Nếu chỗ khác dùng trực tiếp class
+builder.Services.AddScoped<ProductRepository>();
+builder.Services.AddScoped<CategoryRepository>();
 
-// (tuỳ) static files nếu service trả ảnh
-builder.Services.AddDirectoryBrowser();
 
 var app = builder.Build();
 
-app.UseSwagger();
-app.UseSwaggerUI();
+// ===== 5) Chạy Seeder (có hỗ trợ RESET_SEED=true) =====
 
-// KHÔNG ép HTTPS trong container
-// app.UseHttpsRedirection();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-// (tuỳ) static files (giống file cũ của em)
-app.UseStaticFiles();
-app.MapControllers();
-
-// Nghe 8080 trong container
-app.Urls.Add("http://0.0.0.0:8080");
-
-using (var scope = app.Services.CreateScope())
+// Seed không reset, chạy an toàn nhiều lần
+using(var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<ProductDBContext>();
+    var db = scope.ServiceProvider.GetRequiredService<ProductService.Model.ProductDBContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Seeder");
     try
     {
-        await db.Database.MigrateAsync();
-        await DbSeeder.SeedAsync(db);
-        Console.WriteLine("[PRODUCT SEED] done");
+        await ProductService.Data.DbSeeder.SeedAsync(db, logger); // <-- chỉ 2 tham số
     }
     catch (Exception ex)
     {
-        Console.WriteLine("[PRODUCT SEED] failed: " + ex.Message);
-        throw; // tùy bạn: có thể không throw nếu muốn app vẫn chạy
+        logger.LogError(ex, "[SEED] failed - app vẫn chạy");
     }
+}
+// phục vụ ảnh
+
+// ===== 6) Pipeline =====
+// Dev: KHÔNG ép HTTPS (tránh lỗi 307/SSL khi gọi từ FE)
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
 }
 
 
-app.MapGet("/", () => "ProductService OK");
+app.UseCors("web");
+
+app.UseSwagger();
+app.UseSwaggerUI();
+app.UseStaticFiles();
+
+app.MapControllers();
 
 app.Run();

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using ProductService.Model;
 using ProductService.Repository;
 using System.Transactions;
-using Shared.Contracts; 
+
 namespace ProductService.Controllers
 {
     [Route("api/[controller]")]
@@ -11,15 +11,15 @@ namespace ProductService.Controllers
     public class ProductController : ControllerBase
     {
         private readonly ProductDBContext _context;
-        private readonly ProcductRepository _productRepo; // hoặc ProductRepository nếu đúng tên lớp
+        private readonly IProductRepository<Product> _productRepo; // đổi sang interface
 
-        public ProductController(ProductDBContext context, ProcductRepository productRepo)
+        public ProductController(ProductDBContext context, IProductRepository<Product> productRepo) // đổi tham số
         {
             _context = context;
             _productRepo = productRepo;
         }
 
-        // GET /api/Product  -> FE gốc kỳ vọng { products: [...] }
+        // GET /api/Product  -> { products: [...] }
         [HttpGet]
         public IActionResult Get()
         {
@@ -45,11 +45,10 @@ namespace ProductService.Controllers
                 })
                 .ToList();
 
-            // 👇 Quan trọng: bọc lại cho đúng shape FE đọc
             return Ok(new { products });
         }
 
-        // GET /api/Product/{id} -> FE thường đọc { product: {...} }
+        // GET /api/Product/{id} -> { product: {...} }
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
@@ -77,8 +76,6 @@ namespace ProductService.Controllers
                 .FirstOrDefault();
 
             if (product == null) return NotFound();
-
-            // 👇 bọc lại
             return Ok(new { product });
         }
 
@@ -86,13 +83,10 @@ namespace ProductService.Controllers
         [HttpPost]
         public IActionResult Post([FromBody] Product product)
         {
-            using (var scope = new TransactionScope())
-            {
-                _productRepo.Insert(product);
-                scope.Complete();
-                // Trả về shape quen thuộc cũng được, nhưng giữ nguyên CreatedAtAction cho đúng REST
-                return CreatedAtAction(nameof(Get), new { id = product.ProductId }, new { product });
-            }
+            using var scope = new TransactionScope();
+            _productRepo.Insert(product);
+            scope.Complete();
+            return CreatedAtAction(nameof(Get), new { id = product.ProductId }, new { product });
         }
 
         // PUT /api/Product/{id}
@@ -101,12 +95,10 @@ namespace ProductService.Controllers
         {
             if (id != product.ProductId) return BadRequest("ID không hợp lệ");
 
-            using (var scope = new TransactionScope())
-            {
-                _productRepo.Update(product);
-                scope.Complete();
-                return Ok("Cập nhật thành công");
-            }
+            using var scope = new TransactionScope();
+            _productRepo.Update(product);
+            scope.Complete();
+            return Ok("Cập nhật thành công");
         }
 
         // DELETE /api/Product/{id}
@@ -117,7 +109,7 @@ namespace ProductService.Controllers
             return Ok();
         }
 
-        // GET /api/Product/san-pham-noi-bat  -> tuỳ FE có dùng không
+        // GET /api/Product/san-pham-noi-bat -> { products: [...] }
         [HttpGet("san-pham-noi-bat")]
         public IActionResult GetProductNoiBat()
         {

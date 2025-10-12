@@ -4,10 +4,12 @@ import "./style.scss";
 import Breadcrumb from "../theme/breadcrumb";
 import { generatePath, Link } from "react-router-dom";
 import { ROUTERS } from "utils/router";
-
 import axios from "axios";
 import { formatter } from "utils/fomatter";
 import { AiOutlineEye, AiOutlineShoppingCart } from "react-icons/ai";
+
+// === API base URL cho Product ===
+const PRODUCT_API = process.env.REACT_APP_PRODUCT_API || `http://${window.location.hostname}:7007`;
 
 const ProductPage = () => {
   const sorts = [
@@ -23,11 +25,12 @@ const ProductPage = () => {
   const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+  const productApi = axios.create({ baseURL: PRODUCT_API });
 
     useEffect(() => {
   const fetchProduct = async () => {
     try {
-      const res = await axios.get('https://localhost:7007/api/Product'); // dùng URL tương đối
+      const res = await productApi.get("/api/Product");
       const list = Array.isArray(res.data) ? res.data : (res.data?.products || []);
       setProducts(list);
     } catch (err) {
@@ -92,14 +95,13 @@ const ProductPage = () => {
             <div className="row">
               {(Array.isArray(products) ? products : []).map((item, index) => {
                 const pid = item.productId ?? item.ProductId ?? item.id ?? item.Id;
-                const imgUrl = `url(https://localhost:7007/images/${item.image})`;
                 return (
                   <div className="col-lg-4 col-md-4 col-sm-6 col-xs-12" key={`${pid}-${index}`}>
                     <div className="featured_item pl-pr-10">
                       <div
                         className="featured_item_img"
                         style={{
-                          backgroundImage: imgUrl,
+                                                    backgroundImage: `url(/images/${encodeURIComponent(item?.image || '')})`,
                           backgroundSize: "cover",
                           backgroundPosition: "center",
                         }}

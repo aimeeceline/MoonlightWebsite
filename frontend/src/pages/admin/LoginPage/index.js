@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ROUTERS } from "utils/router";
 import axios from "axios";
 import { AiOutlineHome } from "react-icons/ai";
+const USER_API    = process.env.REACT_APP_USER_API    || `http://${window.location.hostname}:7200`;
 
 const LoginPage = () => {
     const navigate = useNavigate();
@@ -11,6 +12,7 @@ const LoginPage = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const userApi = axios.create({ baseURL: USER_API });
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -18,7 +20,7 @@ const LoginPage = () => {
         setError('');
 
         try {
-            const response = await axios.post('https://localhost:7200/api/auth/login', {
+            const response = await userApi.post("/api/Auth/login", {
                 username,
                 password
             });

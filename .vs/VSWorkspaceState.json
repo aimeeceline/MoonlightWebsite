@@ -1,0 +1,10 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\backend",
+    "\\backend\\ProductService",
+    "\\backend\\ProductService\\Data"
+  ],
+  "SelectedNode": "\\backend\\ProductService\\Data\\DbSeeder.cs",
+  "PreviewInSolutionExplorer": false
+}

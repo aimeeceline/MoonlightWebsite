@@ -1,20 +1,27 @@
-﻿using System.Security.Claims;
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using UserService.Model; // UserDBContext
+using System.Text;
+using UserService.Model; // chứa UserDBContext
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ---------- Controllers + Swagger (kèm Bearer) ----------
+// 1) DbContext
+builder.Services.AddDbContext<UserDBContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("UserDB")));
+
+// 2) Controllers
 builder.Services.AddControllers();
+
+// 3) Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "UserService", Version = "v1" });
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "UserService API", Version = "v1" });
+
+    // JWT trên Swagger
+    var scheme = new OpenApiSecurityScheme
     {
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
@@ -22,80 +29,63 @@ builder.Services.AddSwaggerGen(c =>
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
         Description = "Nhập: Bearer {token}"
-    });
+    };
+    c.AddSecurityDefinition("Bearer", scheme);
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
-        {
-            new OpenApiSecurityScheme { Reference = new OpenApiReference
-                { Type = ReferenceType.SecurityScheme, Id = "Bearer" } },
-            Array.Empty<string>()
-        }
+        { scheme, Array.Empty<string>() }
     });
 });
 
-// ---------- DB: ưu tiên ENV, fallback appsettings ----------
-var conn =
-    Environment.GetEnvironmentVariable("ConnectionStrings__Default") // từ docker-compose
-    ?? builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? builder.Configuration.GetConnectionString("Default");
-
-builder.Services.AddDbContext<UserDBContext>(options => options.UseSqlServer(conn));
-
-// ---------- CORS (không bắt buộc khi đi qua Nginx) ----------
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", p => p
-        .AllowAnyOrigin()
-        .AllowAnyHeader()
-        .AllowAnyMethod());
-});
-
-// ---------- JWT (đọc từ ENV Jwt__Issuer/Audience/Key) ----------
-var jwtIssuer   = builder.Configuration["Jwt:Issuer"]   ?? "http://userservice:8080";
-var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "bae-beauty-api";
-var jwtKey      = builder.Configuration["Jwt:Key"]      ?? "SuperSecretKeyDontCommit";
-var signingKey  = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+// 4) JWT
+var jwtSection = builder.Configuration.GetSection("Jwt");
+var issuer = jwtSection["Issuer"];
+var audience = jwtSection["Audience"];
+var key = jwtSection["Key"]; // chuỗi bí mật
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(o =>
+    .AddJwtBearer(options =>
     {
-        o.TokenValidationParameters = new TokenValidationParameters
+        options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = true,   ValidIssuer = jwtIssuer,
-            ValidateAudience = true, ValidAudience = jwtAudience,
-            ValidateIssuerSigningKey = true, IssuerSigningKey = signingKey,
+            ValidateIssuer = true,
+            ValidateAudience = true,
             ValidateLifetime = true,
-            ClockSkew = TimeSpan.FromMinutes(2),
-            RoleClaimType = ClaimTypes.Role,
-            NameClaimType = ClaimTypes.NameIdentifier
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = issuer,
+            ValidAudience = audience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key!))
         };
     });
-
-builder.Services.AddAuthorization();
-
+// CORS cho FE dev (localhost & 127.0.0.1:3000)
+builder.Services.AddCors(o => o.AddPolicy("dev", p =>
+    p.WithOrigins("http://localhost:3000", "http://127.0.0.1:3000")
+     .AllowAnyHeader()
+     .AllowAnyMethod()
+// .AllowCredentials() // CHỈ bật nếu bạn gửi cookie/JWT qua cookie
+));
 var app = builder.Build();
 
-// ---------- Middleware ----------
-app.UseSwagger();
-app.UseSwaggerUI();
+// 5) Tự động migrate DB đúng cách (lấy instance từ DI)
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<UserDBContext>();
+    await db.Database.MigrateAsync();
+}
 
-// KHÔNG ép HTTPS trong container (tránh 301/https khi không gắn cert):
-// app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+    app.UseSwagger();
+    app.UseSwaggerUI();
 
-app.UseCors("AllowAll");
+
+
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-// ---------- Lắng nghe 8080 trong container ----------
-app.Urls.Add("http://0.0.0.0:8080");
-
-// ---------- Auto-migrate khi khởi động ----------
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<UserDBContext>();
-    db.Database.Migrate();
-}
 
 app.Run();

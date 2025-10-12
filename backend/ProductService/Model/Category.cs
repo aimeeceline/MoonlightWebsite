@@ -1,14 +1,19 @@
-﻿using ProductService.Model;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.Collections.Generic;
 
-public partial class Category
+namespace ProductService.Model
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int CategoryId { get; set; }
+    public partial class Category
+    {
+        public Category()
+        {
+            Products = new HashSet<Product>();
+        }
 
-    public string Name { get; set; } = string.Empty;
-    public string? Description { get; set; }
-    public ICollection<Product> Products { get; set; } = new List<Product>();
+        public int CategoryId { get; set; }
+        public string Name { get; set; } = null!;
+        public string Description { get; set; } = null!;
+
+        public virtual ICollection<Product> Products { get; set; }
+    }
 }

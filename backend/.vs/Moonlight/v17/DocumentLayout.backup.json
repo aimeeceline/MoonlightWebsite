@@ -3,16 +3,79 @@
   "WorkspaceRootPath": "D:\\MoonlightWebsite\\backend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{9B52D58A-BEA8-4644-B2AE-837C76E01A61}|UserService\\UserService.csproj|d:\\moonlightwebsite\\backend\\userservice\\model\\userdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{9B52D58A-BEA8-4644-B2AE-837C76E01A61}|UserService\\UserService.csproj|solutionrelative:userservice\\model\\userdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{9B52D58A-BEA8-4644-B2AE-837C76E01A61}|UserService\\UserService.csproj|d:\\moonlightwebsite\\backend\\userservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9B52D58A-BEA8-4644-B2AE-837C76E01A61}|UserService\\UserService.csproj|solutionrelative:userservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9B52D58A-BEA8-4644-B2AE-837C76E01A61}|UserService\\UserService.csproj|d:\\moonlightwebsite\\backend\\userservice\\model\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9B52D58A-BEA8-4644-B2AE-837C76E01A61}|UserService\\UserService.csproj|solutionrelative:userservice\\model\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{9B52D58A-BEA8-4644-B2AE-837C76E01A61}|UserService\\UserService.csproj|d:\\moonlightwebsite\\backend\\userservice\\model\\adrress.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{9B52D58A-BEA8-4644-B2AE-837C76E01A61}|UserService\\UserService.csproj|solutionrelative:userservice\\model\\adrress.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{9B52D58A-BEA8-4644-B2AE-837C76E01A61}|UserService\\UserService.csproj|d:\\moonlightwebsite\\backend\\userservice\\model\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{9B52D58A-BEA8-4644-B2AE-837C76E01A61}|UserService\\UserService.csproj|solutionrelative:userservice\\model\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|d:\\moonlightwebsite\\backend\\productservice\\repository\\productrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|solutionrelative:productservice\\repository\\productrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|d:\\moonlightwebsite\\backend\\productservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|solutionrelative:productservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|d:\\moonlightwebsite\\backend\\productservice\\controllers\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|solutionrelative:productservice\\controllers\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|d:\\moonlightwebsite\\backend\\productservice\\productservice.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|solutionrelative:productservice\\productservice.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|d:\\moonlightwebsite\\backend\\productservice\\model\\product.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|solutionrelative:productservice\\model\\product.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|d:\\moonlightwebsite\\backend\\productservice\\model\\productdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|solutionrelative:productservice\\model\\productdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|d:\\moonlightwebsite\\backend\\productservice\\data\\dbseeder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|solutionrelative:productservice\\data\\dbseeder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|d:\\moonlightwebsite\\backend\\productservice\\controllers\\searchcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|solutionrelative:productservice\\controllers\\searchcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|d:\\moonlightwebsite\\backend\\productservice\\model\\category.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|solutionrelative:productservice\\model\\category.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|d:\\moonlightwebsite\\backend\\productservice\\repository\\categoryrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|solutionrelative:productservice\\repository\\categoryrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|d:\\moonlightwebsite\\backend\\productservice\\repository\\genericrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|solutionrelative:productservice\\repository\\genericrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|d:\\moonlightwebsite\\backend\\productservice\\controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|solutionrelative:productservice\\controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|d:\\moonlightwebsite\\backend\\productservice\\repository\\iproductrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|solutionrelative:productservice\\repository\\iproductrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Program Files\\dotnet\\sdk\\9.0.305\\Sdks\\Microsoft.NET.Sdk\\targets\\Microsoft.PackageDependencyResolution.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9B52D58A-BEA8-4644-B2AE-837C76E01A61}|UserService\\UserService.csproj|d:\\moonlightwebsite\\backend\\userservice\\migrations\\20251011155657_inituseraddress.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9B52D58A-BEA8-4644-B2AE-837C76E01A61}|UserService\\UserService.csproj|solutionrelative:userservice\\migrations\\20251011155657_inituseraddress.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9B52D58A-BEA8-4644-B2AE-837C76E01A61}|UserService\\UserService.csproj|d:\\moonlightwebsite\\backend\\userservice\\model\\userdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9B52D58A-BEA8-4644-B2AE-837C76E01A61}|UserService\\UserService.csproj|solutionrelative:userservice\\model\\userdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -21,48 +84,9 @@
       "VerticalTabListWidth": 256,
       "DocumentGroups": [
         {
-          "DockedHeight": 265,
-          "SelectedChildIndex": 2,
+          "DockedHeight": 345,
+          "SelectedChildIndex": 9,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Adrress.cs",
-              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\UserService\\Model\\Adrress.cs",
-              "RelativeDocumentMoniker": "UserService\\Model\\Adrress.cs",
-              "ToolTip": "D:\\MoonlightWebsite\\backend\\UserService\\Model\\Adrress.cs",
-              "RelativeToolTip": "UserService\\Model\\Adrress.cs",
-              "ViewState": "AgIAAAkAAAAAAAAAAAA1wA8AAAAoAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-11T15:38:54.826Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "User.cs",
-              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\UserService\\Model\\User.cs",
-              "RelativeDocumentMoniker": "UserService\\Model\\User.cs",
-              "ToolTip": "D:\\MoonlightWebsite\\backend\\UserService\\Model\\User.cs",
-              "RelativeToolTip": "UserService\\Model\\User.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAcwBwAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-11T15:38:50.974Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "UserDBContext.cs",
-              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\UserService\\Model\\UserDBContext.cs",
-              "RelativeDocumentMoniker": "UserService\\Model\\UserDBContext.cs",
-              "ToolTip": "D:\\MoonlightWebsite\\backend\\UserService\\Model\\UserDBContext.cs*",
-              "RelativeToolTip": "UserService\\Model\\UserDBContext.cs*",
-              "ViewState": "AgIAACUAAAAAAAAAAAAuwDcAAAAvAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-11T14:40:01.17Z",
-              "EditorCaption": ""
-            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
@@ -74,6 +98,252 @@
             {
               "$type": "Bookmark",
               "Name": "ST:1:0:{e8b06f52-6d01-11d2-aa7d-00c04f990343}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "DbSeeder.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\ProductService\\Data\\DbSeeder.cs",
+              "RelativeDocumentMoniker": "ProductService\\Data\\DbSeeder.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\ProductService\\Data\\DbSeeder.cs",
+              "RelativeToolTip": "ProductService\\Data\\DbSeeder.cs",
+              "ViewState": "AgIAAGUAAAAAAAAAAADwv5oAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T16:57:32.166Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\ProductService\\Program.cs",
+              "RelativeDocumentMoniker": "ProductService\\Program.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\ProductService\\Program.cs",
+              "RelativeToolTip": "ProductService\\Program.cs",
+              "ViewState": "AgIAACcAAAAAAAAAAAAAADYAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T18:15:32.936Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "ProductService.csproj",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\ProductService\\ProductService.csproj",
+              "RelativeDocumentMoniker": "ProductService\\ProductService.csproj",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\ProductService\\ProductService.csproj",
+              "RelativeToolTip": "ProductService\\ProductService.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-10-12T02:12:05.174Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "SearchController.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\ProductService\\Controllers\\SearchController.cs",
+              "RelativeDocumentMoniker": "ProductService\\Controllers\\SearchController.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\ProductService\\Controllers\\SearchController.cs",
+              "RelativeToolTip": "ProductService\\Controllers\\SearchController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T03:44:07.567Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "Category.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\ProductService\\Model\\Category.cs",
+              "RelativeDocumentMoniker": "ProductService\\Model\\Category.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\ProductService\\Model\\Category.cs",
+              "RelativeToolTip": "ProductService\\Model\\Category.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T08:32:15.57Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "CategoryController.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\ProductService\\Controllers\\CategoryController.cs",
+              "RelativeDocumentMoniker": "ProductService\\Controllers\\CategoryController.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\ProductService\\Controllers\\CategoryController.cs",
+              "RelativeToolTip": "ProductService\\Controllers\\CategoryController.cs",
+              "ViewState": "AgIAABgAAAAAAAAAAAAYwBwAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T03:32:44.716Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\UserService\\Program.cs",
+              "RelativeDocumentMoniker": "UserService\\Program.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\UserService\\Program.cs",
+              "RelativeToolTip": "UserService\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T02:40:30.808Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "ProductRepository.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\ProductService\\Repository\\ProductRepository.cs",
+              "RelativeDocumentMoniker": "ProductService\\Repository\\ProductRepository.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\ProductService\\Repository\\ProductRepository.cs",
+              "RelativeToolTip": "ProductService\\Repository\\ProductRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T04:11:14.977Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Adrress.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\UserService\\Model\\Adrress.cs",
+              "RelativeDocumentMoniker": "UserService\\Model\\Adrress.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\UserService\\Model\\Adrress.cs",
+              "RelativeToolTip": "UserService\\Model\\Adrress.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T15:38:54.826Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "User.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\UserService\\Model\\User.cs",
+              "RelativeDocumentMoniker": "UserService\\Model\\User.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\UserService\\Model\\User.cs",
+              "RelativeToolTip": "UserService\\Model\\User.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T15:38:50.974Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Product.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\ProductService\\Model\\Product.cs",
+              "RelativeDocumentMoniker": "ProductService\\Model\\Product.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\ProductService\\Model\\Product.cs",
+              "RelativeToolTip": "ProductService\\Model\\Product.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAwAAAAyAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T08:17:54.915Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "ProductDBContext.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\ProductService\\Model\\ProductDBContext.cs",
+              "RelativeDocumentMoniker": "ProductService\\Model\\ProductDBContext.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\ProductService\\Model\\ProductDBContext.cs",
+              "RelativeToolTip": "ProductService\\Model\\ProductDBContext.cs",
+              "ViewState": "AgIAACEAAAAAAAAAAAAowEkAAAAxAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T08:12:57.436Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "CategoryRepository.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\ProductService\\Repository\\CategoryRepository.cs",
+              "RelativeDocumentMoniker": "ProductService\\Repository\\CategoryRepository.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\ProductService\\Repository\\CategoryRepository.cs",
+              "RelativeToolTip": "ProductService\\Repository\\CategoryRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T04:24:16.241Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "GenericRepository.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\ProductService\\Repository\\GenericRepository.cs",
+              "RelativeDocumentMoniker": "ProductService\\Repository\\GenericRepository.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\ProductService\\Repository\\GenericRepository.cs",
+              "RelativeToolTip": "ProductService\\Repository\\GenericRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACIAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T04:23:50.159Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "ProductController.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\ProductService\\Controllers\\ProductController.cs",
+              "RelativeDocumentMoniker": "ProductService\\Controllers\\ProductController.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\ProductService\\Controllers\\ProductController.cs",
+              "RelativeToolTip": "ProductService\\Controllers\\ProductController.cs",
+              "ViewState": "AgIAADsAAAAAAAAAAAAWwEkAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T03:33:05.556Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "IProductRepository.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\ProductService\\Repository\\IProductRepository.cs",
+              "RelativeDocumentMoniker": "ProductService\\Repository\\IProductRepository.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\ProductService\\Repository\\IProductRepository.cs",
+              "RelativeToolTip": "ProductService\\Repository\\IProductRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T04:11:10.55Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "Microsoft.PackageDependencyResolution.targets",
+              "DocumentMoniker": "C:\\Program Files\\dotnet\\sdk\\9.0.305\\Sdks\\Microsoft.NET.Sdk\\targets\\Microsoft.PackageDependencyResolution.targets",
+              "ToolTip": "C:\\Program Files\\dotnet\\sdk\\9.0.305\\Sdks\\Microsoft.NET.Sdk\\targets\\Microsoft.PackageDependencyResolution.targets",
+              "ViewState": "AgIAAP0AAAAAAAAAAAASwAkBAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003801|",
+              "WhenOpened": "2025-10-12T02:23:10.839Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "20251011155657_InitUserAddress.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\UserService\\Migrations\\20251011155657_InitUserAddress.cs",
+              "RelativeDocumentMoniker": "UserService\\Migrations\\20251011155657_InitUserAddress.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\UserService\\Migrations\\20251011155657_InitUserAddress.cs",
+              "RelativeToolTip": "UserService\\Migrations\\20251011155657_InitUserAddress.cs",
+              "ViewState": "AgIAAEUAAAAAAAAAAAAYwA4AAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T15:56:57.716Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "UserDBContext.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\UserService\\Model\\UserDBContext.cs",
+              "RelativeDocumentMoniker": "UserService\\Model\\UserDBContext.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\UserService\\Model\\UserDBContext.cs",
+              "RelativeToolTip": "UserService\\Model\\UserDBContext.cs",
+              "ViewState": "AgIAACUAAAAAAAAAAAAuwDcAAAAvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T14:40:01.17Z"
+            }
+          ]
+        },
+        {
+          "DockedHeight": 164,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{0ad07096-bba9-4900-a651-0598d26f6d24}"
             },
             {
               "$type": "Bookmark",

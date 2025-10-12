@@ -1,17 +1,14 @@
-﻿# build
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+﻿FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ProductService/ProductService.csproj ProductService/
-COPY Shared/Shared.csproj Shared/
-RUN dotnet restore ProductService/ProductService.csproj
-COPY . .
+COPY backend/ProductService/ProductService.csproj ./ProductService/
+RUN dotnet restore ./ProductService/ProductService.csproj
+COPY backend/ProductService/. ./ProductService/
 WORKDIR /src/ProductService
-RUN dotnet publish -c Release -o /app /p:UseAppHost=false
+RUN dotnet publish -c Release -o /app/publish
 
-# run
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
-COPY --from=build /app .
+COPY --from=build /app/publish .
+ENV ASPNETCORE_URLS=http://0.0.0.0:8080
 EXPOSE 8080
-ENV ASPNETCORE_URLS=http://+:8080
 ENTRYPOINT ["dotnet","ProductService.dll"]

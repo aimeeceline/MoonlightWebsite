@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProductService.Model;
-using Shared.Contracts; 
+
 namespace ProductService.Controllers
 {
     [Route("api/[controller]")]
@@ -11,7 +11,7 @@ namespace ProductService.Controllers
         private readonly ProductDBContext _context;
         public CategoryController(ProductDBContext context) => _context = context;
 
-        // GET /api/Category  -> nếu FE đọc categories, bọc lại { categories: [...] }
+        // GET /api/Category  -> FE đọc { categories: [...] }
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -19,8 +19,8 @@ namespace ProductService.Controllers
                 .AsNoTracking()
                 .Select(c => new
                 {
-                    categoryId  = c.CategoryId,
-                    name        = c.Name,
+                    categoryId = c.CategoryId,
+                    name = c.Name,
                     description = c.Description
                 })
                 .ToListAsync();
@@ -28,7 +28,7 @@ namespace ProductService.Controllers
             return Ok(new { categories });
         }
 
-        // GET /api/Category/category/{id} -> FE gốc đọc { products: [...] }
+        // GET /api/Category/category/{id} -> { products: [...] }
         [HttpGet("category/{id:int}")]
         public async Task<IActionResult> GetProductsByCategory(int id)
         {

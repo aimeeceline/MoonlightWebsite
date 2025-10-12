@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ProductService.Model;   // Import DbContext
-using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using ProductService.Model;
-using Shared.Contracts; 
+
 namespace ProductService.Controllers
 {
     [Route("api/[controller]")]
@@ -10,30 +9,23 @@ namespace ProductService.Controllers
     public class SearchController : ControllerBase
     {
         private readonly ProductDBContext _context;
+        public SearchController(ProductDBContext context) => _context = context;
 
-        public SearchController(ProductDBContext context)
-        {
-            _context = context;
-        }
-
+        // GET /api/Search?keyword=...
         [HttpGet]
-        public IActionResult Search(string keyword)
+        public async Task<IActionResult> Search(string keyword)
         {
-            if (string.IsNullOrEmpty(keyword))
-            {
-                return BadRequest(new { message = "Từ khóa tìm kiếm không được để trống." });
-            }
+            if (string.IsNullOrWhiteSpace(keyword))
+                return Ok(new { products = Array.Empty<object>() }); // vẫn trả 200 cho FE
 
-            var results = _context.Products
-                .Where(p => p.Name.Contains(keyword)) // có thể thêm ToLower() nếu cần
-                .ToList();
+            var products = await _context.Products
+                .AsNoTracking()
+                .Where(p => EF.Functions.Like(p.Name, $"%{keyword.Trim()}%"))
+                .Select(p => new { p.ProductId, p.Name, p.Price, p.Image, p.Inventory })
+                .ToListAsync();
 
-            if (results == null || results.Count == 0)
-            {
-                return NotFound(new { message = "Không tìm thấy sản phẩm nào." });
-            }
-
-            return Ok(results);
+            // Không NotFound để FE đỡ phải handle 404
+            return Ok(new { products });
         }
     }
 }

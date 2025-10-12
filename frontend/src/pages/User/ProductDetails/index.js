@@ -9,11 +9,12 @@ import { generatePath, Link, useParams } from "react-router-dom";
 import axios from "axios";
 import { ROUTERS } from "utils/router";
 
-// Đặt baseURL một lần (nếu chưa có)
-const API_BASE = "https://localhost:7007";
+// === API base URL cho Product ===
+const PRODUCT_API = process.env.REACT_APP_PRODUCT_API || `http://${window.location.hostname}:7007`;
 
 const ProductDetails = () => {
   const { productId } = useParams();
+  const productApi = axios.create({ baseURL: PRODUCT_API });
 
   // Chi tiết
   const [product, setProduct] = useState(null);
@@ -41,8 +42,8 @@ useEffect(() => {
       setProduct(null);
 
       try {
-        const { data } = await axios.get(
-  `https://localhost:7007/api/Product/${productId}`,
+        const { data } = await productApi.get(
+  `/api/Product/${productId}`,
   { signal: ctrl.signal }
 );
 
@@ -81,8 +82,8 @@ useEffect(() => {
 
   (async () => {
     try {
-      const { data } = await axios.get(
-  `https://localhost:7007/api/Product/san-pham-noi-bat`,
+      const { data } = await productApi.get(
+  `/api/Product/san-pham-noi-bat`,
   { signal: ctrl.signal }
 );
 
@@ -123,7 +124,7 @@ useEffect(() => {
               <div className="col-lg-6 col-xl-12 col-md-12 col-sm-12 col-xs-12 product_details_pic">
                 <div className="product_details_picture position-relative">
                   <img
-                    src={`${API_BASE}/images/${product.image}`}
+                    src={`${PRODUCT_API}/images/${product.image}`}
                     alt="product-main"
                     style={{ borderRadius: "6px" }}
                   />
@@ -137,15 +138,15 @@ useEffect(() => {
 
                 <div className="main">
                   <img
-                    src={`${API_BASE}/images/${product.image1}`}
+                    src={`${PRODUCT_API}/images/${product.image1}`}
                     alt="product-1"
                   />
                   <img
-                    src={`${API_BASE}/images/${product.image2}`}
+                    src={`${PRODUCT_API}/images/${product.image2}`}
                     alt="product-2"
                   />
                   <img
-                    src={`${API_BASE}/images/${product.image3}`}
+                    src={`${PRODUCT_API}/images/${product.image3}`}
                     alt="product-3"
                   />
                 </div>
@@ -205,7 +206,7 @@ useEffect(() => {
               item.productId ?? item.ProductId ?? item.id ?? item.Id ?? null;
             if (!pid) return null;
 
-            const imgUrl = `${API_BASE}/images/${item.image}`;
+            const imgUrl = `${PRODUCT_API}/images/${item.image}`;
 
             return (
               <div
