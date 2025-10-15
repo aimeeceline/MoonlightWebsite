@@ -1,121 +1,105 @@
-﻿using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Text.Json;
+﻿using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Shared.Contracts;
+using System.Net.Http.Headers;
 
 namespace CartService.Repository
 {
+    // map với section "Services"
+    public class ServiceUrls
+    {
+        public string? ProductService { get; init; }
+        public string? DiscountService { get; init; }
+        public string? UserService { get; init; }
+    }
+
     public class ApiClientHelper
     {
-        private readonly IHttpClientFactory _httpClientFactory;
-        private readonly IConfiguration _config;
+        private readonly HttpClient _http;
+        private readonly IHttpContextAccessor _ctx;
+        private readonly ServiceUrls _urls;
 
-        // Json options: bỏ qua hoa/thường, mapping kiểu web
-        private static readonly JsonSerializerOptions JsonOpts =
-            new(JsonSerializerDefaults.Web)
-            {
-                PropertyNameCaseInsensitive = true
-            };
-
-        public ApiClientHelper(IHttpClientFactory httpClientFactory, IConfiguration config)
+        public ApiClientHelper(HttpClient http, IHttpContextAccessor ctx, IOptions<ServiceUrls> urls)
         {
-            _httpClientFactory = httpClientFactory;
-            _config = config;
+            _http = http;
+            _ctx = ctx;
+            _urls = urls.Value;
         }
 
-        private HttpClient CreateClient()
-        {
-            // nếu bạn có AddHttpClient trong Program.cs thì dùng factory;
-            // nếu chưa, fallback tạo client tiêu chuẩn (accept self-signed).
-            var handler = new HttpClientHandler
-            {
-                ServerCertificateCustomValidationCallback = (msg, cert, chain, errors) => true
-            };
+        // ---- URL nội bộ (fallback đúng tên container -dev) ----
+        private string ProductBaseUrl => _urls.ProductService ?? "http://productservice-dev:8080";
+        private string DiscountBaseUrl => _urls.DiscountService ?? "http://discountservice-dev:8080";
+        private string UserBaseUrl => _urls.UserService ?? "http://userservice-dev:8080";
 
-            return _httpClientFactory != null
-                ? _httpClientFactory.CreateClient()
-                : new HttpClient(handler);
+        // ---- Gắn Bearer nếu có trên request gốc ----
+        private void AttachBearer(HttpRequestMessage req)
+        {
+            var raw = _ctx.HttpContext?.Request.Headers["Authorization"].ToString();
+            if (!string.IsNullOrWhiteSpace(raw) && raw.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+            {
+                var token = raw.Substring("Bearer ".Length).Trim();
+                if (!string.IsNullOrEmpty(token))
+                    req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
         }
 
-        private string ProductBaseUrl =>
-            // ưu tiên ENV / appsettings, fallback hostname của compose (đổi port cho đúng dịch vụ của bạn)
-            _config["Services:Product"] ??
-            "http://productservice:8080";
-
-        private string DiscountBaseUrl =>
-            _config["Services:Discount"] ??
-            "http://discountservice:8080";
-
-        /// <summary>
-        /// Lấy product theo id từ ProductService (trả về ProductDto; tolerant với schema).
-        /// </summary>
-        public async Task<ProductDto?> GetProductByIdAsync(int productId, string? bearerToken = null)
+        // ================= PRODUCTS =================
+        public async Task<ProductDto?> GetProductByIdAsync(int id)
         {
-            var http = CreateClient();
-            var url = $"{ProductBaseUrl}/api/Product/{productId}";
+            var url = $"{ProductBaseUrl}/api/Product/{id}";
+            using var req = new HttpRequestMessage(HttpMethod.Get, url);
+            AttachBearer(req); // có cũng không sao
 
-            if (!string.IsNullOrWhiteSpace(bearerToken))
-                http.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", bearerToken);
+            using var resp = await _http.SendAsync(req);
+            if (!resp.IsSuccessStatusCode) return null;
 
-            using var res = await http.GetAsync(url);
-            if (!res.IsSuccessStatusCode) return null;
+            var json = await resp.Content.ReadAsStringAsync();
 
-            var json = await res.Content.ReadAsStringAsync();
-
-            // cố gắng parse trực tiếp
+            // Unwrap nếu server trả { "product": {...} }, còn nếu phẳng thì dùng root luôn
             try
             {
-                var direct = JsonSerializer.Deserialize<ProductDto>(json, JsonOpts);
-                if (direct != null && direct.ProductId > 0) return direct;
+                var root = JObject.Parse(json);
+                var token = root["product"] ?? root;              // 👈 quan trọng
+                return token.ToObject<ProductDto>();
             }
-            catch { /* bỏ qua */ }
-
-            // nếu api bọc { data: {...} } hoặc { product: {...} }
-            try
+            catch
             {
-                using var doc = JsonDocument.Parse(json);
-                var root = doc.RootElement;
-
-                JsonElement payload;
-                if (root.ValueKind == JsonValueKind.Object &&
-                    (root.TryGetProperty("data", out payload) ||
-                     root.TryGetProperty("result", out payload) ||
-                     root.TryGetProperty("product", out payload)))
-                {
-                    var dto = JsonSerializer.Deserialize<ProductDto>(payload.GetRawText(), JsonOpts);
-                    if (dto != null && dto.ProductId > 0) return dto;
-                }
-
-                if (root.ValueKind == JsonValueKind.Array && root.EnumerateArray().Any())
-                {
-                    var first = root[0];
-                    var dto = JsonSerializer.Deserialize<ProductDto>(first.GetRawText(), JsonOpts);
-                    if (dto != null && dto.ProductId > 0) return dto;
-                }
+                // fallback: nếu không phải JSON object, thử parse trực tiếp
+                return JsonConvert.DeserializeObject<ProductDto>(json);
             }
-            catch { /* bỏ qua */ }
-
-            return null;
         }
 
-        /// <summary>
-        /// Gọi DiscountService áp mã giảm giá. Body bạn truyền kiểu { Code = "...", OrderTotal = 123.45M }
-        /// </summary>
-        public async Task<HttpResponseMessage> ApplyDiscountAsync(object body, string? bearerToken = null)
+        // ================= DISCOUNT =================
+        // body ví dụ: new { Code = dto.DiscountCode, OrderTotal = total }
+        public async Task<HttpResponseMessage> ApplyDiscountAsync(object body)
         {
-            var http = CreateClient();
             var url = $"{DiscountBaseUrl}/api/Discount/apply";
+            var json = JsonConvert.SerializeObject(body);
 
-            if (!string.IsNullOrWhiteSpace(bearerToken))
-                http.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", bearerToken);
+            using var req = new HttpRequestMessage(HttpMethod.Post, url)
+            {
+                Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json")
+            };
+            AttachBearer(req);
 
-            var content = new StringContent(
-                JsonSerializer.Serialize(body, JsonOpts), Encoding.UTF8, "application/json");
+            return await _http.SendAsync(req);
+        }
 
-            return await http.PostAsync(url, content);
+        // ================= USER =================
+        // Ví dụ gọi sang UserService để tra cứu userId theo username (tuỳ bạn có endpoint này hay không)
+        public async Task<int> GetUserIdByUsernameAsync(string username)
+        {
+            var url = $"{UserBaseUrl}/api/User/by-username/{Uri.EscapeDataString(username)}";
+            using var req = new HttpRequestMessage(HttpMethod.Get, url);
+            AttachBearer(req);
+
+            using var resp = await _http.SendAsync(req);
+            if (!resp.IsSuccessStatusCode) return 0;
+
+            var json = await resp.Content.ReadAsStringAsync();
+            dynamic obj = JsonConvert.DeserializeObject<dynamic>(json)!;
+            return (int?)obj?.userId ?? 0;
         }
     }
 }

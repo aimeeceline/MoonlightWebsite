@@ -2,7 +2,7 @@ import { memo, useState, useEffect } from "react";
 import "./style.scss";
 import axios from "axios";
 
-const API_BASE = "https://localhost:7099"; // gom base để dễ đổi
+const CART_API = process.env.REACT_APP_CART_API || `http://${window.location.hostname}:7099`;
 
 const Quantity = ({
   product,
@@ -62,7 +62,7 @@ const Quantity = ({
 
 
     try {
-      const res = await axios.post(`${API_BASE}/api/Cart/add-to-cart`, cartPayload, {
+      const res = await axios.post(`${CART_API}/api/Cart/add-to-cart`, cartPayload, {
         headers: { Authorization: `Bearer ${token}` }
       });
       console.log('Send add-to-cart', { productId: product?.productId, quantity });

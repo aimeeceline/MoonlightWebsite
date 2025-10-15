@@ -1,17 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
-
 namespace UserService.Model
 {
     public partial class UserDBContext : DbContext
     {
-        public UserDBContext() { }
         public UserDBContext(DbContextOptions<UserDBContext> options) : base(options) { }
 
-        public DbSet<User> Users { get; set; } = null!;
-        public DbSet<Address> Addresses { get; set; } = null!;
+        public virtual DbSet<User> Users { get; set; } = null!;
+        public virtual DbSet<Address> Addresses { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
+        { 
             // ===== User =====
             modelBuilder.Entity<User>(entity =>
             {

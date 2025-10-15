@@ -1,11 +1,11 @@
-﻿using CartService.Model;
-using CartService.Repository;
+﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;                 // dùng Newtonsoft
-using Shared.Contracts;               // ProductDto, DiscountDto, v.v.
-using System.Security.Claims;
+using Newtonsoft.Json;
+using CartService.Model;
+using CartService.Repository;
+using Shared.Contracts;
 
 namespace CartService.Controllers
 {
@@ -30,38 +30,45 @@ namespace CartService.Controllers
             _context = context;
         }
 
+        // -------- Helpers --------
+        private static int? TryGetUserId(ClaimsPrincipal u)
+        {
+            var idStr =
+                u.FindFirstValue(ClaimTypes.NameIdentifier) ??
+                u.FindFirstValue("nameid") ??
+                u.FindFirstValue("uid") ??
+                u.FindFirstValue("sub");
+
+            return int.TryParse(idStr, out var id) ? id : (int?)null;
+        }
+
         // ========== ADD TO CART ==========
         [Authorize(Policy = "UserOnly")]
         [HttpPost("add-to-cart")]
-        public async Task<IActionResult> AddToCart([FromBody] AddCartItemsRequest request)
+        public async Task<IActionResult> AddToCart([FromBody] AddCartItemRequest request)
         {
+            var userId = TryGetUserId(User);
+            if (userId is null) return Unauthorized("Không tìm thấy thông tin người dùng.");
             if (!ModelState.IsValid) return BadRequest(ModelState);
-
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null) return Unauthorized("Không tìm thấy thông tin người dùng.");
-            if (User.FindFirst(ClaimTypes.Role)?.Value != "User")
-                return Unauthorized("Chỉ User mới được thao tác.");
-            int userId = int.Parse(userIdClaim.Value);
-
             if (request?.Items == null || !request.Items.Any())
                 return BadRequest("Danh sách sản phẩm trống.");
 
-            // Lấy/hoặc tạo giỏ
+            // lấy/hoặc tạo giỏ
             var cart = await _context.Carts
                 .Include(c => c.CartItems)
-                .FirstOrDefaultAsync(c => c.UserId == userId);
-
-            if (cart == null)
-            {
-                cart = new Cart
+                .FirstOrDefaultAsync(c => c.UserId == userId)
+                ?? new Cart
                 {
-                    UserId = userId,
+                    UserId = userId.Value,
                     CreateDate = DateTime.Now,
                     TotalCartPrice = 0,
                     OriginalTotal = 0,
                     Quantity = 0,
                     CartItems = new List<CartItem>()
                 };
+
+            if (cart.CartId == 0)
+            {
                 _context.Carts.Add(cart);
                 await _context.SaveChangesAsync();
             }
@@ -71,20 +78,13 @@ namespace CartService.Controllers
                 if (item.ProductId <= 0 || item.Quantity <= 0)
                     return BadRequest("productId/quantity không hợp lệ.");
 
-                // Lấy product
-                var prod = await _apiClientHelper.GetProductByIdAsync(item.ProductId);
-                if (prod == null) return BadRequest($"Không tìm thấy sản phẩm với ID: {item.ProductId}");
+                var product = await _apiClientHelper.GetProductByIdAsync(item.ProductId);
+                if (product == null) return BadRequest($"Không tìm thấy sản phẩm với ID: {item.ProductId}");
 
-                // fallback: tên/ảnh/giá
-                string? prodName = prod.Name ?? prod.ProductName;
-                string? prodImg = prod.Image ?? prod.ProductImage ?? prod.ImageUrl;
+                string? prodName = product.Name ?? product.ProductName;
+                string? prodImg = product.Image ?? product.ProductImage ?? product.ImageUrl;
+                decimal price = (product.Price ?? product.SalePrice ?? product.MinPrice) ?? 0m;
 
-                decimal price = 0m;
-                if (prod.Price is decimal p1) price = p1;
-                else if (prod.SalePrice is decimal p2) price = p2;
-                else if (prod.MinPrice is decimal p3) price = p3;
-
-                // Upsert
                 var existing = cart.CartItems.FirstOrDefault(i => i.ProductId == item.ProductId);
                 if (existing != null)
                 {
@@ -113,11 +113,11 @@ namespace CartService.Controllers
 
             await _context.SaveChangesAsync();
 
-            // Tính lại tổng
+            // tính lại tổng
             var allItems = await _context.CartItems.Where(ci => ci.CartId == cart.CartId).ToListAsync();
             cart.Quantity = allItems.Sum(i => i.Quantity);
             cart.OriginalTotal = allItems.Sum(i => (i.Price ?? 0m) * i.Quantity);
-            cart.TotalCartPrice = cart.OriginalTotal; // chưa discount
+            cart.TotalCartPrice = cart.OriginalTotal;
             await _context.SaveChangesAsync();
 
             return Ok(new
@@ -143,11 +143,8 @@ namespace CartService.Controllers
         [HttpGet("user-cart")]
         public async Task<IActionResult> GetCartByUserId()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null) return Unauthorized("Không tìm thấy thông tin người dùng.");
-            if (User.FindFirst(ClaimTypes.Role)?.Value != "User")
-                return Unauthorized("Chỉ người dùng với quyền User mới có thể thực hiện hành động này.");
-            int userId = int.Parse(userIdClaim.Value);
+            var userId = TryGetUserId(User);
+            if (userId is null) return Unauthorized("Không tìm thấy thông tin người dùng.");
 
             var cart = await _context.Carts
                 .Where(c => c.UserId == userId)
@@ -168,11 +165,8 @@ namespace CartService.Controllers
         [HttpGet("user-cartItem")]
         public async Task<IActionResult> GetCartItem()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null) return Unauthorized("Không tìm thấy thông tin người dùng.");
-            if (User.FindFirst(ClaimTypes.Role)?.Value != "User")
-                return Unauthorized("Chỉ người dùng với quyền User mới có thể thực hiện hành động này.");
-            int userId = int.Parse(userIdClaim.Value);
+            var userId = TryGetUserId(User);
+            if (userId is null) return Unauthorized("Không tìm thấy thông tin người dùng.");
 
             var cart = await _context.Carts
                 .Where(c => c.UserId == userId)
@@ -207,12 +201,8 @@ namespace CartService.Controllers
         [HttpPut("update-item-quantity/{cartItemId}")]
         public async Task<IActionResult> UpdateItemQuantity(int cartItemId, [FromBody] UpdateCartItemRequest request)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null) return Unauthorized("Không tìm thấy thông tin người dùng.");
-            if (User.FindFirst(ClaimTypes.Role)?.Value != "User")
-                return Unauthorized("Chỉ người dùng với quyền User mới có thể thực hiện hành động này.");
-            int userId = int.Parse(userIdClaim.Value);
-
+            var userId = TryGetUserId(User);
+            if (userId is null) return Unauthorized("Không tìm thấy thông tin người dùng.");
             if (request.Quantity <= 0) return BadRequest("Số lượng phải lớn hơn 0.");
 
             var cartItem = _cartItemRepo.GetById(cartItemId);
@@ -220,10 +210,10 @@ namespace CartService.Controllers
             if (cartItem.Cart == null || cartItem.Cart.UserId != userId)
                 return Unauthorized("Không tìm thấy giỏ hàng hoặc không phải của bạn.");
 
-            var prod = await _apiClientHelper.GetProductByIdAsync(cartItem.ProductId);
-            if (prod == null) return NotFound($"Sản phẩm với ID {cartItem.ProductId} không tồn tại.");
+            var product = await _apiClientHelper.GetProductByIdAsync(cartItem.ProductId);
+            if (product == null) return NotFound($"Sản phẩm với ID {cartItem.ProductId} không tồn tại.");
 
-            decimal price = (prod.Price ?? prod.SalePrice ?? prod.MinPrice) ?? 0m;
+            decimal price = (product.Price ?? product.SalePrice ?? product.MinPrice) ?? 0m;
 
             cartItem.Quantity = request.Quantity;
             cartItem.Price = price;
@@ -235,7 +225,7 @@ namespace CartService.Controllers
             cart.Quantity = all.Sum(i => i.Quantity);
             cart.OriginalTotal = all.Sum(i => (i.Price ?? 0m) * i.Quantity);
             var discountAmount = cart.Discount ?? 0m;
-            cart.TotalCartPrice = Math.Max(cart.OriginalTotal.Value - discountAmount, 0);
+            cart.TotalCartPrice = Math.Max((cart.OriginalTotal ?? 0m) - discountAmount, 0m);
             _cartRepo.Update(cart);
 
             var refreshed = _cartItemRepo.GetById(cartItemId)!;
@@ -258,11 +248,8 @@ namespace CartService.Controllers
         [HttpDelete("delete-item/{cartItemId}")]
         public IActionResult DeleteCartItem(int cartItemId)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null) return Unauthorized(new { Message = "Không tìm thấy thông tin người dùng." });
-            if (User.FindFirst(ClaimTypes.Role)?.Value != "User")
-                return Unauthorized(new { Message = "Chỉ người dùng với quyền User mới có thể thực hiện hành động này." });
-            int userId = int.Parse(userIdClaim.Value);
+            var userId = TryGetUserId(User);
+            if (userId is null) return Unauthorized(new { Message = "Không tìm thấy thông tin người dùng." });
 
             var cartItem = _cartItemRepo.GetById(cartItemId);
             if (cartItem == null) return NotFound(new { Message = "Không tìm thấy sản phẩm trong giỏ hàng." });
@@ -278,7 +265,7 @@ namespace CartService.Controllers
                 cart.Quantity = all.Sum(i => i.Quantity);
                 cart.OriginalTotal = all.Sum(i => (i.Price ?? 0m) * i.Quantity);
                 var totalDiscount = cart.Discount ?? 0m;
-                cart.TotalCartPrice = cart.OriginalTotal - totalDiscount;
+                cart.TotalCartPrice = Math.Max((cart.OriginalTotal ?? 0m) - totalDiscount, 0m);
 
                 if (cart.Quantity == 0)
                 {
@@ -306,9 +293,8 @@ namespace CartService.Controllers
         [HttpPost("apply-discount")]
         public async Task<IActionResult> ApplyDiscount([FromBody] DiscountDto dto)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null) return Unauthorized("Không tìm thấy thông tin người dùng.");
-            int userId = int.Parse(userIdClaim.Value);
+            var userId = TryGetUserId(User);
+            if (userId is null) return Unauthorized("Không tìm thấy thông tin người dùng.");
 
             var cart = await _context.Carts
                 .Include(c => c.CartItems)
@@ -321,7 +307,6 @@ namespace CartService.Controllers
             if (!string.IsNullOrEmpty(cart.DiscountCode))
                 return BadRequest("Giỏ hàng đã áp dụng mã giảm giá. Hủy mã trước khi áp dụng mã mới.");
 
-            // chuẩn hóa body gửi sang DiscountService
             var body = new { Code = dto.DiscountCode, OrderTotal = cart.OriginalTotal ?? 0m };
             var resp = await _apiClientHelper.ApplyDiscountAsync(body);
             if (!resp.IsSuccessStatusCode)
@@ -332,13 +317,12 @@ namespace CartService.Controllers
 
             var json = await resp.Content.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<DiscountDto>(json);
-
             if (result == null || string.IsNullOrWhiteSpace(result.DiscountCode))
                 return BadRequest("Phản hồi không hợp lệ từ DiscountService.");
 
             cart.DiscountCode = result.DiscountCode;
-            cart.Discount = result.DiscountAmount;
-            cart.TotalCartPrice = (cart.OriginalTotal ?? 0m) - (result.DiscountAmount ?? 0m);
+            cart.Discount = result.DiscountAmount ?? 0m;
+            cart.TotalCartPrice = Math.Max((cart.OriginalTotal ?? 0m) - (result.DiscountAmount ?? 0m), 0m);
 
             _cartRepo.Update(cart);
             await _context.SaveChangesAsync();
@@ -357,9 +341,8 @@ namespace CartService.Controllers
         [HttpDelete("remove-discount")]
         public async Task<IActionResult> RemoveDiscountFromCart()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null) return Unauthorized("Không tìm thấy thông tin người dùng.");
-            int userId = int.Parse(userIdClaim.Value);
+            var userId = TryGetUserId(User);
+            if (userId is null) return Unauthorized("Không tìm thấy thông tin người dùng.");
 
             var cart = await _context.Carts
                 .Include(c => c.CartItems)
@@ -390,9 +373,8 @@ namespace CartService.Controllers
         [HttpDelete("delete-cart")]
         public async Task<IActionResult> ClearCart()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null) return Unauthorized("Không tìm thấy thông tin người dùng.");
-            int userId = int.Parse(userIdClaim.Value);
+            var userId = TryGetUserId(User);
+            if (userId is null) return Unauthorized("Không tìm thấy thông tin người dùng.");
 
             var carts = await _context.Carts.Where(c => c.UserId == userId).ToListAsync();
             if (!carts.Any()) return NotFound("Giỏ hàng đã trống.");

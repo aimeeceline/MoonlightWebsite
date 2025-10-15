@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace CartService.Model
@@ -16,8 +16,7 @@ namespace CartService.Model
         public decimal? OriginalTotal { get; set; }
         public decimal? TotalCartPrice { get; set; }
         public decimal? Discount { get; set; }
-        public string DiscountCode { get; set; }
-
+        public string? DiscountCode { get; set; }
         public int Quantity { get; set; }
         public virtual ICollection<CartItem> CartItems { get; set; }
     }

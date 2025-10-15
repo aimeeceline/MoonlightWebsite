@@ -29,8 +29,8 @@ builder.Services.AddSwaggerGen(c =>
 // ===== 3) CORS cho FE (Dev) =====
 // Nếu bạn chắc FE luôn ở 3000 thì có thể giới hạn .WithOrigins("http://localhost:3000")
 builder.Services.AddCors(o => o.AddPolicy("web", p =>
-    p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()
-));
+ p.WithOrigins("http://localhost:3000", "http://127.0.0.1:3000")
+          .AllowAnyHeader().AllowAnyMethod()));
 
 // ===== 4) Đăng ký DI cho repository =====
 // Nếu Controller inject IProductRepository<Product>

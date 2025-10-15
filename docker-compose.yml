@@ -1,3 +1,16 @@
+x-dotnet-dev: &dotnet-dev
+  image: mcr.microsoft.com/dotnet/sdk:8.0
+  environment:
+    - ASPNETCORE_ENVIRONMENT=Development
+    - ASPNETCORE_URLS=http://+:8080
+    - DOTNET_USE_POLLING_FILE_WATCHER=1
+    - Jwt__Issuer=Moonlight.Auth
+    - Jwt__Audience=Moonlight.Client
+    - Jwt__Key=THIS_IS_A_LONG_RANDOM_64+_CHAR_SECRET_CHANGE_ME_NOW
+  depends_on:
+    sqlserver:
+      condition: service_healthy
+
 services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -5,8 +18,7 @@ services:
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=Lananh@123A
-    ports:
-      - "1433:1433"
+    ports: ["1433:1433"]
     volumes:
       - mssqldata:/var/opt/mssql
     healthcheck:
@@ -15,80 +27,129 @@ services:
       timeout: 5s
       retries: 30
 
-  # productservice:
-  #   container_name: productservice
-  #   build:
-  #     context: .
-  #     dockerfile: backend/ProductService/Dockerfile   # Đường dẫn Dockerfile của bạn
-  #   environment:
-  #     - ASPNETCORE_ENVIRONMENT=Development            # hoặc Production nếu muốn
-  #     - ConnectionStrings__Default=Server=sqlserver,1433;Database=ProductDB;User Id=sa;Password=Lananh@123A;TrustServerCertificate=True
-  #   depends_on:
-  #     sqlserver:
-  #       condition: service_healthy
-  #   ports:
-  #     - "7007:8080"                                    # host:container
-  #   restart: unless-stopped
-
-  # frontend:
-  #   container_name: frontend
-  #   build:
-  #     context: .
-  #     dockerfile: frontend/Dockerfile
-  #   depends_on:
-  #     productservice:
-  #       condition: service_started
-  #   ports:
-  #     - "3000:80"   # mở FE ngoài host ở cổng 3000
-  #   restart: unless-stopped
-  
-  
-    # ===== ProductService (hot reload) =====
   productservice-dev:
-    image: mcr.microsoft.com/dotnet/sdk:8.0
+    <<: *dotnet-dev
     container_name: productservice-dev
-    working_dir: /src/ProductService               # 👈 đặt đúng thư mục có .csproj
+    working_dir: /src/ProductService
     volumes:
-      - ./backend:/src                             # 👈 mount gốc backend vào /src
+      - ./backend:/src
+      - nuget_cache_product:/root/.nuget/packages   # cache riêng
     command: >
-      bash -lc "dotnet restore &&
-              dotnet watch run --urls http://0.0.0.0:8080"
+      bash -lc "
+        rm -rf /src/ProductService/bin /src/ProductService/obj &&
+        dotnet restore /src/ProductService/ProductService.csproj --disable-parallel -v minimal &&
+        dotnet watch run --urls http://0.0.0.0:8080
+      "
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__ProductDB=Server=sqlserver,1433;Database=ProductDB;User ID=sa;Password=Lananh@123A;TrustServerCertificate=True;Encrypt=False
-    ports:
-      - "7007:8080"
-    depends_on:
-      sqlserver:
-        condition: service_started
-  #===== Userservice (hot reload) =====
+    ports: ["7007:8080"]
+
   userservice-dev:
-    image: mcr.microsoft.com/dotnet/sdk:8.0
+    <<: *dotnet-dev
     container_name: userservice-dev
     working_dir: /src/UserService
     volumes:
-      - ./backend:/src            # folder chứa .csproj của UserService
-      - ./Shared:/src/Shared          # (nếu dùng project Shared)
-    command: bash -lc "dotnet restore && dotnet watch run --urls http://0.0.0.0:8080"
-    ports:
-      - "7200:8080"                   # FE hay gọi 7200 → map ra host 7200
+      - ./backend:/src
+      - nuget_cache_user:/root/.nuget/packages       # cache riêng
+    command: >
+      bash -lc "
+        rm -rf /src/UserService/bin /src/UserService/obj &&
+        dotnet restore /src/UserService/UserService.csproj --disable-parallel -v minimal &&
+        dotnet watch run --urls http://0.0.0.0:8080
+      "
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__UserDB=Server=sqlserver,1433;Database=UserDB;User ID=sa;Password=Lananh@123A;TrustServerCertificate=True;Encrypt=False
+    ports: ["7200:8080"]
+
+  cartservice-dev:
+    <<: *dotnet-dev
+    container_name: cartservice-dev
+    working_dir: /src/CartService
+    volumes:
+      - ./backend:/src
+      - nuget_cache_cart:/root/.nuget/packages       # cache riêng
+    command: >
+      bash -lc "
+        rm -rf /src/CartService/bin /src/CartService/obj &&
+        dotnet restore /src/CartService/CartService.csproj --disable-parallel -v minimal &&
+        dotnet watch run --urls http://0.0.0.0:8080
+      "
+    environment:
+      - Services__ProductService=http://productservice-dev:8080
+      - Services__DiscountService=http://discountservice-dev:8080
+      - Services__UserService=http://userservice-dev:8080  
+      - ConnectionStrings__CartDB=Server=sqlserver,1433;Database=CartDB;User ID=sa;Password=Lananh@123A;TrustServerCertificate=True;Encrypt=False
+    ports: ["7099:8080"]
     depends_on:
-      - sqlserver
-    # ===== Frontend DEV (hot reload CRA/Vite) =====
+      productservice-dev:
+        condition: service_started
+      discountservice-dev:
+        condition: service_started
+      userservice-dev:
+        condition: service_started
+
+  orderservice-dev:
+    <<: *dotnet-dev
+    container_name: orderservice-dev
+    working_dir: /src/OrdersService
+    volumes:
+      - ./backend:/src
+      - nuget_cache_order:/root/.nuget/packages      # cache riêng
+    command: >
+      bash -lc "
+        rm -rf /src/OrdersService/bin /src/OrdersService/obj &&
+        dotnet restore /src/OrdersService/OrdersService.csproj --disable-parallel -v minimal &&
+        dotnet watch run --urls http://0.0.0.0:8080
+      "
+    environment:
+      - Services__ProductService=http://productservice-dev:8080
+      - Services__DiscountService=http://discountservice-dev:8080
+      - Services__UserService=http://userservice-dev:8080  
+      - Services__PaymentService=http://paymentservice-dev:8080    
+      - ConnectionStrings__OrderDB=Server=sqlserver,1433;Database=OrderDB;User ID=sa;Password=Lananh@123A;TrustServerCertificate=True;Encrypt=False
+    ports: ["7101:8080"]
+
+  paymentservice-dev:
+    <<: *dotnet-dev
+    container_name: paymentservice-dev
+    working_dir: /src/PaymentService
+    volumes:
+      - ./backend:/src
+      - nuget_cache_payment:/root/.nuget/packages    # cache riêng
+    command: >
+      bash -lc "
+        rm -rf /src/PaymentService/bin /src/PaymentService/obj &&
+        dotnet restore /src/PaymentService/PaymentService.csproj --disable-parallel -v minimal &&
+        dotnet watch run --urls http://0.0.0.0:8080
+      "
+    environment:
+      - ConnectionStrings__PaymentDB=Server=sqlserver,1433;Database=PaymentDB;User ID=sa;Password=Lananh@123A;TrustServerCertificate=True;Encrypt=False
+    ports: ["7103:8080"]
+
+  discountservice-dev:
+    <<: *dotnet-dev
+    container_name: discountservice-dev
+    working_dir: /src/DiscountService
+    volumes:
+      - ./backend:/src
+      - nuget_cache_discount:/root/.nuget/packages    # cache riêng
+    command: >
+      bash -lc "
+        rm -rf /src/DiscountService/bin /src/DiscountService/obj &&
+        dotnet restore /src/DiscountService/DiscountService.csproj --disable-parallel -v minimal &&
+        dotnet watch run --urls http://0.0.0.0:8080
+      "
+    environment:
+      - ConnectionStrings__DiscountDB=Server=sqlserver,1433;Database=DiscountDB;User ID=sa;Password=Lananh@123A;TrustServerCertificate=True;Encrypt=False
+    ports: ["7088:8080"]
+
   frontend-dev:
     image: node:18-alpine
     container_name: frontend-dev
     working_dir: /app
     volumes:
-      - ./frontend:/app                     # đảm bảo ./frontend chứa package.json
+      - ./frontend:/app
       - node_modules_cache:/app/node_modules
-    ports:
-      - "3000:3000"
     environment:
       - HOST=0.0.0.0
       - PORT=3000
@@ -98,10 +159,15 @@ services:
       - WDS_SOCKET_PORT=3000
       - BROWSER=none
       - CI=true
-  # KHÔNG dùng healthcheck trong dev lúc này
     command: ["sh","-lc","[ -x node_modules/.bin/react-scripts ] || (npm ci || npm install); npm run start"]
-    restart: unless-stopped
+    ports: ["3000:3000"]
 
 volumes:
-    mssqldata:
-    node_modules_cache:
+  mssqldata:
+  node_modules_cache:
+  nuget_cache_product:
+  nuget_cache_user:
+  nuget_cache_cart:
+  nuget_cache_order:
+  nuget_cache_payment:
+  nuget_cache_discount:

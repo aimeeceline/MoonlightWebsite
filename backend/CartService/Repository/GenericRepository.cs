@@ -21,8 +21,7 @@ namespace CartService.Repository
             return _entities.AsNoTracking().AsEnumerable();
         }
 
-        public T GetById(int id) => _entities.Find(id)!;
-
+        public virtual T? GetById(int id) => _entities.Find(id);
         public int Insert(T entity)
         {
             _entities.Add(entity);
@@ -38,6 +37,7 @@ namespace CartService.Repository
         public int Delete(int id)
         {
             var entity = GetById(id);
+            if (entity == null) return 0;
             _entities.Remove(entity);
             return _context.SaveChanges();
         }

@@ -1,20 +1,22 @@
-﻿namespace CartService.Model
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace CartService.Model
 { 
-    public class AddCartItemsRequest
+    public class AddCartItemRequest
     {
        public List<CartItemRequest> Items { get; set; } = new();    
 }
     // Cập nhật số lượng sản phẩm mới
-    public class UpdateCartItemRequest
-    {
-        public int Quantity { get; set; }  // Số lượng mới của sản phẩm
-    }
-
     public class CartItemRequest
     {
-        public int ProductId { get; set; }
-        public int Quantity { get; set; }
+        [Range(1, int.MaxValue)] public int ProductId { get; set; }
+        [Range(1, int.MaxValue)] public int Quantity { get; set; }
     }
+    public class UpdateCartItemRequest
+    {
+        [Range(1, int.MaxValue)] public int Quantity { get; set; }
+    }
+
 
     public class CartItemDto
     {

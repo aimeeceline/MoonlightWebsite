@@ -3,8 +3,10 @@
     "",
     "\\backend",
     "\\backend\\ProductService",
-    "\\backend\\ProductService\\Data"
+    "\\backend\\ProductService\\Data",
+    "\\backend\\UserService",
+    "\\backend\\UserService\\Model"
   ],
-  "SelectedNode": "\\backend\\ProductService\\Data\\DbSeeder.cs",
+  "SelectedNode": "\\backend\\UserService\\Model\\LoginRequest.cs",
   "PreviewInSolutionExplorer": false
 }

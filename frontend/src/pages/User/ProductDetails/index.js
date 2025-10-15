@@ -12,6 +12,7 @@ import { ROUTERS } from "utils/router";
 // === API base URL cho Product ===
 const PRODUCT_API = process.env.REACT_APP_PRODUCT_API || `http://${window.location.hostname}:7007`;
 
+
 const ProductDetails = () => {
   const { productId } = useParams();
   const productApi = axios.create({ baseURL: PRODUCT_API });

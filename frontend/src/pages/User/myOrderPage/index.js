@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useState, useCallback } from "react";
 import "./style.scss";
 import Breadcrumb from "../theme/breadcrumb";
 
@@ -6,153 +6,135 @@ import call1ing from "assets/User/images/about/account.jpg";
 import axios from "axios";
 import { formatter } from "utils/fomatter";
 
+const PRODUCT_API = process.env.REACT_APP_PRODUCT_API || `http://${window.location.hostname}:7007`;
+const USER_API    = process.env.REACT_APP_USER_API    || `http://${window.location.hostname}:7200`;
+const CART_API    = process.env.REACT_APP_CART_API    || `http://${window.location.hostname}:7099`;
 
+// ---- axios instances (auto gắn Bearer) ----
+const withToken = (config) => {
+  const t = localStorage.getItem("token");
+  if (t) config.headers.Authorization = `Bearer ${t}`;
+  return config;
+};
+const apiUser = axios.create({ baseURL: USER_API  });
+const apiCart = axios.create({ baseURL: CART_API });
+apiUser.interceptors.request.use(withToken);
+apiCart.interceptors.request.use(withToken);
 
 const MyOrderPage = () => {
+  const [cart, setCart] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [userInfo, setUserInfo] = useState({ username: "", email: "", phone: "" });
 
-    const [orders, setOrders] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
-    const [userInfo, setUserInfo] = useState({ username: "", email: "", phone: "" });
+  // --- lấy thông tin user ---
+  const getUserInfo = useCallback(async () => {
+    try {
+      const res = await apiUser.get(`/api/Auth/me`);
+      setUserInfo({
+        username: res.data?.username ?? "",
+        email:    res.data?.email ?? "",
+        phone:    res.data?.phone ?? ""
+      });
+    } catch (e) {
+      console.error("Error fetching user info", e?.response ?? e);
+    }
+  }, []);
 
+  // --- lấy giỏ hàng hiện tại ---
+  const getCart = useCallback(async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) { setCart(null); setLoading(false); return; }
 
-    // Lấy thông tin người dùng từ API
-    const getUserInfo = async () => {
-        try {
-            const token = localStorage.getItem("token");
-            const response = await axios.get("https://localhost:7200/api/Auth/me", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+      const res = await apiCart.get(`/api/Cart/user-cartItem`);
+      // CartService trả object { cartId, quantity, originalTotal, totalCartPrice, discount, discountCode, items: [...] }
+      setCart(res.data ?? null);
+      setError("");
+    } catch (e) {
+      console.error("Lỗi lấy giỏ hàng:", e?.response ?? e);
+      setError("Không thể lấy giỏ hàng. Vui lòng thử lại.");
+      setCart(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-            setUserInfo({
-                username: response.data.username || "",
-                email: response.data.email || "",
-                phone: response.data.phone || ""
-            });
-        } catch (error) {
-            console.error("Error fetching user info", error);
-        }
-    };
+  useEffect(() => { getUserInfo(); }, [getUserInfo]);
+  useEffect(() => { getCart(); }, [getCart]);
 
-
-    useEffect(() => {
-        getUserInfo();
-    }, []);
-
-
-    useEffect(() => {
-        const fetchOrders = async () => {
-            const token = localStorage.getItem("token");
-            if (!token) {
-                setOrders([]);
-                setLoading(false);
-                return;
-            }
-
-            try {
-                const response = await axios.get("https://localhost:7033/api/Order/get-orders", {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-
-                setOrders(response.data);
-                setError("");
-            } catch (err) {
-                setError("Không thể lấy danh sách đơn hàng. Vui lòng thử lại.");
-                console.error("Lỗi khi lấy đơn hàng:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchOrders();
-    }, []);
-
-
-    return (
-        <>
-            <Breadcrumb name="Tài khoản của tôi" />
-            <div className="container">
-                <div className="row">
-                    <div className="col-lg-3 col-md-12 col-sm-12 col-xs-12">
-                        <div className="myaccount">
-                            <div className="myaccount_about">
-                                <img src={call1ing} alt="Account" className="myaccount_about_img" />
-                                <h3 className="myaccount_abount_title">{userInfo.username}</h3>
-                            </div>
-                            <div className="myaccount_phone">Số điện thoại: {userInfo.phone || "Không có số điện thoại"}</div>
-                            <div className="myaccount_email">Email: {userInfo.email || "Không có email"}</div>
-                        </div>
-                    </div>
-
-                    <div className="col-lg-9 col-md-12 col-sm-12 col-xs-12 ">
-                        <h2>Đơn hàng của tôi</h2>
-                        <div className="row">
-                            {loading && <p>Đang tải đơn hàng...</p>}
-                            {error && <p style={{ color: "red" }}>{error}</p>}
-
-                            {orders.length === 0 && !loading && <p>Chưa có đơn hàng nào.</p>}
-
-                            {orders.map(order => (
-                                <div className="order" key={order.orderId}>
-                                    <h3 className="order_title">
-                                        Mã đơn hàng: <span><u>#{order.orderId}</u></span>
-                                    </h3>
-                                    <div className="order_info">
-                                        <div className="order_date">
-                                            Ngày đặt: {new Date(order.createdDate).toLocaleDateString()}
-                                        </div>
-
-                                        {/* Trạng thái thanh toán */}
-                                        <div className="order_status">
-                                            {order.status === "Pending"
-                                                ? "Chờ thanh toán"
-                                                : order.status === "Completed"
-                                                    ? "Đã thanh toán"
-                                                    : order.status}
-                                        </div>
-                                    </div>
-
-                                    <div className="order-items">
-  {order.items.map((it, idx) => {
-  const img = !it.imageProduct
-    ? "/placeholder.png"
-    : (it.imageProduct.startsWith("http")
-        ? it.imageProduct
-        : `https://localhost:7007/images/${it.imageProduct}`);
+  const items = cart?.items ?? [];
 
   return (
-    <div className="order-item" key={`${it.productId}-${idx}`}>
-      <img src={img} alt={it.name || "product"} className="order-item_img" />
-      <div className="order-item_details">
-        <h3>{it.name}</h3>
-        <p>Phân loại: {it.categoryName || "-"}</p>
-        <p>x{it.soLuong}</p>
-      </div>
-    </div>
-  );
-})}
-</div>
-                                    <div className="order_discount">
-                                        Số tiền tiết kiệm được: <span>{formatter(order.discount)}</span>
-                                    </div>
-                                    <div className="order_discount">
-                                        Phí ship: <span>{formatter(order.ship)}</span>
-                                    </div>
-                                    <div className="order_total">
-                                        Tổng tiền đơn hàng: <span>{formatter(order.totalCost)}</span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
+    <>
+      <Breadcrumb name="Tài khoản của tôi" />
+      <div className="container">
+        <div className="row">
+          {/* Sidebar user */}
+          <div className="col-lg-3 col-md-12 col-sm-12 col-xs-12">
+            <div className="myaccount">
+              <div className="myaccount_about">
+                <img src={call1ing} alt="Account" className="myaccount_about_img" />
+                <h3 className="myaccount_abount_title">{userInfo.username || "Người dùng"}</h3>
+              </div>
+              <div className="myaccount_phone">Số điện thoại: {userInfo.phone || "Không có số điện thoại"}</div>
+              <div className="myaccount_email">Email: {userInfo.email || "Không có email"}</div>
             </div>
-        </>
-    );
-}
+          </div>
+
+          {/* Giỏ hàng hiện tại (từ CartService) */}
+          <div className="col-lg-9 col-md-12 col-sm-12 col-xs-12 ">
+            <h2>Giỏ hàng của tôi</h2>
+            {loading && <p>Đang tải giỏ hàng...</p>}
+            {error && <p style={{ color: "red" }}>{error}</p>}
+            {!loading && !error && items.length === 0 && <p>Giỏ hàng của bạn trống.</p>}
+
+            {items.length > 0 && (
+              <div className="order">
+                <div className="order-items">
+                  {items.map((it, idx) => {
+                    const name = it.productName ?? it.name ?? "(Không rõ tên)";
+                    const qty  = it.quantity ?? it.soLuong ?? 0;
+                    const imgRaw = it.productImage ?? it.imageProduct ?? it.image ?? it.imageUrl ?? "";
+                    const img = !imgRaw
+                      ? "/images/placeholder.png"
+                      : (imgRaw.startsWith("http") ? imgRaw : `${PRODUCT_API}/images/${imgRaw}`);
+                    const price = it.price ?? 0;
+                    const total = it.totalCost ?? (price * qty);
+
+                    return (
+                      <div className="order-item" key={`${it.productId ?? idx}-${idx}`}>
+                        <img src={img} alt={name} className="order-item_img" />
+                        <div className="order-item_details">
+                          <h3>{name}</h3>
+                          <p>x{qty}</p>
+                          <p>Đơn giá: {formatter(price)}</p>
+                          <p>Thành tiền: {formatter(total)}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="order_discount">
+                  Mã giảm giá: <span>{cart?.discountCode ?? "Không có"}</span>
+                </div>
+                <div className="order_discount">
+                  Tiết kiệm: <span>{formatter(cart?.discount ?? 0)}</span>
+                </div>
+                <div className="order_total">
+                  Tổng tiền: <span>{formatter(cart?.originalTotal ?? 0)}</span>
+                </div>
+                <div className="order_total">
+                  Thành tiền: <span>{formatter(cart?.totalCartPrice ?? 0)}</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
 
 export default memo(MyOrderPage);

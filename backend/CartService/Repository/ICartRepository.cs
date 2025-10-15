@@ -1,15 +1,15 @@
-﻿namespace CartService.Repository
+namespace CartService.Repository
 {
     public interface ICartRepository<T> where T : class
     {
         
         IEnumerable<T> GetAll();
-        T GetById(int id);
+        T? GetById(int id);
         int Insert(T entity);
 
         int Update(T entity);
 
-        int Delete(int id); // Xóa
+        int Delete(int id); // X�a
         
     }
 }

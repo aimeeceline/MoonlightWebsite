@@ -1,4 +1,4 @@
-﻿namespace PaymentService.Model
+namespace Shared.Contracts
 {
     public class OrderDto
     {

@@ -2,56 +2,101 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using PaymentService.Model; // PaymentDBContext
+using Microsoft.OpenApi.Models;
+using PaymentService.Model;
+using PaymentService.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1) DB
-var conn = Environment.GetEnvironmentVariable("ConnectionStrings__Default")
-           ?? builder.Configuration.GetConnectionString("DefaultConnection")
-           ?? builder.Configuration.GetConnectionString("Default");
+// ===== DB =====
+var conn = builder.Configuration.GetConnectionString("PaymentDB")
+    ?? "Server=sqlserver,1433;Database=PaymentDB;User Id=sa;Password=Lananh@123A;Encrypt=False;TrustServerCertificate=True";
 builder.Services.AddDbContext<PaymentDBContext>(o => o.UseSqlServer(conn));
 
-// 2) Controllers + Swagger
-builder.Services.AddControllers();
+// ===== DI =====
+builder.Services.AddHttpClient<ApiClientHelper>();     // để gọi Order/User/... nếu cần
+builder.Services.AddHttpContextAccessor();
+builder.Services.Configure<ServiceUrls>(builder.Configuration.GetSection("Services"));
+
+// ===== MVC + Newtonsoft =====
+builder.Services.AddControllers().AddNewtonsoftJson(o =>
+{
+    // Cho thống nhất FE: camelCase
+    o.SerializerSettings.ContractResolver =
+        new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver();
+});
+
+// ===== Swagger =====
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "PaymentService API", Version = "v1" });
+    var scheme = new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Nhập: Bearer {token}"
+    };
+    c.AddSecurityDefinition("Bearer", scheme);
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement { { scheme, Array.Empty<string>() } });
+});
 
-// 3) JWT
-var issuer   = builder.Configuration["Jwt:Issuer"]   ?? "http://userservice:8080";
-var audience = builder.Configuration["Jwt:Audience"] ?? "bae-beauty-api";
-var key      = builder.Configuration["Jwt:Key"]      ?? "SuperSecretKeyDontCommit";
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-  .AddJwtBearer(o => o.TokenValidationParameters = new()
-  {
-      ValidateIssuer = true, ValidIssuer = issuer,
-      ValidateAudience = true, ValidAudience = audience,
-      ValidateIssuerSigningKey = true, IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
-      ValidateLifetime = true
-  });
+// ===== CORS dev =====
+builder.Services.AddCors(p => p.AddPolicy("dev", b => b
+    .WithOrigins("http://localhost:3000", "http://127.0.0.1:3000", "https://localhost:3000")
+    .AllowAnyHeader().AllowAnyMethod()
+));
 
-builder.Services.AddAuthorization();
+// ===== JWT (nếu Payment cần auth) =====
+var jwt = builder.Configuration.GetSection("Jwt");
+if (!string.IsNullOrEmpty(jwt["Key"]))
+{
+    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(o =>
+        {
+            o.RequireHttpsMetadata = false;
+            o.SaveToken = true;
+            o.TokenValidationParameters = new()
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = jwt["Issuer"],
+                ValidAudience = jwt["Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt["Key"]!)),
+                ClockSkew = TimeSpan.Zero
+            };
+        });
+}
 
 var app = builder.Build();
 
+// Auto-migrate (tùy bạn dùng hay không)
+using (var scope = app.Services.CreateScope())
+    await scope.ServiceProvider.GetRequiredService<PaymentDBContext>().Database.MigrateAsync();
+
+// pipeline
 app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "PaymentService v1"); c.RoutePrefix = "swagger"; });
 
-// Không bắt buộc HTTPS trong container
-// app.UseHttpsRedirection();
-
+app.UseCors("dev");
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
-// Expose 8080
-app.Urls.Add("http://0.0.0.0:8080");
-
-// Auto-migrate
-using (var scope = app.Services.CreateScope())
-{
-    scope.ServiceProvider.GetRequiredService<PaymentDBContext>().Database.Migrate();
-}
+app.MapGet("/healthz", () => new { ok = true, at = DateTime.UtcNow });
 
 app.Run();
+
+// map section Services
+public record ServiceUrls
+{
+    public string? OrderService { get; init; }
+    public string? CartService { get; init; }
+    public string? UserService { get; init; }
+    public string? ProductService { get; init; }
+}

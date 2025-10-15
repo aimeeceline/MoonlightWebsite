@@ -1,4 +1,4 @@
-﻿namespace Shared.Contracts
+namespace Shared.Contracts
 {
     public class PaymentStatusResponse
     {

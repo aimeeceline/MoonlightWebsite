@@ -1,4 +1,4 @@
-﻿namespace CartService.Model
+namespace Shared.Contracts
 {
     public class DiscountDto
     {

@@ -1,4 +1,4 @@
-﻿namespace OrdersService.Model
+namespace Shared.Contracts
 {
     public class PaymentResponse
     {

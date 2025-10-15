@@ -23,7 +23,7 @@ namespace CartService.Repository
                            .ToList();
         }
 
-        public CartItem? GetById(int cartItemId)
+        public override CartItem? GetById(int cartItemId)
         {
             return _context.CartItems
                            .AsNoTracking()

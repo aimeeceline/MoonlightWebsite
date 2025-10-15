@@ -9,8 +9,8 @@ using UserService.Model;
 
 namespace UserService.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
         private readonly UserDBContext _db;
@@ -26,25 +26,20 @@ namespace UserService.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            if (request == null)
-                return BadRequest(new { message = "Thiếu dữ liệu." });
+            if (request == null) return BadRequest(new { message = "Thiếu dữ liệu." });
 
-            var username = (request.Username ?? string.Empty).Trim();
-            var password = (request.Password ?? string.Empty).Trim();
-
+            var username = (request.Username ?? "").Trim();
+            var password = (request.Password ?? "").Trim();
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
                 return BadRequest(new { message = "Username/password trống." });
 
             var user = await _db.Users.AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Username != null && u.Username.ToLower() == username.ToLower());
 
-            if (user == null)
-                return Unauthorized("Tên đăng nhập hoặc mật khẩu không đúng.");
+            if (user == null) return Unauthorized("Tên đăng nhập hoặc mật khẩu không đúng.");
 
-            var stored = (user.Password ?? string.Empty).Trim();
-            var ok = string.Equals(stored, password, StringComparison.Ordinal);
-
-            if (!ok)
+            var stored = (user.Password ?? "").Trim();
+            if (!string.Equals(stored, password, StringComparison.Ordinal))
                 return Unauthorized("Tên đăng nhập hoặc mật khẩu không đúng.");
 
             var token = GenerateJwtToken(user);
@@ -58,11 +53,22 @@ namespace UserService.Controllers
 
         private string GenerateJwtToken(User user)
         {
+            // đọc config
+            var issuer = _cfg["Jwt:Issuer"] ?? throw new InvalidOperationException("Missing Jwt:Issuer");
+            var audience = _cfg["Jwt:Audience"] ?? throw new InvalidOperationException("Missing Jwt:Audience");
+            var keyStr = _cfg["Jwt:Key"] ?? throw new InvalidOperationException("Missing Jwt:Key");
+
+            var role = string.IsNullOrWhiteSpace(user.TypeUser) ? "User" : user.TypeUser;
+
+            // 🔑 luôn nhúng userId dưới 3 tên claim phổ biến
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),       // "sub" = userId (số)
+                new Claim("uid", user.UserId.ToString()),                             // fallback "uid"
+                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),         // nameidentifier
+
                 new Claim(ClaimTypes.Name, user.Username ?? string.Empty),
-                new Claim(ClaimTypes.Role, string.IsNullOrWhiteSpace(user.TypeUser) ? "User" : user.TypeUser),
+                new Claim(ClaimTypes.Role, role),
             };
 
             if (!string.IsNullOrWhiteSpace(user.Email))
@@ -70,15 +76,16 @@ namespace UserService.Controllers
             if (!string.IsNullOrWhiteSpace(user.Phone))
                 claims.Add(new Claim("phone", user.Phone!));
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_cfg["Jwt:Key"]!));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyStr));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
+            var now = DateTime.UtcNow;
             var jwt = new JwtSecurityToken(
-                issuer: _cfg["Jwt:Issuer"],
-                audience: _cfg["Jwt:Audience"],
+                issuer: issuer,
+                audience: audience,
                 claims: claims,
-                notBefore: DateTime.UtcNow,
-                expires: DateTime.UtcNow.AddHours(2),
+                notBefore: now,
+                expires: now.AddHours(2),
                 signingCredentials: creds
             );
 
@@ -91,7 +98,9 @@ namespace UserService.Controllers
         {
             return Ok(new
             {
-                id = User.FindFirstValue(ClaimTypes.NameIdentifier),
+                id = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                     ?? User.FindFirstValue("uid")
+                     ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub),
                 username = User.FindFirstValue(ClaimTypes.Name),
                 role = User.FindFirstValue(ClaimTypes.Role),
                 email = User.FindFirstValue(ClaimTypes.Email),
@@ -99,4 +108,6 @@ namespace UserService.Controllers
             });
         }
     }
+
+    public record LoginRequest(string Username, string Password);
 }
