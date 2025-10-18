@@ -78,6 +78,9 @@ builder.Services.AddAuthorization(opts =>
     opts.AddPolicy("UserOnly", p => p.RequireAuthenticatedUser().RequireRole("User"));
     opts.AddPolicy("AdminOnly", p => p.RequireAuthenticatedUser().RequireRole("Admin"));
     opts.AddPolicy("UserOrAdmin", p => p.RequireAuthenticatedUser().RequireRole("User", "Admin"));
+
+    // 👇 THÊM: chỉ tài khoản đang hoạt động (JWT phải có claim is_active=true)
+    opts.AddPolicy("ActiveUser", p => p.RequireAuthenticatedUser().RequireClaim("is_active", "true"));
 });
 
 var app = builder.Build();

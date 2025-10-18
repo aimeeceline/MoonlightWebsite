@@ -17,6 +17,7 @@ var conn =
  ?? "Server=sqlserver,1433;Database=UserDB;User Id=sa;Password=Lananh@123A;Encrypt=False;TrustServerCertificate=True";
 
 builder.Services.AddDbContext<UserDBContext>(opt => opt.UseSqlServer(conn));
+
 /* ============== 2) REPOSITORIES ============== */
 builder.Services.AddScoped(typeof(IUserRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<UserRepository>();
@@ -48,7 +49,6 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
-
 
 /* ============== 4) CORS (Dev FE) ============== */
 builder.Services.AddCors(o => o.AddPolicy("dev", p =>
@@ -85,9 +85,13 @@ builder.Services
 
 builder.Services.AddAuthorization(opts =>
 {
+    // các policy cũ giữ nguyên
     opts.AddPolicy("UserOnly", p => p.RequireAuthenticatedUser().RequireRole("User"));
     opts.AddPolicy("AdminOnly", p => p.RequireAuthenticatedUser().RequireRole("Admin"));
     opts.AddPolicy("UserOrAdmin", p => p.RequireAuthenticatedUser().RequireRole("User", "Admin"));
+
+    // THÊM: chỉ tài khoản đang hoạt động (JWT phải có is_active=true)
+    opts.AddPolicy("ActiveUser", p => p.RequireAuthenticatedUser().RequireClaim("is_active", "true"));
 });
 
 var app = builder.Build();
@@ -97,19 +101,15 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<UserDBContext>();
     await db.Database.MigrateAsync();
-    await DbSeeder.SeedAsync(db);  // 1 admin (id=0, không address) + 2 user + 4 address
+    await DbSeeder.SeedAsync(db);  // 1 admin + 2 user + 4 address
 }
 
 /* ============== 7) MIDDLEWARE PIPELINE ============== */
 
-// Bật Swagger trong Dev (nếu muốn luôn bật, bỏ if)
-
 app.UseSwagger();
 app.UseSwaggerUI();
 
-// Dev trong container chỉ HTTP:8080 -> KHÔNG redirect HTTPS
 // app.UseHttpsRedirection();
-
 app.UseCors("dev");
 
 app.UseAuthentication();

@@ -17,10 +17,10 @@ namespace PaymentService.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.0")
+                .HasAnnotation("ProductVersion", "8.0.20")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("PaymentService.Model.Payment", b =>
                 {
@@ -29,7 +29,7 @@ namespace PaymentService.Migrations
                         .HasColumnType("int")
                         .HasColumnName("PaymentID");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PaymentId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PaymentId"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime");
@@ -48,7 +48,7 @@ namespace PaymentService.Migrations
                     b.Property<string>("OrderCode")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)")
-                        .HasColumnName("OrderCode ");
+                        .HasColumnName("OrderCode");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("int")
@@ -73,7 +73,7 @@ namespace PaymentService.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<decimal>("TotalPrice")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<string>("TransactionId")
                         .IsRequired()
@@ -86,6 +86,12 @@ namespace PaymentService.Migrations
                         .HasColumnName("UserID");
 
                     b.HasKey("PaymentId");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("TransactionId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Payments");
                 });

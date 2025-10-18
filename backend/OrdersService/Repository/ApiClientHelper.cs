@@ -1,4 +1,4 @@
-﻿using System.Net.Http;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using Shared.Contracts;
@@ -21,26 +21,21 @@ namespace OrdersService.Repository
 
         private HttpClient CreateClient()
         {
-            var handler = new HttpClientHandler
-            {
-                // chấp nhận self-signed cert trong dev/docker
-                ServerCertificateCustomValidationCallback = (msg, cert, chain, errors) => true
-            };
-            return _httpClientFactory != null ? _httpClientFactory.CreateClient() : new HttpClient(handler);
+            if (_httpClientFactory != null) return _httpClientFactory.CreateClient();
+            var handler = new HttpClientHandler { ServerCertificateCustomValidationCallback = (msg, cert, chain, errors) => true };
+            return new HttpClient(handler);
         }
 
         private string ProductBaseUrl =>
-            _config["Services:Product"] ?? "http://productservice:8080"; // sửa theo compose của bạn
+            _config["Services:Product"]
+            ?? Environment.GetEnvironmentVariable("PRODUCT_API_BASE")
+            ?? "http://localhost:7007";
 
-        /// <summary>
-        /// Lấy Product theo Id từ ProductService. Trả về ProductDto (schema tolerant).
-        /// </summary>
         public async Task<ProductDto?> GetProductByIdAsync(int productId, string? bearerToken = null)
         {
             var http = CreateClient();
             if (!string.IsNullOrWhiteSpace(bearerToken))
-                http.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", bearerToken);
+                http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
 
             var url = $"{ProductBaseUrl}/api/Product/{productId}";
             using var res = await http.GetAsync(url);
@@ -48,15 +43,13 @@ namespace OrdersService.Repository
 
             var json = await res.Content.ReadAsStringAsync();
 
-            // a) thử parse trực tiếp
             try
             {
                 var dto = JsonSerializer.Deserialize<ProductDto>(json, JsonOpts);
                 if (dto != null && dto.ProductId > 0) return dto;
             }
-            catch { /* ignore */ }
+            catch { }
 
-            // b) thử bóc { data: {...} } / { result: {...} } / { product: {...} } / array
             try
             {
                 using var doc = JsonDocument.Parse(json);
@@ -79,14 +72,14 @@ namespace OrdersService.Repository
                     if (dto != null && dto.ProductId > 0) return dto;
                 }
             }
-            catch { /* ignore */ }
+            catch { }
 
             return null;
         }
 
         private static bool TryGetChild(JsonElement root, string name, out JsonElement value)
         {
-            if (root.TryGetProperty(name, out value)) return true;
+            if (root.ValueKind == JsonValueKind.Object && root.TryGetProperty(name, out value)) return true;
             value = default;
             return false;
         }

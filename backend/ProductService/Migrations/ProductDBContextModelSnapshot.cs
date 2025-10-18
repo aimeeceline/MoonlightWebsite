@@ -17,12 +17,12 @@ namespace ProductService.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.8")
+                .HasAnnotation("ProductVersion", "8.0.21")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Category", b =>
+            modelBuilder.Entity("ProductService.Model.Category", b =>
                 {
                     b.Property<int>("CategoryId")
                         .ValueGeneratedOnAdd()
@@ -32,6 +32,7 @@ namespace ProductService.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoryId"));
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("decription");
@@ -47,7 +48,7 @@ namespace ProductService.Migrations
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("Product", b =>
+            modelBuilder.Entity("ProductService.Model.Product", b =>
                 {
                     b.Property<int>("ProductId")
                         .ValueGeneratedOnAdd()
@@ -67,8 +68,8 @@ namespace ProductService.Migrations
                         .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("DescriptionDetails")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<string>("Image")
                         .IsRequired()
@@ -118,18 +119,19 @@ namespace ProductService.Migrations
                     b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("Product", b =>
+            modelBuilder.Entity("ProductService.Model.Product", b =>
                 {
-                    b.HasOne("Category", "Category")
+                    b.HasOne("ProductService.Model.Category", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__Products__Catego__0519C6AF");
 
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("Category", b =>
+            modelBuilder.Entity("ProductService.Model.Category", b =>
                 {
                     b.Navigation("Products");
                 });

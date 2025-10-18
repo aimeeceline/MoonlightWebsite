@@ -8,8 +8,9 @@ namespace UserService.Model
         public virtual DbSet<User> Users { get; set; } = null!;
         public virtual DbSet<Address> Addresses { get; set; } = null!;
 
+        // UserDBContext.cs (chỉ phần OnModelCreating)
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-        { 
+        {
             // ===== User =====
             modelBuilder.Entity<User>(entity =>
             {
@@ -23,6 +24,12 @@ namespace UserService.Model
                 entity.Property(u => u.TypeUser).IsRequired().HasMaxLength(50).HasColumnName("typeUser");
                 entity.Property(u => u.Email).IsRequired().HasMaxLength(255).HasColumnName("email");
                 entity.Property(u => u.Phone).IsRequired().HasMaxLength(20).HasColumnName("phone");
+
+                // NEW: map IsActive (bit) + default 1
+                entity.Property(u => u.IsActive)
+                      .HasColumnName("IsActive")
+                      .HasColumnType("bit")
+                      .HasDefaultValue(true);
             });
 
             // ===== Address =====
@@ -35,6 +42,7 @@ namespace UserService.Model
                 entity.Property(a => a.UserId).IsRequired();
 
                 entity.Property(a => a.RecipientName).IsRequired().HasMaxLength(100);
+                entity.Property(a => a.Email).IsRequired().HasMaxLength(255);
                 entity.Property(a => a.Phone).IsRequired().HasMaxLength(20);
                 entity.Property(a => a.AddressLine).IsRequired().HasMaxLength(255);
                 entity.Property(a => a.Note).HasMaxLength(500);
@@ -53,5 +61,6 @@ namespace UserService.Model
 
             base.OnModelCreating(modelBuilder);
         }
+
     }
 }

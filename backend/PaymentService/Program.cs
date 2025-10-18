@@ -4,29 +4,32 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PaymentService.Model;
-using PaymentService.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ===== DB =====
-var conn = builder.Configuration.GetConnectionString("PaymentDB")
-    ?? "Server=sqlserver,1433;Database=PaymentDB;User Id=sa;Password=Lananh@123A;Encrypt=False;TrustServerCertificate=True";
+/* ============== DB ============== */
+var conn =
+    builder.Configuration.GetConnectionString("PaymentDB")
+ ?? "Server=sqlserver,1433;Database=PaymentDB;User Id=sa;Password=Lananh@123A;Encrypt=False;TrustServerCertificate=True";
+
 builder.Services.AddDbContext<PaymentDBContext>(o => o.UseSqlServer(conn));
 
-// ===== DI =====
-builder.Services.AddHttpClient<ApiClientHelper>();     // để gọi Order/User/... nếu cần
-builder.Services.AddHttpContextAccessor();
+/* ============== Settings ============== */
 builder.Services.Configure<ServiceUrls>(builder.Configuration.GetSection("Services"));
+builder.Services.Configure<PaymentSettings>(builder.Configuration.GetSection("Payment"));
 
-// ===== MVC + Newtonsoft =====
+/* ============== Infra ============== */
+builder.Services.AddHttpClient();
+builder.Services.AddHttpContextAccessor();
+
+/* ============== Controllers + JSON ============== */
 builder.Services.AddControllers().AddNewtonsoftJson(o =>
 {
-    // Cho thống nhất FE: camelCase
     o.SerializerSettings.ContractResolver =
         new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver();
 });
 
-// ===== Swagger =====
+/* ============== Swagger ============== */
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -44,15 +47,15 @@ builder.Services.AddSwaggerGen(c =>
     c.AddSecurityRequirement(new OpenApiSecurityRequirement { { scheme, Array.Empty<string>() } });
 });
 
-// ===== CORS dev =====
+/* ============== CORS Dev ============== */
 builder.Services.AddCors(p => p.AddPolicy("dev", b => b
     .WithOrigins("http://localhost:3000", "http://127.0.0.1:3000", "https://localhost:3000")
     .AllowAnyHeader().AllowAnyMethod()
 ));
 
-// ===== JWT (nếu Payment cần auth) =====
+/* ============== (Optional) JWT ============== */
 var jwt = builder.Configuration.GetSection("Jwt");
-if (!string.IsNullOrEmpty(jwt["Key"]))
+if (!string.IsNullOrWhiteSpace(jwt["Key"]))
 {
     builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(o =>
@@ -71,18 +74,31 @@ if (!string.IsNullOrEmpty(jwt["Key"]))
             };
         });
 }
+builder.Services.AddAuthorization(opts =>
+{
+    opts.AddPolicy("UserOnly", p => p.RequireAuthenticatedUser().RequireRole("User"));
+    opts.AddPolicy("AdminOnly", p => p.RequireAuthenticatedUser().RequireRole("Admin"));
+    opts.AddPolicy("UserOrAdmin", p => p.RequireAuthenticatedUser().RequireRole("User", "Admin"));
 
+    // 👇 THÊM: chỉ tài khoản đang hoạt động (JWT phải có claim is_active=true)
+    opts.AddPolicy("ActiveUser", p => p.RequireAuthenticatedUser().RequireClaim("is_active", "true"));
+});
 var app = builder.Build();
 
-// Auto-migrate (tùy bạn dùng hay không)
+/* ============== Auto-migrate ============== */
 using (var scope = app.Services.CreateScope())
     await scope.ServiceProvider.GetRequiredService<PaymentDBContext>().Database.MigrateAsync();
 
-// pipeline
+/* ============== Pipeline ============== */
 app.UseSwagger();
-app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "PaymentService v1"); c.RoutePrefix = "swagger"; });
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "PaymentService v1");
+    c.RoutePrefix = "swagger";
+});
 
 app.UseCors("dev");
+// app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -92,11 +108,17 @@ app.MapGet("/healthz", () => new { ok = true, at = DateTime.UtcNow });
 
 app.Run();
 
-// map section Services
+/* ============== Records ============== */
 public record ServiceUrls
 {
-    public string? OrderService { get; init; }
-    public string? CartService { get; init; }
-    public string? UserService { get; init; }
-    public string? ProductService { get; init; }
+    public string? OrderService { get; init; }  
+}
+
+public record PaymentSettings
+{
+    public string? SepayApiBase { get; init; }      // mặc định: https://my.sepay.vn
+    public string? SepayApiToken { get; init; }     // token SEPay (đặt trong secrets/env)
+    public string? BankCode { get; init; }          // "970418"
+    public string? AccountNumber { get; init; }     // "962470356635602"
+    public int QrExpireSeconds { get; init; } = 120;
 }

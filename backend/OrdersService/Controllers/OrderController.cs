@@ -1,14 +1,10 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using OrdersService.Model;                // OrderDBContext, Order, OrdersItem (entities)
-using OrdersService.Repository;           // IOrderRepository<T>, ApiClientHelper
-using OrdersService.Services;             // IEmailService
-using Shared.Contracts;                   // CreateOrderRequest, UpdateStatusRequest, UpdateOrderInfoRequest, ProductDto, ...
-using System.Net.Http;
+using System.Net.Http.Json;
 using System.Net.Http.Headers;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using System.Text.Json;
+using OrdersService.Model;
 
 namespace OrdersService.Controllers
 {
@@ -17,271 +13,110 @@ namespace OrdersService.Controllers
     public class OrderController : ControllerBase
     {
         private readonly OrderDBContext _db;
-        private readonly IOrderRepository<Order> _orderRepo;
-        private readonly IOrderRepository<OrdersItem> _orderItemRepo;
-        private readonly IEmailService _email;
-        private readonly ApiClientHelper _api;
-
-        private static readonly JsonSerializerOptions JsonOpts =
-            new(JsonSerializerDefaults.Web) { PropertyNameCaseInsensitive = true };
-
-        public OrderController(
-            OrderDBContext db,
-            IOrderRepository<Order> orderRepo,
-            IOrderRepository<OrdersItem> orderItemRepo,
-            IEmailService email,
-            ApiClientHelper api)
+        private readonly IConfiguration _cfg;
+        private readonly IHttpClientFactory _httpFactory;
+        public OrderController(OrderDBContext db, IConfiguration cfg, IHttpClientFactory httpFactory)
         {
             _db = db;
-            _orderRepo = orderRepo;
-            _orderItemRepo = orderItemRepo;
-            _email = email;
-            _api = api;
+            _cfg = cfg;
+            _httpFactory = httpFactory;
         }
 
-        // ----------------------------------------------------------
-        // Tạo đơn hàng
-        // ----------------------------------------------------------
-        [Authorize(Policy = "UserOrAdmin")]
-        [HttpPost("create-order")]
-        public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequest request)
+        // === Helpers ===
+        private int GetUserId()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null) return Unauthorized("Không tìm thấy thông tin người dùng.");
+            var id = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                  ?? User.FindFirstValue("uid")
+                  ?? User.FindFirstValue("sub");
+            return int.TryParse(id, out var uid) ? uid : 0;
+        }
 
-            int userId = int.Parse(userIdClaim.Value);
+        private static decimal Max0(decimal v) => v < 0 ? 0 : v;
 
-            // Nếu đã có đơn Pending thì trả về luôn
-            var existingPendingOrder = await _db.Orders
-                .Include(o => o.OrdersItems)
-                .FirstOrDefaultAsync(o => o.UserId == userId && o.Status == "Pending");
+        private static void RecalcOrderTotal(Order order)
+        {
+            var items = order.OrdersItems ?? new List<OrdersItem>();
+            var sumLines = items.Sum(i => i.TotalCost ?? 0m);
+            var discount = order.Discount ?? 0m;
+            var ship = order.Ship ?? 0m;
+            order.TotalCost = Max0(sumLines - discount + ship);
+        }
 
-            if (existingPendingOrder != null)
-            {
-                return Ok(new
-                {
-                    message = "Bạn đã có đơn hàng đang chờ thanh toán!",
-                    orderId = existingPendingOrder.OrderId,
-                    discountCode = existingPendingOrder.DiscountCode,
-                    totalProductCost = existingPendingOrder.OrdersItems.Sum(i => i.Price * i.SoLuong),
-                    discount = existingPendingOrder.Discount,
-                    ship = existingPendingOrder.Ship,
-                    totalCost = existingPendingOrder.TotalCost
-                });
-            }
+        // ========== USER APIs ==========
+        // POST /api/Order/create
+        [HttpPost("create")]
+        [Authorize(Policy = "ActiveUser")]
+        public async Task<IActionResult> Create([FromBody] OrderRequestDto dto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var status = request.PaymentMethod == "COD" ? "Chờ xác nhận" : "Pending";
+            // Bảo vệ null trước khi Trim()
+            if (string.IsNullOrWhiteSpace(dto?.NameReceive)
+             || string.IsNullOrWhiteSpace(dto.Phone)
+             || string.IsNullOrWhiteSpace(dto.Email)
+             || string.IsNullOrWhiteSpace(dto.Address))
+                return BadRequest("Thiếu NameReceive/Phone/Email/Address");
 
-            var newOrder = new Order
+            if (dto.Items == null || dto.Items.Count == 0)
+                return BadRequest("Danh sách items trống");
+
+            int userId = GetUserId();
+            if (userId <= 0) return Unauthorized();
+
+            var order = new Order
             {
                 UserId = userId,
-                CreatedDate = DateTime.Now,
-                Status = status,
-                Discount = request.Discount ?? 0m,
-                Ship = request.Ship ?? 0m,
-                DiscountCode = request.DiscountCode,
-                TotalCost = 0m,
-                OrdersItems = new List<OrdersItem>()
+                NameReceive = dto.NameReceive.Trim(),
+                Phone = dto.Phone.Trim(),
+                Email = dto.Email.Trim(),
+                Address = dto.Address.Trim(),
+                DiscountCode = string.IsNullOrWhiteSpace(dto.DiscountCode) ? null : dto.DiscountCode.Trim(),
+                Discount = dto.Discount ?? 0m,
+                Ship = dto.Ship ?? 0m,
+                PaymentMethod = string.IsNullOrWhiteSpace(dto.PaymentMethod) ? "COD" : dto.PaymentMethod!.Trim(),
+                PaymentStatus = string.IsNullOrWhiteSpace(dto.PaymentStatus) ? "Pending" : dto.PaymentStatus!.Trim(),
+                Note = string.IsNullOrWhiteSpace(dto.Note) ? null : dto.Note!.Trim(),
+                CreatedDate = DateTime.UtcNow,
+                Status = "Chờ xác nhận"
             };
 
-            decimal totalProductCost = 0m;
-
-            foreach (var it in request.Items)
+            foreach (var x in dto.Items)
             {
-                // Lấy sản phẩm từ ProductService
-                var prod = await _api.GetProductByIdAsync(it.ProductId);
-                if (prod == null || prod.ProductId <= 0)
-                    return BadRequest($"Không lấy được sản phẩm ID {it.ProductId}");
-
-                // Chuẩn hoá dữ liệu hiển thị
-                var name = (!string.IsNullOrWhiteSpace(prod.Name) ? prod.Name :
-                           !string.IsNullOrWhiteSpace(prod.ProductName) ? prod.ProductName : "-");
-
-                var img = (!string.IsNullOrWhiteSpace(prod.ImageUrl) ? prod.ImageUrl :
-                          !string.IsNullOrWhiteSpace(prod.ProductImage) ? prod.ProductImage :
-                          !string.IsNullOrWhiteSpace(prod.Image) ? prod.Image : "");
-
-                var price = (prod.Price ?? prod.SalePrice ?? prod.MinPrice) ?? 0m;
-
-                var categoryName = !string.IsNullOrWhiteSpace(prod.CategoryName) ? prod.CategoryName :
-                                   (prod.Category?.Name ?? prod.Category?.CategoryName ??
-                                    prod.CategoryDto?.Name ?? prod.CategoryDto?.CategoryName ?? "-");
-
-                var lineTotal = price * it.Quantity;
-                totalProductCost += lineTotal;
-
-                newOrder.OrdersItems.Add(new OrdersItem
+                var qty = Math.Max(1, x.Quantity);
+                var price = Math.Max(0, x.Price);
+                order.OrdersItems.Add(new OrdersItem
                 {
-                    ProductId = prod.ProductId,
-                    Name = name,
-                    ImageProduct = img,
+                    ProductId = x.ProductId,
+                    CategoryName = x.CategoryName,
+                    Name = x.Name,
+                    ImageProduct = x.ImageProduct,
+                    SoLuong = qty,
                     Price = price,
-                    SoLuong = it.Quantity,
-                    TotalCost = lineTotal,
-                    CategoryName = categoryName,
-
-                    // thông tin nhận hàng
-                    NameReceive = request.NameReceive,
-                    Phone = request.Phone,
-                    Email = request.Email,
-                    Address = request.Address,
-                    PaymentMethod = request.PaymentMethod,
-                    PaymentStatus = "Chưa thanh toán",
-                    Discount = 0m,
-                    Ship = 0m,
-                    Note = request.Note,
-                    CreatedDate = DateTime.Now
+                    TotalCost = price * qty,
+                    Note = x.Note,
+                    CreatedDate = DateTime.UtcNow
                 });
             }
 
-            // Tính tổng
-            newOrder.TotalCost = Math.Max(0m, totalProductCost - (request.Discount ?? 0m) + (request.Ship ?? 0m));
-
-            _db.Orders.Add(newOrder);
+            RecalcOrderTotal(order);
+            _db.Orders.Add(order);
             await _db.SaveChangesAsync();
 
-            // Tuỳ chọn: sau khi tạo đơn có thể dọn giỏ
-            // (Bạn có thể đổi URL sang service name trong docker network, ví dụ http://cartservice:8090/...)
-            // var bearer = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-            // await SendDeleteAsync("http://cartservice:8090/api/Cart/delete-cart", bearer);
-
-            return Ok(new
-            {
-                message = "Đơn hàng đã tạo thành công!",
-                orderId = newOrder.OrderId,
-                discountCode = newOrder.DiscountCode,
-                totalProductCost,
-                discount = newOrder.Discount,
-                ship = newOrder.Ship,
-                totalCost = newOrder.TotalCost
-            });
+            // (giữ nguyên phần gọi DiscountService như hiện tại)
+            return CreatedAtAction(nameof(GetDetail), new { id = order.OrderId }, new { orderId = order.OrderId });
         }
 
-        // ----------------------------------------------------------
-        // Đồng bộ trạng thái thanh toán từ PaymentService
-        // ----------------------------------------------------------
-        [Authorize(Policy = "UserOrAdmin")]
-        [HttpGet("sync-order-payment-status")]
-        public async Task<IActionResult> SyncOrderPaymentStatus()
+        // GET /api/Order/my
+        [HttpGet("my")]
+        [Authorize(Policy = "ActiveUser")]
+        public async Task<IActionResult> MyOrders()
         {
-            try
-            {
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-                if (userIdClaim == null) return Unauthorized("Không tìm thấy thông tin người dùng.");
+            int userId = GetUserId();
+            if (userId <= 0) return Unauthorized();
 
-                var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-                var paymentUrl = "http://paymentservice:8080/api/Payment/check-payment-by-user"; // đổi đúng host/port nội bộ
-
-                var json = await SendGetAsync(paymentUrl, token);
-                if (string.IsNullOrWhiteSpace(json))
-                    return BadRequest("Không lấy được thông tin thanh toán.");
-
-                var info = JsonSerializer.Deserialize<PaymentStatusResponse>(json, JsonOpts);
-                if (info is { Status: not null } &&
-                    info.Status.Equals("Completed", StringComparison.OrdinalIgnoreCase) &&
-                    info.OrderId > 0)
-                {
-                    var order = _orderRepo.GetById(info.OrderId);
-                    if (order == null) return NotFound("Không tìm thấy đơn hàng tương ứng.");
-
-                    order.Status = "Completed";
-                    _orderRepo.Update(order);
-
-                    var firstEmail = order.OrdersItems.FirstOrDefault()?.Email;
-                    if (!string.IsNullOrEmpty(firstEmail))
-                    {
-                        await _email.SendEmailAsync(
-                            firstEmail!,
-                            "Xác nhận đơn hàng thành công",
-                            $"<h3>Đơn hàng #{order.OrderId}</h3><p>Thanh toán thành công.</p>"
-                        );
-                    }
-
-                    return Ok("Đã cập nhật trạng thái đơn hàng.");
-                }
-
-                return Ok("Giao dịch chưa hoàn tất, không cập nhật trạng thái đơn hàng.");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Lỗi đồng bộ: {ex.Message}");
-            }
-        }
-
-        // ----------------------------------------------------------
-        // Test gửi email
-        // ----------------------------------------------------------
-        [HttpGet("test-email")]
-        public async Task<IActionResult> TestEmail()
-        {
-            await _email.SendEmailAsync("test@example.com", "Test Email", "Nội dung test thử");
-            return Ok("Email đã được gửi!");
-        }
-
-        // ----------------------------------------------------------
-        // Kiểm tra đơn Pending của user
-        // ----------------------------------------------------------
-        [Authorize(Policy = "UserOrAdmin")]
-        [HttpGet("pending-order")]
-        public async Task<IActionResult> GetPendingOrder()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null) return Unauthorized("Không tìm thấy thông tin người dùng.");
-
-            int userId = int.Parse(userIdClaim.Value);
-
-            var pending = await _db.Orders
-                .Include(o => o.OrdersItems)
-                .FirstOrDefaultAsync(o => o.UserId == userId && o.Status == "Pending");
-
-            if (pending == null) return Ok(new { hasPending = false });
-
-            return Ok(new
-            {
-                hasPending = true,
-                orderId = pending.OrderId,
-                totalCost = pending.TotalCost,
-                createdDate = pending.CreatedDate
-            });
-        }
-
-        // ----------------------------------------------------------
-        // Cập nhật trạng thái đơn
-        // ----------------------------------------------------------
-        [Authorize(Policy = "UserOrAdmin")]
-        [HttpPatch("update-status/{orderId}")]
-        public IActionResult UpdateOrderStatus(int orderId, [FromBody] UpdateStatusRequest request)
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null) return Unauthorized("Không tìm thấy thông tin người dùng.");
-
-            var order = _orderRepo.GetById(orderId);
-            if (order == null) return NotFound("Đơn hàng không tồn tại.");
-
-            var allowed = new[] { "Pending", "Completed", "Cancelled", "Chờ xác nhận" };
-            if (!allowed.Contains(request.Status)) return BadRequest("Trạng thái không hợp lệ.");
-
-            order.Status = request.Status;
-            _orderRepo.Update(order);
-
-            return Ok(new { message = "Cập nhật trạng thái thành công." });
-        }
-
-        // ----------------------------------------------------------
-        // Lấy danh sách đơn của user
-        // ----------------------------------------------------------
-        [Authorize(Policy = "UserOrAdmin")]
-        [HttpGet("get-orders")]
-        public IActionResult GetOrdersByUser()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null) return Unauthorized("Không tìm thấy thông tin người dùng.");
-
-            int userId = int.Parse(userIdClaim.Value);
-
-            var orders = _db.Orders
+            var orders = await _db.Orders.AsNoTracking()
                 .Where(o => o.UserId == userId)
-                .OrderByDescending(o => o.CreatedDate)
+                .OrderByDescending(o => o.OrderId)
                 .Select(o => new
                 {
                     o.OrderId,
@@ -290,172 +125,144 @@ namespace OrdersService.Controllers
                     o.TotalCost,
                     o.Discount,
                     o.Ship,
-                    Items = o.OrdersItems.Select(i => new
-                    {
-                        i.ProductId,
-                        i.Name,
-                        i.ImageProduct,
-                        i.SoLuong,
-                        i.Price,
-                        i.TotalCost,
-                        i.CategoryName,
-                        i.CreatedDate,
-                        i.PaymentStatus
-                    }).ToList()
-                })
-                .ToList();
-
-            if (!orders.Any()) return NotFound("Không có đơn hàng nào.");
-            return Ok(orders);
-        }
-
-        // ----------------------------------------------------------
-        // Lấy tất cả đơn (Admin)
-        // ----------------------------------------------------------
-        [Authorize(Policy = "AdminOnly")]
-        [HttpGet("all-order")]
-        public IActionResult GetAllOrders()
-        {
-            var orders = _db.Orders
-                .OrderByDescending(o => o.CreatedDate)
-                .Select(o => new
-                {
-                    o.OrderId,
-                    o.UserId,
-                    Username = "Không xác định",
-                    o.CreatedDate,
-                    o.Status,
-                    o.TotalCost,
-                    o.Discount,
-                    o.Ship
-                })
-                .ToList();
-
-            if (!orders.Any()) return NotFound("Không có đơn hàng nào.");
-            return Ok(orders);
-        }
-
-        // ----------------------------------------------------------
-        // Chi tiết đơn
-        // ----------------------------------------------------------
-        [Authorize(Policy = "UserOrAdmin")]
-        [HttpGet("detail/{orderId}")]
-        public IActionResult GetOrderDetail(int orderId)
-        {
-            var order = _db.Orders
-                .Where(o => o.OrderId == orderId)
-                .Select(o => new
-                {
-                    o.OrderId,
-                    o.UserId,
-                    Username = "Không xác định",
-                    o.CreatedDate,
-                    o.Status,
-                    o.TotalCost,
-                    o.Discount,
                     o.DiscountCode,
-                    o.Ship,
-                    Items = o.OrdersItems.Select(i => new
-                    {
-                        i.OrderItemId,
-                        i.OrderId,
-                        i.Phone,
-                        i.Email,
-                        i.Address,
-                        i.ProductId,
-                        i.SoLuong,
-                        i.Price,
-                        i.Discount,
-                        i.Ship,
-                        i.CreatedDate,
-                        i.PaymentMethod,
-                        i.PaymentStatus,
-                        i.TotalCost,
-                        i.Note,
-                        i.NameReceive,
-                        i.Name,
-                        i.ImageProduct,
-                        i.CategoryName
-                    }).ToList()
+                    o.PaymentMethod,
+                    o.PaymentStatus
                 })
-                .FirstOrDefault();
+                .ToListAsync();
 
-            if (order == null) return NotFound("Không tìm thấy đơn hàng.");
-            return Ok(order);
+            return Ok(orders);
         }
 
-        // ----------------------------------------------------------
-        // Xoá đơn
-        // ----------------------------------------------------------
-        [Authorize(Policy = "UserOrAdmin")]
-        [HttpDelete("delete/{orderId}")]
-        public async Task<IActionResult> DeleteOrder(int orderId)
+        // GET /api/Order/detail/{id}
+        [HttpGet("detail/{id:int}")]
+        [Authorize(Policy = "ActiveUser")]
+        public async Task<IActionResult> GetDetail(int id)
         {
-            var order = await _db.Orders.FindAsync(orderId);
-            if (order == null) return NotFound("Không tìm thấy đơn hàng.");
+            int userId = GetUserId();
+            if (userId <= 0) return Unauthorized();
 
-            var items = _db.OrdersItems.Where(i => i.OrderId == orderId).ToList();
-            _db.OrdersItems.RemoveRange(items);
-            _db.Orders.Remove(order);
-            await _db.SaveChangesAsync();
-
-            return Ok($"Đã xoá đơn hàng #{orderId}.");
-        }
-
-        // ----------------------------------------------------------
-        // Sửa thông tin đơn (Admin)
-        // ----------------------------------------------------------
-        [Authorize(Policy = "AdminOnly")]
-        [HttpPut("update-order-info/{orderId}")]
-        public async Task<IActionResult> UpdateOrderInfo(int orderId, [FromBody] UpdateOrderInfoRequest request)
-        {
-            var order = _db.Orders
+            var order = await _db.Orders
                 .Include(o => o.OrdersItems)
-                .FirstOrDefault(o => o.OrderId == orderId);
+                .AsNoTracking()
+                .FirstOrDefaultAsync(o => o.OrderId == id && o.UserId == userId);
 
-            if (order == null) return NotFound("Không tìm thấy đơn hàng.");
+            if (order is null) return NotFound();
 
-            foreach (var item in order.OrdersItems)
+            return Ok(new
             {
-                item.Address = request.Address;
-                item.Phone = request.Phone;
-                item.Email = request.Email;
-                item.Note = request.Note;
-            }
+                order.OrderId,
+                order.UserId,
+                order.CreatedDate,
+                order.Status,
+                order.NameReceive,
+                order.Phone,
+                order.Email,
+                order.Address,
+                order.Note,
+                order.Discount,
+                order.Ship,
+                order.DiscountCode,
+                order.PaymentMethod,
+                order.PaymentStatus,
+                order.TotalCost,
+                items = order.OrdersItems.Select(i => new
+                {
+                    i.OrderItemId,
+                    i.ProductId,
+                    i.CategoryName,
+                    i.Name,
+                    i.ImageProduct,
+                    quantity = i.SoLuong,
+                    price = i.Price ?? 0m,
+                    totalCost = i.TotalCost ?? 0m,
+                    i.Note
+                }).ToList()
+            });
+        }
 
-            order.Status = request.Status;
+        // POST /api/Order/cancel/{id}
+        [HttpPost("cancel/{id:int}")]
+        [Authorize(Policy = "ActiveUser")]
+        public async Task<IActionResult> Cancel(int id)
+        {
+            int userId = GetUserId();
+            if (userId <= 0) return Unauthorized();
+
+            var order = await _db.Orders.FirstOrDefaultAsync(o => o.OrderId == id && o.UserId == userId);
+            if (order is null) return NotFound();
+
+            if (order.Status == "Thành công" || order.Status == "Đang giao")
+                return BadRequest("Đơn đang giao/hoàn tất không thể hủy.");
+
+            order.Status = "Đã hủy";
+            await _db.SaveChangesAsync();
+            return NoContent();
+        }
+
+        // ========== ADMIN APIs ==========
+        // GET /api/Order/all
+        [HttpGet("all")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> All()
+        {
+            var orders = await _db.Orders
+                .AsNoTracking()
+                .OrderByDescending(o => o.OrderId)
+                .Select(o => new
+                {
+                    o.OrderId,
+                    o.UserId,
+                    o.CreatedDate,
+                    o.Status,
+                    o.TotalCost,
+                    o.Discount,
+                    o.Ship,
+                    o.DiscountCode,
+                    o.PaymentMethod,
+                    o.PaymentStatus
+                }).ToListAsync();
+
+            return Ok(orders);
+        }
+
+        // PATCH /api/Order/update-status/{id}
+        [HttpPatch("update-status/{id:int}")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateStatusRequest req)
+        {
+            var order = await _db.Orders.FirstOrDefaultAsync(o => o.OrderId == id);
+            if (order is null) return NotFound();
+            order.Status = req.Status;
+            await _db.SaveChangesAsync();
+            return NoContent();
+        }
+
+        // PUT /api/Order/update-info/{id}
+        [HttpPut("update-info/{id:int}")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> UpdateInfo(int id, [FromBody] UpdateOrderInfoRequest req)
+        {
+            var order = await _db.Orders.Include(o => o.OrdersItems).FirstOrDefaultAsync(o => o.OrderId == id);
+            if (order is null) return NotFound();
+
+            if (!string.IsNullOrWhiteSpace(req.NameReceive)) order.NameReceive = req.NameReceive!.Trim();
+            if (!string.IsNullOrWhiteSpace(req.Phone)) order.Phone = req.Phone!.Trim();
+            if (!string.IsNullOrWhiteSpace(req.Email)) order.Email = req.Email!.Trim();
+            if (!string.IsNullOrWhiteSpace(req.Address)) order.Address = req.Address!.Trim();
+            if (!string.IsNullOrWhiteSpace(req.Note)) order.Note = req.Note!.Trim();
+
+            if (!string.IsNullOrWhiteSpace(req.PaymentMethod)) order.PaymentMethod = req.PaymentMethod!.Trim();
+            if (!string.IsNullOrWhiteSpace(req.PaymentStatus)) order.PaymentStatus = req.PaymentStatus!.Trim();
+
+            if (!string.IsNullOrWhiteSpace(req.DiscountCode)) order.DiscountCode = req.DiscountCode!.Trim();
+            if (req.Discount.HasValue) order.Discount = Math.Max(0, req.Discount.Value);
+            if (req.Ship.HasValue) order.Ship = Math.Max(0, req.Ship.Value);
+
+            RecalcOrderTotal(order);
             await _db.SaveChangesAsync();
 
-            return Ok(new { message = "Cập nhật thông tin đơn hàng thành công!" });
-        }
-
-        // ======= Helpers =======
-        private static HttpClient CreateInsecureClient()
-        {
-            var handler = new HttpClientHandler
-            {
-                ServerCertificateCustomValidationCallback = (msg, cert, chain, errors) => true
-            };
-            return new HttpClient(handler);
-        }
-
-        private static async Task<string> SendGetAsync(string url, string? bearerToken = null)
-        {
-            using var http = CreateInsecureClient();
-            var req = new HttpRequestMessage(HttpMethod.Get, url);
-            if (!string.IsNullOrWhiteSpace(bearerToken))
-                req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
-            var res = await http.SendAsync(req);
-            return res.IsSuccessStatusCode ? await res.Content.ReadAsStringAsync() : "";
-        }
-
-        private static async Task SendDeleteAsync(string url, string? bearerToken = null)
-        {
-            using var http = CreateInsecureClient();
-            var req = new HttpRequestMessage(HttpMethod.Delete, url);
-            if (!string.IsNullOrWhiteSpace(bearerToken))
-                req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
-            await http.SendAsync(req);
+            return NoContent();
         }
     }
 }

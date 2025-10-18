@@ -1,17 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json.Linq;
+using Microsoft.Extensions.Options;
 using PaymentService.Model;
 using PaymentService.Repository;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
-using System.Security.Principal;
-using System.Text;
 using System.Text.Json;
-using System.Web;
-using Shared.Contracts; 
 
 namespace PaymentService.Controllers
 {
@@ -20,289 +14,192 @@ namespace PaymentService.Controllers
     public class PaymentController : Controller
     {
         private readonly PaymentRepository _paymentRepo;
-        private readonly ApiClientHelper _apiClientHelper;
+        private readonly IHttpClientFactory _httpFactory;
+        private readonly IOptions<ServiceUrls> _svc;
+        private readonly IOptions<PaymentSettings> _pay;
 
-
-        public PaymentController()
+        public PaymentController(IHttpClientFactory httpFactory, IOptions<ServiceUrls> svc, IOptions<PaymentSettings> pay)
         {
-            _paymentRepo = new PaymentRepository();
-            _apiClientHelper = new ApiClientHelper();
+            _paymentRepo = new PaymentRepository(); // giữ cách khởi tạo cũ để không vỡ code cũ
+            _httpFactory = httpFactory;
+            _svc = svc;
+            _pay = pay;
         }
 
-        // Phương thức tạo mã QR
-        private string GenerateVietQR(string account, string bank, decimal amount, string description)
+        // --- Helpers ---
+        private int GetUserId()
         {
-            // Mã hóa các tham số
-            string encodedAccount = Uri.EscapeDataString(account);
-            string encodedBank = Uri.EscapeDataString(bank);
+            var s = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                 ?? User.FindFirstValue("uid")
+                 ?? User.FindFirstValue("sub");
+            return int.TryParse(s, out var id) ? id : 0;
+        }
+
+        private string BuildVietQrUrl(decimal amount, string description)
+        {
+            var bank = _pay.Value.BankCode ?? "970418";
+            var acc = _pay.Value.AccountNumber ?? "962470356635602";
             string encodedAmount = Uri.EscapeDataString(amount.ToString("0.00"));
-            string encodedDescription = Uri.EscapeDataString(description);
-
-            // Tạo URL QR theo định dạng của SEPay
-            string qrUrl = $"https://qr.sepay.vn/img?acc={encodedAccount}&bank={encodedBank}&amount={encodedAmount}&des={encodedDescription}";
-
-            return qrUrl;
+            string encodedDes = Uri.EscapeDataString(description);
+            string encodedBank = Uri.EscapeDataString(bank);
+            string encodedAcc = Uri.EscapeDataString(acc);
+            return $"https://qr.sepay.vn/img?acc={encodedAcc}&bank={encodedBank}&amount={encodedAmount}&des={encodedDes}";
         }
-        // Tạo mã QR
-        [Authorize(Policy = "UserOnly")]
+
+        private async Task<(bool ok, string? refNumber, string status)> PollSepayAsync(Payment payment)
+        {
+            // đọc config
+            var baseUrl = _pay.Value.SepayApiBase ?? "https://my.sepay.vn";
+            var token = _pay.Value.SepayApiToken;
+            if (string.IsNullOrWhiteSpace(token))
+                return (false, null, "NoToken");
+
+            var client = _httpFactory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var url = $"{baseUrl.TrimEnd('/')}/userapi/transactions/list";
+            using var resp = await client.GetAsync(url);
+            if (!resp.IsSuccessStatusCode) return (false, null, "Error");
+
+            var raw = await resp.Content.ReadAsStringAsync();
+            var doc = JsonDocument.Parse(raw);
+            if (!doc.RootElement.TryGetProperty("transactions", out var arr) || arr.ValueKind != JsonValueKind.Array)
+                return (false, null, "NoData");
+
+            foreach (var t in arr.EnumerateArray())
+            {
+                var code = t.TryGetProperty("code", out var c) ? c.GetString() : null;
+                var amt = t.TryGetProperty("amount_in", out var a) ? a.ToString() : null;
+                var refn = t.TryGetProperty("reference_number", out var r) ? r.GetString() : null;
+
+                if (code == payment.OrderCode && decimal.TryParse(amt, out var money))
+                {
+                    if (money == payment.TotalPrice)
+                        return (true, refn, "Completed");
+                }
+            }
+
+            return (true, null, "Pending");
+        }
+
+        // =============== API ===============
+
+        /// <summary>
+        /// Tạo payment VietQR cho đơn mới nhất của user (dựa vào OrderService /api/Order/my).
+        /// Body: { "totalPrice": 123000, "note": "..." }
+        /// </summary>
+        [Authorize(Policy = "ActiveUser")]
         [HttpPost("process-payment")]
         public async Task<IActionResult> ProcessPayment([FromBody] QRRequestModel paymentRequest)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
-                return Unauthorized("Không tìm thấy thông tin người dùng.");
-
-            int userId = int.Parse(userIdClaim.Value);
-
+            int userId = GetUserId();
+            if (userId <= 0) return Unauthorized("Thiếu userId.");
             if (paymentRequest == null || paymentRequest.TotalPrice <= 0)
-            {
                 return BadRequest("Số tiền không hợp lệ.");
+
+            // gọi OrderService để lấy đơn mới nhất
+            var client = _httpFactory.CreateClient();
+            var orderBase = _svc.Value.OrderService ?? "http://orderservice-dev:8080";
+            var urlMy = $"{orderBase.TrimEnd('/')}/api/Order/my";
+
+            // forward bearer
+            var authHeader = Request.Headers.Authorization.ToString();
+            if (!string.IsNullOrWhiteSpace(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+            {
+                client.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", authHeader.Substring("Bearer ".Length).Trim());
             }
 
-            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-            if (string.IsNullOrEmpty(token))
+            using var res = await client.GetAsync(urlMy);
+            if (!res.IsSuccessStatusCode)
+                return StatusCode((int)res.StatusCode, "Không thể kết nối OrderService.");
+
+            var listJson = await res.Content.ReadAsStringAsync();
+            var orders = JsonSerializer.Deserialize<List<dynamic>>(listJson,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
+
+            // chọn đơn mới nhất theo CreatedDate
+            var latest = orders.OrderByDescending(o => (DateTime?)o?.CreatedDate ?? DateTime.MinValue).FirstOrDefault();
+            if (latest is null || latest.OrderId is null)
+                return BadRequest("Không tìm thấy đơn hàng để tạo QR.");
+
+            int orderId = (int)latest.OrderId;
+            string orderCode = $"DH{orderId:D6}";
+            string note = string.IsNullOrWhiteSpace(paymentRequest.Note)
+                ? $"Thanh toán cho đơn hàng {orderCode}"
+                : paymentRequest.Note;
+
+            // QR URL
+            string qrCodeUrl = BuildVietQrUrl(paymentRequest.TotalPrice, note);
+            DateTime expire = DateTime.UtcNow.AddSeconds(Math.Max(30, _pay.Value.QrExpireSeconds));
+
+            // upsert payment pending cho user
+            var existing = _paymentRepo.GetPendingPaymentByUserId(userId);
+            string newTxn = Guid.NewGuid().ToString("N");
+
+            if (existing is null || existing.Status == "Completed")
             {
-                return Unauthorized("Thiếu token xác thực.");
-            }
-
-            // Gọi OrderService
-            string orderServiceUrl = "https://localhost:7033/api/Order/get-orders";
-            string responseString = await _apiClientHelper.GetStringAsync(orderServiceUrl, token);
-            Console.WriteLine("Response từ OrderService: " + responseString);
-
-            if (string.IsNullOrEmpty(responseString))
-            {
-                return StatusCode(500, "Không thể kết nối tới OrderService.");
-            }
-
-            var orders = JsonSerializer.Deserialize<List<OrderDto>>(responseString, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
-
-            var latestOrder = orders?
-            .OrderByDescending(o => o.CreatedAt)
-            .FirstOrDefault();
-
-            if (latestOrder == null)
-            {
-                return BadRequest("Không tìm thấy đơn hàng để tạo mã QR.");
-            }
-
-            string orderCode = $"DH{latestOrder.OrderId}";
-
-            // Tạo mã QR
-            string bankCode = "970418";
-            string accountNumber = "962470356635602";
-            string transactionId = Guid.NewGuid().ToString();
-            string note = $"Thanh toán cho đơn hàng {orderCode}";
-            string qrCodeUrl = GenerateVietQR(accountNumber, bankCode, paymentRequest.TotalPrice, note);
-            DateTime expirationTime = DateTime.Now.AddSeconds(120);
-
-            var existingPayment = _paymentRepo.GetPendingPaymentByUserId(userId);
-            if (existingPayment != null)
-            {
-                if (existingPayment.Status == "Completed")
-                {
-                    var newPayment = new Payment
-                    {
-                        UserId = userId,
-                        OrderId = latestOrder.OrderId,
-                        OrderCode = orderCode,
-                        PaymentMethod = "VietQR",
-                        PaymentDate = DateTime.Now,
-                        TransactionId = transactionId,
-                        ReferenceNumber = null,
-                        TotalPrice = paymentRequest.TotalPrice,
-                        Status = "Pending",
-                        CreatedAt = DateTime.Now,
-                        ExpirationTime = expirationTime,
-                        Description = $"QR Code URL: {qrCodeUrl}",
-                        Note= note,
-                    };
-
-                    _paymentRepo.Insert(newPayment);
-
-                    return Ok(new
-                    {
-                        paymentId = newPayment.PaymentId,
-                        transactionId = newPayment.TransactionId,
-                        qrCodeUrl,
-                        expirationTime
-                    });
-                }
-                else
-                {
-                    existingPayment.TransactionId = transactionId;
-                    existingPayment.OrderId = latestOrder.OrderId;
-                    existingPayment.OrderCode = orderCode;
-                    existingPayment.TotalPrice = paymentRequest.TotalPrice;
-                    existingPayment.Description = $"QR Code URL: {qrCodeUrl}";
-                    existingPayment.Status = "Pending";
-                    existingPayment.PaymentDate = DateTime.Now;
-                    existingPayment.ExpirationTime = expirationTime;
-                    existingPayment.ReferenceNumber = null;
-
-                    _paymentRepo.Update(existingPayment);
-
-                    return Ok(new
-                    {
-                        paymentId = existingPayment.PaymentId,
-                        transactionId = existingPayment.TransactionId,
-                        qrCodeUrl,
-                        expirationTime
-                    });
-                }
-            }
-            else
-            {
-                var newPayment = new Payment
+                var p = new Payment
                 {
                     UserId = userId,
-                    OrderId = latestOrder.OrderId,
+                    OrderId = orderId,
                     OrderCode = orderCode,
                     PaymentMethod = "VietQR",
-                    PaymentDate = DateTime.Now,
-                    TransactionId = transactionId,
+                    PaymentDate = DateTime.UtcNow,   // thời điểm tạo phiên
+                    TransactionId = newTxn,
                     ReferenceNumber = null,
                     TotalPrice = paymentRequest.TotalPrice,
                     Status = "Pending",
-                    CreatedAt = DateTime.Now,
-                    ExpirationTime = expirationTime,
+                    CreatedAt = DateTime.UtcNow,
+                    ExpirationTime = expire,
                     Description = $"QR Code URL: {qrCodeUrl}",
-                    Note = note,
+                    Note = note
                 };
-
-                _paymentRepo.Insert(newPayment);
-
-                return Ok(new
-                {
-                    paymentId = newPayment.PaymentId,
-                    transactionId = newPayment.TransactionId,
-                    qrCodeUrl,
-                    expirationTime
-                });
+                _paymentRepo.Insert(p);
+                return Ok(new { paymentId = p.PaymentId, transactionId = p.TransactionId, qrCodeUrl, expirationTime = expire });
             }
-        }
-
-
-        private async Task<string> GetReferenceNumberAsync(Payment payment)
-        {
-            string apiUrl = "https://my.sepay.vn/userapi/transactions/list";
-            string apiToken = "20PQ9Q1TLJWXE4KEHXSDOCPRPOWUIMXKJDZNNBKHLDLRIAZBVYSYI6FNGEU0A84V"; // Sử dụng biến môi trường hoặc cấu hình để bảo mật token
-
-            using (HttpClient client = new HttpClient())
+            else
             {
-                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiToken}");
-                HttpResponseMessage response = await client.GetAsync(apiUrl);
+                existing.TransactionId = newTxn;
+                existing.OrderId = orderId;
+                existing.OrderCode = orderCode;
+                existing.TotalPrice = paymentRequest.TotalPrice;
+                existing.Description = $"QR Code URL: {qrCodeUrl}";
+                existing.Status = "Pending";
+                existing.PaymentDate = DateTime.UtcNow;
+                existing.ExpirationTime = expire;
+                existing.ReferenceNumber = null;
+                _paymentRepo.Update(existing);
 
-                if (!response.IsSuccessStatusCode)
-                {
-                    return null;
-                }
-
-                string responseData = await response.Content.ReadAsStringAsync();
-                var result = JsonSerializer.Deserialize<Dictionary<string, object>>(responseData);
-
-                if (result == null || !result.ContainsKey("transactions"))
-                {
-                    return null;
-                }
-
-                var transactions = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(result["transactions"].ToString());
-                if (transactions == null || transactions.Count == 0)
-                {
-                    return null;
-                }
-
-                foreach (var transaction in transactions)
-                {
-                    string? referenceNumber = transaction["reference_number"]?.ToString();
-                    string? transactionContent = transaction["transaction_content"]?.ToString();
-
-                    if (transactionContent.Contains(payment.TransactionId) && !string.IsNullOrEmpty(referenceNumber))
-                    {
-                        return referenceNumber;
-                    }
-                }
-
-                return null;
+                return Ok(new { paymentId = existing.PaymentId, transactionId = existing.TransactionId, qrCodeUrl, expirationTime = expire });
             }
         }
 
-        private async Task<string> CheckTransactionStatusAsync(Payment payment)
-        {
-            string apiUrl = "https://my.sepay.vn/userapi/transactions/list";
-            string apiToken = "20PQ9Q1TLJWXE4KEHXSDOCPRPOWUIMXKJDZNNBKHLDLRIAZBVYSYI6FNGEU0A84V"; // Nên đưa vào cấu hình
-
-            using (HttpClient client = new HttpClient())
-            {
-                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiToken}");
-
-                HttpResponseMessage response = await client.GetAsync(apiUrl);
-                if (!response.IsSuccessStatusCode)
-                {
-                    return "Error";
-                }
-
-                string responseData = await response.Content.ReadAsStringAsync();
-
-                var result = JsonSerializer.Deserialize<Dictionary<string, object>>(responseData);
-                if (result == null || !result.ContainsKey("transactions"))
-                {
-                    return "No Data";
-                }
-
-                var transactionsJson = result["transactions"].ToString();
-                var transactions = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(transactionsJson);
-
-                if (transactions == null || transactions.Count == 0)
-                {
-                    return "No Transactions";
-                }
-
-                foreach (var transaction in transactions)
-                {
-                    string? code = transaction["code"]?.ToString();
-                    string? amountInStr = transaction["amount_in"]?.ToString();
-                    string? referenceNumber = transaction["reference_number"]?.ToString();
-
-                    if (code == payment.OrderCode && decimal.TryParse(amountInStr, out decimal amount))
-                    {
-                        if (amount == payment.TotalPrice)
-                        {
-                            payment.Status = "Completed";
-                            payment.ReferenceNumber = referenceNumber;
-
-                            _paymentRepo.Update(payment);
-                            return "Completed";
-                        }
-                    }
-                }
-
-                return "Pending";
-            }
-        }
-
-
-        [Authorize(Policy = "UserOnly")]
+        /// <summary>
+        /// Kiểm tra trạng thái payment theo paymentId; nếu Completed, cập nhật trường ReferenceNumber/PaymentDate.
+        /// </summary>
+        [Authorize(Policy = "ActiveUser")]
         [HttpGet("check-payment")]
-        public async Task<IActionResult> CheckPaymentStatus(int paymentId)
+        public async Task<IActionResult> CheckPaymentStatus([FromQuery] int paymentId)
         {
-            if (paymentId <= 0)
-            {
-                return BadRequest("PaymentId không hợp lệ.");
-            }
-
+            if (paymentId <= 0) return BadRequest("PaymentId không hợp lệ.");
             var payment = _paymentRepo.GetById(paymentId);
+            if (payment is null) return NotFound("Không tìm thấy giao dịch.");
 
-            if (payment == null)
+            var (ok, refNo, status) = await PollSepayAsync(payment);
+            if (!ok) return StatusCode(502, "Không thể gọi SEPay.");
+
+            if (status == "Completed" && payment.Status != "Completed")
             {
-                return NotFound("Không tìm thấy giao dịch.");
+                payment.Status = "Completed";
+                payment.ReferenceNumber = refNo;
+                payment.PaymentDate = DateTime.UtcNow;
+                _paymentRepo.Update(payment);
+
+                // TODO: (khuyên) gọi OrderService cập nhật PaymentStatus = "Paid"
+                // var orderBase = _svc.Value.OrderService ?? "...";
+                // await client.PutAsJsonAsync($"{orderBase}/api/Order/update-info/{payment.OrderId}", new { PaymentStatus = "Paid" });
             }
-
-
-            string transactionStatus = await CheckTransactionStatusAsync(payment);
 
             return Ok(new
             {
@@ -314,46 +211,38 @@ namespace PaymentService.Controllers
             });
         }
 
-        [Authorize(Policy = "UserOnly")]
+        /// <summary>
+        /// Kiểm tra payment mới nhất của user đang đăng nhập.
+        /// </summary>
+        [Authorize(Policy = "ActiveUser")]
         [HttpGet("check-payment-by-user")]
         public async Task<IActionResult> CheckPaymentByUser()
         {
-            try
+            int userId = GetUserId();
+            if (userId <= 0) return Unauthorized();
+
+            var payment = _paymentRepo.GetLatestPaymentByUserId(userId);
+            if (payment is null) return NotFound("Không tìm thấy giao dịch.");
+
+            var (ok, refNo, status) = await PollSepayAsync(payment);
+            if (!ok) return StatusCode(502, "Không thể gọi SEPay.");
+
+            if (status == "Completed" && payment.Status != "Completed")
             {
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-                if (userIdClaim == null)
-                {
-                    return Unauthorized("Không tìm thấy thông tin người dùng.");
-                }
-
-                int userId = int.Parse(userIdClaim.Value);
-
-                var payment = _paymentRepo.GetLatestPaymentByUserId(userId);
-
-                if (payment == null)
-                {
-                    return NotFound("Không tìm thấy giao dịch nào.");
-                }
-
-                // Kiểm tra trạng thái giao dịch mới nhất
-                string transactionStatus = await CheckTransactionStatusAsync(payment);
-
-                return Ok(new
-                {
-                    paymentId = payment.PaymentId,
-                    orderId = payment.OrderId,
-                    status = payment.Status,
-                    totalPrice = payment.TotalPrice,
-                    transactionStatus = transactionStatus
-                });
+                payment.Status = "Completed";
+                payment.ReferenceNumber = refNo;
+                payment.PaymentDate = DateTime.UtcNow;
+                _paymentRepo.Update(payment);
             }
-            catch (Exception ex)
+
+            return Ok(new
             {
-                Console.WriteLine($"Lỗi: {ex.Message}");
-                return StatusCode(500, "Có lỗi xảy ra khi xử lý yêu cầu.");
-            }
+                paymentId = payment.PaymentId,
+                orderId = payment.OrderId,
+                status = payment.Status,
+                totalPrice = payment.TotalPrice,
+                transactionStatus = status
+            });
         }
-
-
     }
 }

@@ -30,6 +30,7 @@ builder.Services.AddHttpClient<ApiClientHelper>(); // typed HttpClient gọi Car
 
 // ===== MVC + Swagger =====
 builder.Services.AddControllers().AddNewtonsoftJson();
+builder.Services.AddHttpClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -81,6 +82,7 @@ builder.Services.AddAuthorization(opts =>
     opts.AddPolicy("UserOnly", p => p.RequireAuthenticatedUser().RequireRole("User"));
     opts.AddPolicy("AdminOnly", p => p.RequireAuthenticatedUser().RequireRole("Admin"));
     opts.AddPolicy("UserOrAdmin", p => p.RequireAuthenticatedUser().RequireRole("User", "Admin"));
+    opts.AddPolicy("ActiveUser", p => p.RequireClaim("is_active", "true"));
 });
 
 var app = builder.Build();

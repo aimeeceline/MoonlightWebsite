@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using UserService.Model;
 
 namespace UserService.Data;
@@ -21,7 +22,8 @@ public static class DbSeeder
                 Password = "Admin@123", // dev/demo; production nhớ băm mật khẩu
                 TypeUser = "Admin",
                 Email = "admin@demo.local",
-                Phone = "0900000000"
+                Phone = "0900000000",
+                IsActive = true
             };
             db.Users.Add(admin);
             await db.SaveChangesAsync();
@@ -38,7 +40,8 @@ public static class DbSeeder
                 Password = "User@123",
                 TypeUser = "User",
                 Email = "alice@demo.local",
-                Phone = "0901111111"
+                Phone = "0901111111",
+                IsActive = true
             };
             db.Users.Add(u1);
             await db.SaveChangesAsync(); // cần UserId để seed Address
@@ -54,15 +57,17 @@ public static class DbSeeder
                 Password = "User@123",
                 TypeUser = "User",
                 Email = "bob@demo.local",
-                Phone = "0902222222"
+                Phone = "0902222222",
+                IsActive = true
             };
             db.Users.Add(u2);
             await db.SaveChangesAsync();
         }
 
         // ========== 3) 4 ADDRESS (2 cho mỗi user; mỗi user 1 default) ==========
+
         // Helper: bảo đảm chỉ 1 địa chỉ default mỗi user
-        async Task EnsureSingleDefault(long userId)
+        async Task EnsureSingleDefault(int userId)
         {
             var defaults = await db.Addresses
                 .Where(a => a.UserId == userId && a.IsDefault)
@@ -88,6 +93,7 @@ public static class DbSeeder
                 {
                     UserId = u1.UserId,
                     RecipientName = "Alice",
+                    Email = "alice@demo.local",               // ✔ BỔ SUNG Email (bắt buộc)
                     Phone = "0901111111",
                     AddressLine = "22 Nguyễn Kiệm, P.3, Q.Gò Vấp, HCM",
                     Note = null,
@@ -97,6 +103,7 @@ public static class DbSeeder
                 {
                     UserId = u1.UserId,
                     RecipientName = "Alice",
+                    Email = "alice@demo.local",               // ✔ BỔ SUNG Email
                     Phone = "0901111111",
                     AddressLine = "12 Trần Hưng Đạo, P.Cầu Ông Lãnh, Q.1, HCM",
                     Note = "Giao giờ hành chính",
@@ -115,6 +122,7 @@ public static class DbSeeder
                 {
                     UserId = u1.UserId,
                     RecipientName = "Alice",
+                    Email = "alice@demo.local",               // ✔ BỔ SUNG Email
                     Phone = "0901111111",
                     AddressLine = "12 Trần Hưng Đạo, P.Cầu Ông Lãnh, Q.1, HCM",
                     Note = "Giao giờ hành chính",
@@ -134,6 +142,7 @@ public static class DbSeeder
                 {
                     UserId = u2.UserId,
                     RecipientName = "Bob",
+                    Email = "bob@demo.local",                 // ✔ BỔ SUNG Email
                     Phone = "0902222222",
                     AddressLine = "5 Phan Đăng Lưu, P.3, Q.Bình Thạnh, HCM",
                     Note = "Gọi trước khi giao",
@@ -143,6 +152,7 @@ public static class DbSeeder
                 {
                     UserId = u2.UserId,
                     RecipientName = "Bob",
+                    Email = "bob@demo.local",                 // ✔ BỔ SUNG Email
                     Phone = "0902222222",
                     AddressLine = "8 Nguyễn Trãi, P.Bến Thành, Q.1, HCM",
                     Note = null,
@@ -160,6 +170,7 @@ public static class DbSeeder
                 {
                     UserId = u2.UserId,
                     RecipientName = "Bob",
+                    Email = "bob@demo.local",                 // ✔ BỔ SUNG Email
                     Phone = "0902222222",
                     AddressLine = "8 Nguyễn Trãi, P.Bến Thành, Q.1, HCM",
                     Note = null,

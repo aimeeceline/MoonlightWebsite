@@ -84,6 +84,7 @@ body{
     font-weight: 800;
     text-transform: uppercase;
     display: block;
+    width: 300px;
     padding: 16px 30px 17px;
     background: map.get($theme-colors, "main");
     border: none;

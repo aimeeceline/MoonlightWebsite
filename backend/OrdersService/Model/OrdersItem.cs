@@ -1,30 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace OrdersService.Model
 {
     public partial class OrdersItem
     {
         public int OrderItemId { get; set; }
-        public int? OrderId { get; set; }
-        public string? NameReceive { get; set; }
-        public string? Phone { get; set; }
-        public string? Email { get; set; }
-        public string? Address { get; set; }
-        public int? ProductId { get; set; }
-        public string? ImageProduct { get; set; }
-        public string? Name { get; set; }
-        public string? CategoryName { get; set; }
-        public int? SoLuong { get; set; }
-        public decimal? Price { get; set; }
-        public decimal? Discount { get; set; }
-        public decimal? Ship { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public string? PaymentMethod { get; set; }
-        public string? PaymentStatus { get; set; }
-        public decimal? TotalCost { get; set; }
-        public string? Note { get; set; }
+        public int OrderId { get; set; }
 
-        public virtual Order? Order { get; set; }
+        // Sản phẩm
+        public int ProductId { get; set; }
+        public string? CategoryName { get; set; } // nvarchar(500)
+        public string? Name { get; set; }         // nvarchar(500)
+        public string? ImageProduct { get; set; } // nvarchar(500)
+
+        // Số lượng & giá
+        public int SoLuong { get; set; }          // quantity
+        public decimal? Price { get; set; }       // decimal(18,2)
+        public decimal? TotalCost { get; set; }   // decimal(18,2)
+
+        // Ghi chú từng dòng + thời gian tạo dòng
+        public string? Note { get; set; }         // nvarchar(1000)
+        public DateTime CreatedDate { get; set; }
+
+        public virtual Order Order { get; set; } = null!;
     }
 }

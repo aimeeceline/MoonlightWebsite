@@ -10,8 +10,15 @@ import axios from "axios";
 import { ROUTERS } from "utils/router";
 
 // === API base URL cho Product ===
-const PRODUCT_API = process.env.REACT_APP_PRODUCT_API || `http://${window.location.hostname}:7007`;
+const PRODUCT_API =
+  process.env.REACT_APP_PRODUCT_API || `http://${window.location.hostname}:7007`;
 
+// Helper ảnh: nếu BE trả sẵn full URL thì dùng luôn; nếu chỉ là tên file -> nối PRODUCT_API/images/...
+const buildImg = (name) => {
+  if (!name) return "";
+  if (typeof name === "string" && /^https?:\/\//i.test(name)) return name;
+  return `${PRODUCT_API}/images/${name}`;
+};
 
 const ProductDetails = () => {
   const { productId } = useParams();
@@ -28,25 +35,27 @@ const ProductDetails = () => {
 
   // Số lượng mua
   const [quantity, setQuantity] = useState(1);
-useEffect(() => {
-  window.scrollTo({ top: 400, left: 0, behavior: "smooth" });
-}, [productId]);
+
+  // Scroll khi đổi product
+  useEffect(() => {
+    window.scrollTo({ top: 400, left: 0, behavior: "smooth" });
+  }, [productId]);
 
   // ====== Fetch chi tiết sản phẩm ======
   useEffect(() => {
     if (!productId) return;
 
     const ctrl = new AbortController();
+
     const fetchDetail = async () => {
       setLoadingDetail(true);
       setErrorDetail("");
       setProduct(null);
 
       try {
-        const { data } = await productApi.get(
-  `/api/Product/${productId}`,
-  { signal: ctrl.signal }
-);
+        const { data } = await productApi.get(`/api/Product/${productId}`, {
+          signal: ctrl.signal,
+        });
 
         // Chuẩn hoá shape trả về
         const item = data?.product ?? data ?? null;
@@ -71,45 +80,52 @@ useEffect(() => {
 
     fetchDetail();
     return () => ctrl.abort();
-  }, [productId]);
+  }, [productId]); // cố ý không đưa productApi vào deps để tránh refetch vòng lặp
 
-  // ====== Fetch “sản phẩm tương tự” (nổi bật) ======
-  // Lấy sản phẩm tương tự (không gồm sản phẩm đang xem)
-useEffect(() => {
-  const ctrl = new AbortController();
-  let canceled = false;
+  // ====== Fetch “sản phẩm tương tự” (nổi bật) — loại trừ sp hiện tại & chỉ lấy 4 cái ======
+  useEffect(() => {
+    if (!productId) return;
 
-  const currentId = Number(productId); // id của trang chi tiết hiện tại
+    const ctrl = new AbortController();
+    let canceled = false;
 
-  (async () => {
-    try {
-      const { data } = await productApi.get(
-  `/api/Product/san-pham-noi-bat`,
-  { signal: ctrl.signal }
-);
+    (async () => {
+      try {
+        setLoadingHot(true);
 
-      const list = Array.isArray(data) ? data : (data?.products ?? data?.data ?? []);
+        const { data } = await productApi.get(`/api/Product/san-pham-noi-bat`, {
+          signal: ctrl.signal,
+        });
 
-      // ❗️Loại bỏ sản phẩm đang xem
-      const filtered = (list || []).filter((x) => {
-        const pid = Number(x.productId ?? x.ProductId ?? x.id ?? x.Id);
-        return !Number.isNaN(pid) && pid !== currentId;
-      });
+        const list = Array.isArray(data)
+          ? data
+          : data?.products ?? data?.data ?? [];
 
-      if (!canceled) setHot(filtered);
-    } catch (e) {
-      if (!axios.isCancel(e)) {
-        console.error(e);
-        if (!canceled) setHot([]);
+        // ❗️Loại bỏ sản phẩm đang xem
+        const currentId = Number(productId);
+        const filtered = (list || []).filter((x) => {
+          const pid = Number(x.productId ?? x.ProductId ?? x.id ?? x.Id);
+          return Number.isFinite(pid) && pid !== currentId;
+        });
+
+        // ✅ Chỉ lấy 4 sp
+const top4 = filtered.slice().sort(() => Math.random() - 0.5).slice(0, 4);
+        if (!canceled) setHot(top4);
+      } catch (e) {
+        if (!axios.isCancel(e)) {
+          console.error(e);
+          if (!canceled) setHot([]);
+        }
+      } finally {
+        if (!canceled) setLoadingHot(false);
       }
-    }
-  })();
+    })();
 
-  return () => {
-    canceled = true;
-    ctrl.abort();
-  };
-}, [productId]);
+    return () => {
+      canceled = true;
+      ctrl.abort();
+    };
+  }, [productId]); // cố ý không đưa productApi vào deps để ổn định
 
   return (
     <>
@@ -125,7 +141,7 @@ useEffect(() => {
               <div className="col-lg-6 col-xl-12 col-md-12 col-sm-12 col-xs-12 product_details_pic">
                 <div className="product_details_picture position-relative">
                   <img
-                    src={`${PRODUCT_API}/images/${product.image}`}
+                    src={buildImg(product.image)}
                     alt="product-main"
                     style={{ borderRadius: "6px" }}
                   />
@@ -138,18 +154,9 @@ useEffect(() => {
                 </div>
 
                 <div className="main">
-                  <img
-                    src={`${PRODUCT_API}/images/${product.image1}`}
-                    alt="product-1"
-                  />
-                  <img
-                    src={`${PRODUCT_API}/images/${product.image2}`}
-                    alt="product-2"
-                  />
-                  <img
-                    src={`${PRODUCT_API}/images/${product.image3}`}
-                    alt="product-3"
-                  />
+                  <img src={buildImg(product.image1)} alt="product-1" />
+                  <img src={buildImg(product.image2)} alt="product-2" />
+                  <img src={buildImg(product.image3)} alt="product-3" />
                 </div>
               </div>
 
@@ -161,7 +168,7 @@ useEffect(() => {
                   {`${product.viewCount} (lượt đã xem)`}
                 </div>
 
-                <h3>{formatter(product.price)}</h3>
+                <h2>{formatter(product.price)}</h2>
 
                 <p>{product.description}</p>
 
@@ -173,10 +180,7 @@ useEffect(() => {
 
                 <ul>
                   <li>
-                    <b>Tình trạng: </b> <span>{product.trang_thai}</span>
-                  </li>
-                  <li>
-                    <b>Số lượng: </b> <span>{product.inventory}</span>
+                    <b>Số lượng:</b>&emsp; <span>{product.inventory}</span>
                   </li>
                 </ul>
               </div>
@@ -207,7 +211,7 @@ useEffect(() => {
               item.productId ?? item.ProductId ?? item.id ?? item.Id ?? null;
             if (!pid) return null;
 
-            const imgUrl = `${PRODUCT_API}/images/${item.image}`;
+            const imgUrl = buildImg(item.image);
 
             return (
               <div
@@ -215,7 +219,6 @@ useEffect(() => {
                 key={`${pid}-${index}`}
               >
                 <div className="featured_item pl-pr-10">
-                
                   <div
                     className="featured_item_img"
                     style={{
@@ -233,10 +236,11 @@ useEffect(() => {
                     <ul className="featured_item_img_hover">
                       <li>
                         <Link
-                 
-                  to={generatePath(ROUTERS.USER.PRODUCTS, { productId: pid })}
-                >
-                        <AiOutlineEye />
+                          to={generatePath(ROUTERS.USER.PRODUCTS, {
+                            productId: pid,
+                          })}
+                        >
+                          <AiOutlineEye />
                         </Link>
                       </li>
                       <li>
@@ -249,8 +253,8 @@ useEffect(() => {
                     <h6>{item.name}</h6>
                     <h5>{formatter(item.price)}</h5>
                   </div>
+                </div>
               </div>
-            </div>
             );
           })}
 

@@ -38,37 +38,42 @@ namespace UserService.Controllers
 
             if (user == null) return Unauthorized("Tên đăng nhập hoặc mật khẩu không đúng.");
 
+            // chặn user bị khóa (IsActive = false)
+            var isActive = (bool)(user.GetType().GetProperty("IsActive")?.GetValue(user) ?? true);
+            if (!isActive) return Forbid();
+
             var stored = (user.Password ?? "").Trim();
             if (!string.Equals(stored, password, StringComparison.Ordinal))
                 return Unauthorized("Tên đăng nhập hoặc mật khẩu không đúng.");
 
-            var token = GenerateJwtToken(user);
+            var token = GenerateJwtToken(user, isActive);
             return Ok(new
             {
                 token,
+                userId = user.UserId,
                 username = user.Username,
                 role = string.IsNullOrWhiteSpace(user.TypeUser) ? "User" : user.TypeUser
             });
         }
 
-        private string GenerateJwtToken(User user)
+        private string GenerateJwtToken(User user, bool isActive)
         {
-            // đọc config
             var issuer = _cfg["Jwt:Issuer"] ?? throw new InvalidOperationException("Missing Jwt:Issuer");
             var audience = _cfg["Jwt:Audience"] ?? throw new InvalidOperationException("Missing Jwt:Audience");
             var keyStr = _cfg["Jwt:Key"] ?? throw new InvalidOperationException("Missing Jwt:Key");
 
             var role = string.IsNullOrWhiteSpace(user.TypeUser) ? "User" : user.TypeUser;
 
-            // 🔑 luôn nhúng userId dưới 3 tên claim phổ biến
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),       // "sub" = userId (số)
-                new Claim("uid", user.UserId.ToString()),                             // fallback "uid"
-                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),         // nameidentifier
-
+                new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
+                new Claim("uid", user.UserId.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
                 new Claim(ClaimTypes.Name, user.Username ?? string.Empty),
                 new Claim(ClaimTypes.Role, role),
+
+                // để policy ActiveUser dùng
+                new Claim("is_active", isActive ? "true" : "false"),
             };
 
             if (!string.IsNullOrWhiteSpace(user.Email))
@@ -99,8 +104,8 @@ namespace UserService.Controllers
             return Ok(new
             {
                 id = User.FindFirstValue(ClaimTypes.NameIdentifier)
-                     ?? User.FindFirstValue("uid")
-                     ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub),
+                         ?? User.FindFirstValue("uid")
+                         ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub),
                 username = User.FindFirstValue(ClaimTypes.Name),
                 role = User.FindFirstValue(ClaimTypes.Role),
                 email = User.FindFirstValue(ClaimTypes.Email),
@@ -108,6 +113,4 @@ namespace UserService.Controllers
             });
         }
     }
-
-    public record LoginRequest(string Username, string Password);
 }

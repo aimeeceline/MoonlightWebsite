@@ -1,41 +1,33 @@
 {
   "format": 1,
   "restore": {
-    "D:\\MoonlightWebsite\\backend\\CartService\\CartService.csproj": {}
+    "/src/CartService/CartService.csproj": {}
   },
   "projects": {
-    "D:\\MoonlightWebsite\\backend\\CartService\\CartService.csproj": {
+    "/src/CartService/CartService.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\MoonlightWebsite\\backend\\CartService\\CartService.csproj",
+        "projectUniqueName": "/src/CartService/CartService.csproj",
         "projectName": "CartService",
-        "projectPath": "D:\\MoonlightWebsite\\backend\\CartService\\CartService.csproj",
-        "packagesPath": "C:\\Users\\lelan\\.nuget\\packages\\",
-        "outputPath": "D:\\MoonlightWebsite\\backend\\CartService\\obj\\",
+        "projectPath": "/src/CartService/CartService.csproj",
+        "packagesPath": "/root/.nuget/packages/",
+        "outputPath": "/src/CartService/obj/",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "D:\\MoonlightWebsite\\NuGet.Config",
-          "C:\\Users\\lelan\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/root/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "https://api.nuget.org/v3/index.json": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "D:\\MoonlightWebsite\\backend\\Shared\\Shared.csproj": {
-                "projectPath": "D:\\MoonlightWebsite\\backend\\Shared\\Shared.csproj"
+              "/src/Shared/Shared.csproj": {
+                "projectPath": "/src/Shared/Shared.csproj"
               }
             }
           }
@@ -49,8 +41,7 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        },
-        "SdkAnalysisLevel": "9.0.300"
+        }
       },
       "frameworks": {
         "net8.0": {
@@ -110,34 +101,26 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.414/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "D:\\MoonlightWebsite\\backend\\Shared\\Shared.csproj": {
+    "/src/Shared/Shared.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\MoonlightWebsite\\backend\\Shared\\Shared.csproj",
+        "projectUniqueName": "/src/Shared/Shared.csproj",
         "projectName": "Shared",
-        "projectPath": "D:\\MoonlightWebsite\\backend\\Shared\\Shared.csproj",
-        "packagesPath": "C:\\Users\\lelan\\.nuget\\packages\\",
-        "outputPath": "D:\\MoonlightWebsite\\backend\\Shared\\obj\\",
+        "projectPath": "/src/Shared/Shared.csproj",
+        "packagesPath": "/root/.nuget/packages/",
+        "outputPath": "/src/Shared/obj/",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "D:\\MoonlightWebsite\\NuGet.Config",
-          "C:\\Users\\lelan\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/root/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "https://api.nuget.org/v3/index.json": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -155,8 +138,7 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        },
-        "SdkAnalysisLevel": "9.0.300"
+        }
       },
       "frameworks": {
         "net8.0": {
@@ -187,7 +169,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.414/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

@@ -62,7 +62,7 @@ const Quantity = ({
 
 
     try {
-      const res = await axios.post(`${CART_API}/api/Cart/add-to-cart`, cartPayload, {
+      const res = await axios.post(`${CART_API}/api/Cart/add`, cartPayload, {
         headers: { Authorization: `Bearer ${token}` }
       });
       console.log('Send add-to-cart', { productId: product?.productId, quantity });

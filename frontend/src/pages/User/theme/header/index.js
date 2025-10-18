@@ -129,7 +129,7 @@ const Header = () => {
       const token = localStorage.getItem("token");
       if (!token) { setCartDetails({ quantity: 0, totalCartPrice: 0, originalTotal: 0 }); return; }
       try {
-        const r = await axios.get(`${CART_API}/api/Cart/user-cart`, { headers: { Authorization: `Bearer ${token}` }});
+        const r = await axios.get(`${CART_API}/api/Cart/me`, { headers: { Authorization: `Bearer ${token}` }});
         setCartDetails(r.status === 200 ? r.data : { quantity: 0, totalCartPrice: 0, originalTotal: 0 });
       } catch {
         setCartDetails({ quantity: 0, totalCartPrice: 0, originalTotal: 0 });

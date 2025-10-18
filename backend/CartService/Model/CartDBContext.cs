@@ -1,71 +1,86 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace CartService.Model
 {
     public partial class CartDBContext : DbContext
     {
-        public CartDBContext()
-        {
-        }
-
-        public CartDBContext(DbContextOptions<CartDBContext> options)
-            : base(options)
-        {
-        }
+        public CartDBContext() { }
+        public CartDBContext(DbContextOptions<CartDBContext> options) : base(options) { }
 
         public virtual DbSet<Cart> Carts { get; set; } = null!;
         public virtual DbSet<CartItem> CartItems { get; set; } = null!;
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=LAPTOP-B1P0DK29;Database=CartDB;integrated security=true;");
-            }
-        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Cart>(entity =>
             {
-                entity.ToTable("Cart");
+                entity.HasKey(e => e.CartId);
+                entity.Property(e => e.CartId).HasColumnName("CartID");
 
-                entity.Property(e => e.CreateDate).HasColumnType("datetime");
-                entity.Property(e => e.OriginalTotal).HasColumnType("decimal(18, 2)");
-                entity.Property(e => e.TotalCartPrice).HasColumnType("decimal(18, 2)");
-                entity.Property(e => e.Discount).HasColumnType("decimal(18, 2)");
+                entity.Property(e => e.UserId).HasColumnName("UserID");
+
+                entity.Property(e => e.CreateDate)
+                      .HasColumnType("datetime")
+                      .HasDefaultValueSql("GETUTCDATE()");
+
+                // ✅ Tất cả decimal => dùng 0m (decimal), KHÔNG dùng 0 (int)
+                entity.Property(e => e.OriginalTotal)
+                      .HasColumnType("decimal(18, 2)")
+                      .HasDefaultValue(0m);
+
+                entity.Property(e => e.Discount)
+                      .HasColumnType("decimal(18, 2)")
+                      .HasDefaultValue(0m);
+
+                entity.Property(e => e.TotalCartPrice)
+                      .HasColumnType("decimal(18, 2)")
+                      .HasDefaultValue(0m);
+
                 entity.Property(e => e.DiscountCode)
-                  .HasMaxLength(50)
-                  .HasColumnType("nvarchar(50)")
-                  .IsRequired(false);
-                entity.Property(e => e.Quantity).HasColumnType("int");
+                      .HasMaxLength(50);
+
+                entity.Property(e => e.Quantity)
+                      .HasDefaultValue(0);
+
+                // Indexes gợi ý
+                entity.HasIndex(e => e.UserId);
             });
 
             modelBuilder.Entity<CartItem>(entity =>
             {
-                entity.ToTable("CartItem");
+                entity.HasKey(e => e.CartItemId);
+                entity.Property(e => e.CartItemId).HasColumnName("CartItemID");
 
-                entity.Property(e => e.Price).HasColumnType("decimal(18, 2)");
+                entity.Property(e => e.CartId).HasColumnName("CartID");
 
-                entity.Property(e => e.ProductImage).HasMaxLength(250);
+                entity.Property(e => e.ProductId).HasColumnName("ProductID");
 
-                entity.Property(e => e.ProductName).HasMaxLength(250);
+                entity.Property(e => e.ProductName)
+                      .HasMaxLength(250);
 
-                entity.Property(e => e.TotalCost).HasColumnType("decimal(18, 2)");
+                entity.Property(e => e.ProductImage)
+                      .HasMaxLength(250);
+
+                entity.Property(e => e.Quantity)
+                      .HasDefaultValue(1);
+
+                entity.Property(e => e.Price)
+                      .HasColumnType("decimal(18, 2)")
+                      .HasDefaultValue(0m);
+
+                entity.Property(e => e.TotalCost)
+                      .HasColumnType("decimal(18, 2)")
+                      .HasDefaultValue(0m);
+
+                entity.HasIndex(e => new { e.CartId, e.ProductId });
 
                 entity.HasOne(d => d.Cart)
-                    .WithMany(p => p.CartItems)
-                    .HasForeignKey(d => d.CartId)
-                    .HasConstraintName("FK__CartItem__CartId__0519C6AF");
+                      .WithMany(p => p.CartItems)
+                      .HasForeignKey(d => d.CartId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
 
-            OnModelCreatingPartial(modelBuilder);
+            base.OnModelCreating(modelBuilder);
         }
-
-        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }

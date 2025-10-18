@@ -123,6 +123,10 @@ services:
         dotnet watch run --urls http://0.0.0.0:8080
       "
     environment:
+      - Services__ProductService=http://productservice-dev:8080
+      - Services__DiscountService=http://discountservice-dev:8080
+      - Services__UserService=http://userservice-dev:8080  
+      - Services__OrderService=http://orderservice-dev:8080    
       - ConnectionStrings__PaymentDB=Server=sqlserver,1433;Database=PaymentDB;User ID=sa;Password=Lananh@123A;TrustServerCertificate=True;Encrypt=False
     ports: ["7103:8080"]
 

@@ -31,7 +31,7 @@ const ShoppingCart = () => {
     const token = localStorage.getItem("token");
     if (!token) { setCartDetails(null); return; }
     try {
-      const res = await apiCart.get(`/api/Cart/user-cartItem`);
+      const res = await apiCart.get(`/api/Cart/me`);
       setCartDetails(res.status === 200 ? res.data : null);
     } catch (e) {
       console.error("user-cartItem error:", e?.response ?? e);
@@ -46,7 +46,7 @@ const ShoppingCart = () => {
     const token = localStorage.getItem("token");
     if (!token) return alert("Vui lòng đăng nhập!");
     try {
-      const res = await apiCart.delete(`/api/Cart/delete-item/${cartItemId}`);
+      const res = await apiCart.delete(`/api/Cart/remove/${cartItemId}`);
       if (res.status === 200) {
         await fetchCartDetails();
         alert("Sản phẩm đã được xóa khỏi giỏ hàng.");
@@ -67,7 +67,7 @@ const ShoppingCart = () => {
 
     setLoading(true);
     try {
-      const res = await apiCart.post(`/api/Cart/apply-discount`, { discountCode });
+      const res = await apiCart.post(`/api/Cart/discount`, { discountCode });
       if (res.status === 200) {
         setMessage("Áp mã giảm giá thành công!");
         await fetchCartDetails();
@@ -108,7 +108,7 @@ const ShoppingCart = () => {
     const token = localStorage.getItem("token");
     if (!token) return alert("Vui lòng đăng nhập!");
     try {
-      const res = await apiCart.put(`/api/Cart/update-item-quantity/${cartItemId}`, { quantity: newQuantity });
+      const res = await apiCart.put(`/api/Cart/update/${cartItemId}`, { quantity: newQuantity });
       if (res.status === 200) await fetchCartDetails();
       else alert("Cập nhật số lượng không thành công.");
     } catch (error) {

@@ -1,10 +1,3 @@
-/src/PaymentService/obj/Debug/net8.0/PaymentService.csproj.AssemblyReference.cache
-/src/PaymentService/obj/Debug/net8.0/PaymentService.GeneratedMSBuildEditorConfig.editorconfig
-/src/PaymentService/obj/Debug/net8.0/PaymentService.AssemblyInfoInputs.cache
-/src/PaymentService/obj/Debug/net8.0/PaymentService.AssemblyInfo.cs
-/src/PaymentService/obj/Debug/net8.0/PaymentService.csproj.CoreCompileInputs.cache
-/src/PaymentService/obj/Debug/net8.0/PaymentService.MvcApplicationPartsAssemblyInfo.cs
-/src/PaymentService/obj/Debug/net8.0/PaymentService.MvcApplicationPartsAssemblyInfo.cache
 /src/PaymentService/bin/Debug/net8.0/appsettings.Development.json
 /src/PaymentService/bin/Debug/net8.0/appsettings.json
 /src/PaymentService/bin/Debug/net8.0/PaymentService
@@ -136,6 +129,13 @@
 /src/PaymentService/bin/Debug/net8.0/runtimes/win/lib/net6.0/System.Windows.Extensions.dll
 /src/PaymentService/bin/Debug/net8.0/Shared.dll
 /src/PaymentService/bin/Debug/net8.0/Shared.pdb
+/src/PaymentService/obj/Debug/net8.0/PaymentService.csproj.AssemblyReference.cache
+/src/PaymentService/obj/Debug/net8.0/PaymentService.GeneratedMSBuildEditorConfig.editorconfig
+/src/PaymentService/obj/Debug/net8.0/PaymentService.AssemblyInfoInputs.cache
+/src/PaymentService/obj/Debug/net8.0/PaymentService.AssemblyInfo.cs
+/src/PaymentService/obj/Debug/net8.0/PaymentService.csproj.CoreCompileInputs.cache
+/src/PaymentService/obj/Debug/net8.0/PaymentService.MvcApplicationPartsAssemblyInfo.cs
+/src/PaymentService/obj/Debug/net8.0/PaymentService.MvcApplicationPartsAssemblyInfo.cache
 /src/PaymentService/obj/Debug/net8.0/staticwebassets.build.json
 /src/PaymentService/obj/Debug/net8.0/staticwebassets.development.json
 /src/PaymentService/obj/Debug/net8.0/staticwebassets/msbuild.PaymentService.Microsoft.AspNetCore.StaticWebAssets.props

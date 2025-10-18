@@ -1,4 +1,4 @@
-﻿using CartService.Model;
+using CartService.Model;
 using Microsoft.EntityFrameworkCore;
 
 namespace CartService.Repository
@@ -10,25 +10,35 @@ namespace CartService.Repository
         public CartItem? GetByCartIdAndProductId(int cartId, int productId)
         {
             return _context.CartItems
-                           .AsNoTracking()
-                           .FirstOrDefault(ci => ci.CartId == cartId && ci.ProductId == productId);
+                .AsNoTracking()
+                .FirstOrDefault(ci => ci.CartId == cartId && ci.ProductId == productId);
         }
 
-        // Lấy tất cả CartItem của một Cart
-        public List<CartItem> GetByCartId(int cartId)
+        public Task<CartItem?> GetByCartIdAndProductIdAsync(int cartId, int productId)
         {
             return _context.CartItems
-                           .AsNoTracking()
-                           .Where(c => c.CartId == cartId)
-                           .ToList();
+                .AsNoTracking()
+                .FirstOrDefaultAsync(ci => ci.CartId == cartId && ci.ProductId == productId);
+        }
+
+        public List<CartItem> GetByCartId(int cartId)
+        {
+            return _context.CartItems.AsNoTracking()
+                .Where(c => c.CartId == cartId).ToList();
+        }
+
+        public Task<List<CartItem>> GetByCartIdAsync(int cartId)
+        {
+            return _context.CartItems.AsNoTracking()
+                .Where(c => c.CartId == cartId).ToListAsync();
         }
 
         public override CartItem? GetById(int cartItemId)
         {
             return _context.CartItems
-                           .AsNoTracking()
-                           .Include(ci => ci.Cart)
-                           .FirstOrDefault(ci => ci.CartItemId == cartItemId);
+                .AsNoTracking()
+                .Include(ci => ci.Cart)
+                .FirstOrDefault(ci => ci.CartItemId == cartItemId);
         }
     }
 }

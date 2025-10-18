@@ -35,7 +35,7 @@ const RegisterPage = () => {
     try {
       // Luôn ép role là "User" khi gửi
       const payload = { ...user, typeUser: "User" };
-      await userApi.post("/api/User/Create", payload);
+      await userApi.post("/api/User/register", payload);
 
       alert("Bạn đã đăng ký tài khoản thành công!");
       navigate(ROUTERS.ADMIN.LOGIN);
