@@ -3,9 +3,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using PaymentService.Model;
 using PaymentService.Repository;
+using Shared.Contracts;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace PaymentService.Controllers
 {
@@ -18,9 +25,10 @@ namespace PaymentService.Controllers
         private readonly IOptions<ServiceUrls> _svc;
         private readonly IOptions<PaymentSettings> _pay;
 
+
         public PaymentController(IHttpClientFactory httpFactory, IOptions<ServiceUrls> svc, IOptions<PaymentSettings> pay)
         {
-            _paymentRepo = new PaymentRepository(); // giữ cách khởi tạo cũ để không vỡ code cũ
+            _paymentRepo = new PaymentRepository();
             _httpFactory = httpFactory;
             _svc = svc;
             _pay = pay;
@@ -35,10 +43,24 @@ namespace PaymentService.Controllers
             return int.TryParse(s, out var id) ? id : 0;
         }
 
-        private string BuildVietQrUrl(decimal amount, string description)
+        private string BuildVietQrUrl(decimal amount, string description, string transactionId)
         {
-            var bank = _pay.Value.BankCode ?? "970418";
-            var acc = _pay.Value.AccountNumber ?? "962470356635602";
+            // DEMO MOCK: tạo link tới trang xác nhận giả lập
+            if (_pay.Value.UseMockBank)
+            {
+                var host = string.IsNullOrWhiteSpace(_pay.Value.PublicBaseUrl)
+                    ? "http://localhost:7103"
+                    : _pay.Value.PublicBaseUrl!;
+                var sec = _pay.Value.MockSecret ?? "devsecret";
+                var amt = Uri.EscapeDataString(amount.ToString("0")); // VND integer
+                var tx = Uri.EscapeDataString(transactionId);
+                var se = Uri.EscapeDataString(sec);
+                return $"{host.TrimEnd('/')}/mock-bank/confirm?tx={tx}&sec={se}&amount={amt}";
+            }
+
+            // Thực tế (SEPay VietQR)
+            var bank = _pay.Value.BankCode ?? "TPBVVNVX";
+            var acc = _pay.Value.AccountNumber ?? "0795793509";
             string encodedAmount = Uri.EscapeDataString(amount.ToString("0.00"));
             string encodedDes = Uri.EscapeDataString(description);
             string encodedBank = Uri.EscapeDataString(bank);
@@ -48,7 +70,6 @@ namespace PaymentService.Controllers
 
         private async Task<(bool ok, string? refNumber, string status)> PollSepayAsync(Payment payment)
         {
-            // đọc config
             var baseUrl = _pay.Value.SepayApiBase ?? "https://my.sepay.vn";
             var token = _pay.Value.SepayApiToken;
             if (string.IsNullOrWhiteSpace(token))
@@ -82,12 +103,31 @@ namespace PaymentService.Controllers
             return (true, null, "Pending");
         }
 
+        // >>> CHỈNH Ở ĐÂY: dùng _svc và _pay thay vì _configuration
+        private async Task NotifyOrderPaidAsync(int orderId)
+        {
+            var orderBase = _svc.Value.OrderService ?? "http://orderservice-dev:8080";
+            var url = $"{orderBase.TrimEnd('/')}/api/Order/{orderId}/payment-callback";
+
+            var client = _httpFactory.CreateClient();
+
+            var secret = _pay.Value.InternalSecret ?? "devsecret";
+            client.DefaultRequestHeaders.Add("x-internal-secret", secret);
+
+            var payload = new PaymentStatusResponse
+            {
+                Status = "Completed",        // => Order sẽ set PaymentStatus = "Paid"
+                OrderId = orderId,
+                TransactionStatus = "OK",
+                Message = "Payment success"
+            };
+
+            using var resp = await client.PutAsJsonAsync(url, payload);
+            // có thể ghi log nếu muốn
+        }
+
         // =============== API ===============
 
-        /// <summary>
-        /// Tạo payment VietQR cho đơn mới nhất của user (dựa vào OrderService /api/Order/my).
-        /// Body: { "totalPrice": 123000, "note": "..." }
-        /// </summary>
         [Authorize(Policy = "ActiveUser")]
         [HttpPost("process-payment")]
         public async Task<IActionResult> ProcessPayment([FromBody] QRRequestModel paymentRequest)
@@ -97,7 +137,6 @@ namespace PaymentService.Controllers
             if (paymentRequest == null || paymentRequest.TotalPrice <= 0)
                 return BadRequest("Số tiền không hợp lệ.");
 
-            // gọi OrderService để lấy đơn mới nhất
             var client = _httpFactory.CreateClient();
             var orderBase = _svc.Value.OrderService ?? "http://orderservice-dev:8080";
             var urlMy = $"{orderBase.TrimEnd('/')}/api/Order/my";
@@ -114,28 +153,38 @@ namespace PaymentService.Controllers
             if (!res.IsSuccessStatusCode)
                 return StatusCode((int)res.StatusCode, "Không thể kết nối OrderService.");
 
-            var listJson = await res.Content.ReadAsStringAsync();
-            var orders = JsonSerializer.Deserialize<List<dynamic>>(listJson,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
+            var orders = await res.Content.ReadFromJsonAsync<List<JsonElement>>() ?? new();
+            if (orders.Count == 0)
+                return BadRequest("Không có đơn hàng nào.");
 
-            // chọn đơn mới nhất theo CreatedDate
-            var latest = orders.OrderByDescending(o => (DateTime?)o?.CreatedDate ?? DateTime.MinValue).FirstOrDefault();
-            if (latest is null || latest.OrderId is null)
+            var latest = orders
+                .OrderByDescending(o =>
+                    o.TryGetProperty("createdDate", out var cd) && cd.ValueKind == JsonValueKind.String
+                        && DateTime.TryParse(cd.GetString(), out var dt)
+                            ? dt
+                            : DateTime.MinValue)
+                .FirstOrDefault();
+
+            if (latest.ValueKind == JsonValueKind.Undefined)
                 return BadRequest("Không tìm thấy đơn hàng để tạo QR.");
 
-            int orderId = (int)latest.OrderId;
+            int orderId = latest.GetProperty("orderId").GetInt32();
+            decimal totalCost = latest.GetProperty("totalCost").GetDecimal();
+
             string orderCode = $"DH{orderId:D6}";
             string note = string.IsNullOrWhiteSpace(paymentRequest.Note)
                 ? $"Thanh toán cho đơn hàng {orderCode}"
                 : paymentRequest.Note;
 
-            // QR URL
-            string qrCodeUrl = BuildVietQrUrl(paymentRequest.TotalPrice, note);
-            DateTime expire = DateTime.UtcNow.AddSeconds(Math.Max(30, _pay.Value.QrExpireSeconds));
-
-            // upsert payment pending cho user
-            var existing = _paymentRepo.GetPendingPaymentByUserId(userId);
+            // ▶ tạo transactionId trước rồi build QR (mock dùng tx)
             string newTxn = Guid.NewGuid().ToString("N");
+            string qrCodeUrl = BuildVietQrUrl(totalCost, note, newTxn);
+
+            var expireCfg = _pay.Value.QrExpireSeconds;
+            var expireSeconds = Math.Max(30, expireCfg > 0 ? expireCfg : 120);
+            DateTime expire = DateTime.UtcNow.AddSeconds(expireSeconds);
+
+            var existing = _paymentRepo.GetPendingPaymentByUserId(userId);
 
             if (existing is null || existing.Status == "Completed")
             {
@@ -145,10 +194,10 @@ namespace PaymentService.Controllers
                     OrderId = orderId,
                     OrderCode = orderCode,
                     PaymentMethod = "VietQR",
-                    PaymentDate = DateTime.UtcNow,   // thời điểm tạo phiên
+                    PaymentDate = DateTime.UtcNow,
                     TransactionId = newTxn,
                     ReferenceNumber = null,
-                    TotalPrice = paymentRequest.TotalPrice,
+                    TotalPrice = totalCost,
                     Status = "Pending",
                     CreatedAt = DateTime.UtcNow,
                     ExpirationTime = expire,
@@ -156,14 +205,20 @@ namespace PaymentService.Controllers
                     Note = note
                 };
                 _paymentRepo.Insert(p);
-                return Ok(new { paymentId = p.PaymentId, transactionId = p.TransactionId, qrCodeUrl, expirationTime = expire });
+                return Ok(new
+                {
+                    paymentId = p.PaymentId,
+                    transactionId = p.TransactionId,
+                    qrCodeUrl,
+                    expirationTime = expire
+                });
             }
             else
             {
                 existing.TransactionId = newTxn;
                 existing.OrderId = orderId;
                 existing.OrderCode = orderCode;
-                existing.TotalPrice = paymentRequest.TotalPrice;
+                existing.TotalPrice = totalCost;
                 existing.Description = $"QR Code URL: {qrCodeUrl}";
                 existing.Status = "Pending";
                 existing.PaymentDate = DateTime.UtcNow;
@@ -171,13 +226,74 @@ namespace PaymentService.Controllers
                 existing.ReferenceNumber = null;
                 _paymentRepo.Update(existing);
 
-                return Ok(new { paymentId = existing.PaymentId, transactionId = existing.TransactionId, qrCodeUrl, expirationTime = expire });
+                return Ok(new
+                {
+                    paymentId = existing.PaymentId,
+                    transactionId = existing.TransactionId,
+                    qrCodeUrl,
+                    expirationTime = expire
+                });
             }
         }
 
-        /// <summary>
-        /// Kiểm tra trạng thái payment theo paymentId; nếu Completed, cập nhật trường ReferenceNumber/PaymentDate.
-        /// </summary>
+        // --- MOCK BANK PAGES / DEV only ---
+        [HttpGet("/mock-bank/confirm")]
+        [AllowAnonymous]
+        public IActionResult MockBankConfirm([FromQuery] string tx, [FromQuery] string sec, [FromQuery] decimal? amount = null)
+        {
+            var expected = _pay.Value.MockSecret ?? "devsecret";
+            if (sec != expected) return Forbid();
+
+            var amountText = amount.HasValue ? $"{amount.Value:N0} VND" : "–";
+            var html = $@"
+<!doctype html>
+<html>
+<head>
+  <meta charset='utf-8'/>
+  <meta name='viewport' content='width=device-width,initial-scale=1' />
+  <title>Mock Bank - Confirm</title>
+  <style>body{{font-family:Arial;margin:24px}} .box{{max-width:420px;margin:auto;padding:18px;border:1px solid #ddd;border-radius:8px}} button{{padding:10px 16px;border:none;border-radius:6px;background:#0b74de;color:#fff;font-size:16px}} </style>
+</head>
+<body>
+  <div class='box'>
+    <h2>Mock Bank - Xác nhận chuyển tiền</h2>
+    <p><strong>Số tiền:</strong> {amountText}</p>
+    <p><strong>Mã giao dịch (txn):</strong> {tx}</p>
+    <form method='post' action='/mock-bank/confirm'>
+      <input type='hidden' name='tx' value='{tx}' />
+      <input type='hidden' name='sec' value='{sec}' />
+      <button type='submit'>Xác nhận chuyển tiền</button>
+    </form>
+    <p style='color:#666;margin-top:12px;font-size:13px'>Demo: nhấn xác nhận sẽ mark giao dịch là Completed (không chuyển tiền thật).</p>
+  </div>
+</body>
+</html>";
+            return Content(html, "text/html");
+        }
+
+        [HttpPost("/mock-bank/confirm")]
+        [AllowAnonymous]
+        public async Task<IActionResult> MockBankConfirmPost([FromForm] string tx, [FromForm] string sec)
+        {
+            var expected = _pay.Value.MockSecret ?? "devsecret";
+            if (sec != expected) return Forbid();
+
+            var payment = _paymentRepo.GetByTransactionId(tx);
+            if (payment == null) return NotFound("Không tìm thấy giao dịch demo.");
+
+            payment.Status = "Completed";
+            payment.ReferenceNumber = "MOCK" + DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+            payment.PaymentDate = DateTime.UtcNow;
+            _paymentRepo.Update(payment);
+
+            // >>> GỌI CALLBACK sang OrderService
+            await NotifyOrderPaidAsync(payment.OrderId);
+
+            var html = $@"<!doctype html><html><head><meta charset='utf-8'><title>Thanh toán thành công</title></head>
+<body style='font-family:Arial;padding:20px;'><h2>Thanh toán thành công ✅</h2><p>Txn: {tx}</p><p>Ref: {payment.ReferenceNumber}</p></body></html>";
+            return Content(html, "text/html");
+        }
+
         [Authorize(Policy = "ActiveUser")]
         [HttpGet("check-payment")]
         public async Task<IActionResult> CheckPaymentStatus([FromQuery] int paymentId)
@@ -185,6 +301,23 @@ namespace PaymentService.Controllers
             if (paymentId <= 0) return BadRequest("PaymentId không hợp lệ.");
             var payment = _paymentRepo.GetById(paymentId);
             if (payment is null) return NotFound("Không tìm thấy giao dịch.");
+
+            // Nếu đang mock thì trả trạng thái từ DB luôn (không gọi SEPay)
+            if (_pay.Value.UseMockBank)
+            {
+                // Nếu mock và vừa Completed thì vẫn gọi callback để chắc ăn
+                if (payment.Status == "Completed")
+                    await NotifyOrderPaidAsync(payment.OrderId);
+
+                return Ok(new
+                {
+                    paymentId = payment.PaymentId,
+                    orderCode = payment.OrderCode,
+                    transactionId = payment.TransactionId,
+                    referenceNumber = payment.ReferenceNumber,
+                    status = payment.Status
+                });
+            }
 
             var (ok, refNo, status) = await PollSepayAsync(payment);
             if (!ok) return StatusCode(502, "Không thể gọi SEPay.");
@@ -196,9 +329,7 @@ namespace PaymentService.Controllers
                 payment.PaymentDate = DateTime.UtcNow;
                 _paymentRepo.Update(payment);
 
-                // TODO: (khuyên) gọi OrderService cập nhật PaymentStatus = "Paid"
-                // var orderBase = _svc.Value.OrderService ?? "...";
-                // await client.PutAsJsonAsync($"{orderBase}/api/Order/update-info/{payment.OrderId}", new { PaymentStatus = "Paid" });
+                await NotifyOrderPaidAsync(payment.OrderId);
             }
 
             return Ok(new
@@ -211,9 +342,6 @@ namespace PaymentService.Controllers
             });
         }
 
-        /// <summary>
-        /// Kiểm tra payment mới nhất của user đang đăng nhập.
-        /// </summary>
         [Authorize(Policy = "ActiveUser")]
         [HttpGet("check-payment-by-user")]
         public async Task<IActionResult> CheckPaymentByUser()
@@ -224,6 +352,21 @@ namespace PaymentService.Controllers
             var payment = _paymentRepo.GetLatestPaymentByUserId(userId);
             if (payment is null) return NotFound("Không tìm thấy giao dịch.");
 
+            if (_pay.Value.UseMockBank)
+            {
+                if (payment.Status == "Completed")
+                    await NotifyOrderPaidAsync(payment.OrderId);
+
+                return Ok(new
+                {
+                    paymentId = payment.PaymentId,
+                    orderId = payment.OrderId,
+                    status = payment.Status,
+                    totalPrice = payment.TotalPrice,
+                    transactionStatus = payment.Status
+                });
+            }
+
             var (ok, refNo, status) = await PollSepayAsync(payment);
             if (!ok) return StatusCode(502, "Không thể gọi SEPay.");
 
@@ -233,6 +376,8 @@ namespace PaymentService.Controllers
                 payment.ReferenceNumber = refNo;
                 payment.PaymentDate = DateTime.UtcNow;
                 _paymentRepo.Update(payment);
+
+                await NotifyOrderPaidAsync(payment.OrderId);
             }
 
             return Ok(new

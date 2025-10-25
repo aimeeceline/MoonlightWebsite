@@ -101,12 +101,14 @@ namespace ProductService.Controllers
             return Ok("Cập nhật thành công");
         }
 
-        // DELETE /api/Product/{id}
-        [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        [HttpPut("toggle-active/{id}")]
+        public async Task<IActionResult> ToggleActive(long id, [FromQuery] bool active)
         {
-            _productRepo.Delete(id);
-            return Ok();
+            var p = await _context.Products.FirstOrDefaultAsync(x => x.ProductId == id);
+            if (p == null) return NotFound();
+            p.Status = active;   // hoặc p.Status = active;
+            await _context.SaveChangesAsync();
+            return Ok(new { id, isActive = active });
         }
 
         // GET /api/Product/san-pham-noi-bat -> { products: [...] }
@@ -119,5 +121,6 @@ namespace ProductService.Controllers
 
             return Ok(new { products });
         }
+
     }
 }

@@ -2,182 +2,306 @@
 @import "./src/styles/pages/theme.scss";
 @import "./src/styles/pages/all.scss";
 
+/* ====== Tokens nho nhỏ ====== */
+$radius: 12px;
+$shadow: 0 10px 25px rgba(10, 22, 70, 0.06);
+$gap: 20px;
+$muted: #6b7280;
+$border: #e5e7eb;
+$text: #0f172a;
+$bg-soft: #f8fafc;
+$primary: map.get($theme-colors, "primary");
+$accent: #3b82f6;
+
+/* ====== Container ====== */
 .order-detail-container {
-    max-width: 1140px;
-    margin: 0 auto;
-    background: white;
-    padding: 24px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    margin-bottom: 20px;
-  }
-  .order-header {
-    display: flex;
-  }
-  
-  .order-title {
-    display: flex;
-    justify-content: space-between;
+  max-width: 1140px;
+  margin: 24px auto;
+  background: #fff;
+  padding: 28px;
+  border-radius: $radius;
+  box-shadow: $shadow;
+  color: $text;
+}
+
+/* ====== Header (back + edit) ====== */
+.order-header {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+
+  .orders_header_button-create {
+    display: inline-flex;
     align-items: center;
-    border-bottom: 1px solid #e2e8f0;
-    padding-bottom: 16px;
-    margin-bottom: 16px;
-
-    h2 {
-      font-size: 20px;
-      font-weight: bold;
-      color: #374151;
-    }
-
-    span {
-      color: #414c62;
-      font-weight: 800;
-
-      .orderId {
-        color: #17a2b8;
-      }
+    justify-content: center;
+    gap: 8px;
+    height: 40px;
+    width: 44px;
+    border: 1px solid $border;
+    background: #fff;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all .18s ease;
+    svg { font-size: 18px; }
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(2, 6, 23, .08);
+      border-color: #d1d5db;
     }
   }
-  
-  /* Trạng thái cho đơn hàng */
-  .status-badge {
-    display: flex;
-    margin-top: 10px;
-    align-items: center;       /* Căn giữa theo chiều dọc */
-    justify-content: center;   /* Căn giữa theo chiều ngang */
-    height: 30px;
-    min-width: 100px;          /* Đảm bảo badge không quá nhỏ */
-    padding: 5px 10px;
-    border-radius: 20px;
-    font-weight: bold;
-    font-size: 14px;
-    text-align: center;
-    gap: 5px;
-    margin-right: -24px;
-  }
-
-  /* Trạng thái: Đã hủy */
-  .status-canceled {
-      color: #dc3545;
-      background-color: #f8d7da;
-  }
-  .status-canceled::before {
-      content: "❌";
-  }
-
-  /* Trạng thái: Đang giao */
-  .status-shipping {
-      color: #17a2b8;
-      background-color: #d1ecf1;
-  }
-  .status-shipping::before {
-      content: "🚚";
-  }
-
-  /* Trạng thái: Hoàn thành */
-  .status-completed {
-      color: #28a745;
-      background-color: #d4edda;
-  }
-  .status-completed::before {
-      content: "✅";
-  }
-
-  /* Trạng thái: Chờ xử lý */
-  .status-pending {
-      color: #ffc107;
-      background-color: #fff3cd;
-  }
-  .status-pending::before {
-      content: "⏳";
-  }
-
-
-  .order_details {
-    padding: 40px; // tạo khoảng cách bên trong trên, dưới, trái, phải
-    padding-top: 30px;
-    margin-left:11px;
-    margin-right: -40px;
-
-    h3 {
-        border-bottom: 1px solid #eee;
-        padding-bottom: 10px;
-    }
-
-    ul {
-        li {
-            list-style: none;
-            display: flex;
-            justify-content: space-between;
-            line-height: 50px;
-        }
-        .checkout_order_subtotal {
-            border-top: 1px solid #eee;
-            border-bottom: 1px solid #eee;
-            margin-bottom: 2px;
-
-            b {
-                color: map.get($theme-colors, "decriptions");
-            }
-        }
-    }
-    button {
-        width: 100%;
-    }
-}
-  
-.section {
-  margin-bottom: 20px;
-  padding: 20px;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  background-color: #f9fafb;
-  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.05);
 }
 
-.section h3 {
-  color: #1f2937;
-  font-weight: 600;
-  margin-bottom: 10px;
+/* ====== Title line ====== */
+.order-title {
+  display: flex;
+  align-items: center;
+  gap: $gap;
+  padding-bottom: 14px;
+  border-bottom: 1px dashed $border;
+  margin-bottom: $gap;
+
+  h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: .2px;
+  }
+
+  .orderItemId,
+  .orderId {
+    font-weight: 800;
+    color: $accent;
+  }
+}
+
+/* ====== Card / Section ====== */
+.section,
+.order_details {
+  background: $bg-soft;
+  border: 1px solid $border;
+  border-radius: $radius;
+  padding: 18px 20px;
+  box-shadow: inset 0 -1px 0 rgba(2, 6, 23, .02);
+}
+
+.section { margin-bottom: $gap; }
+
+.section h3,
+.order_details h3 {
   font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid $border;
 }
 
+/* ====== Info list (label – value) ====== */
+.order_details ul {
+  margin: 0;
+  padding: 0;
+
+  li {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    column-gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f5f9;
+
+    &:last-child { border-bottom: 0; }
+
+    span { color: $muted; }
+    b { font-weight: 700; }
+  }
+
+  .checkout_order_subtotal {
+    border-top: 2px dashed $border;
+    border-bottom: 0;
+    margin-top: 6px;
+    padding-top: 14px;
+
+    h3 { border: 0; margin: 0; }
+    b  { color: map.get($theme-colors, "decriptions"); }
+  }
+}
+
+/* ====== Products line (giữ style cũ nhưng tinh gọn) ====== */
+.product-item,
+.khuyenmai,
+.total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f5f9;
+
+  &:last-child { border-bottom: 0; }
+}
+
+.total {
+  font-weight: 800;
+  color: #111827;
+}
+
+/* ====== Status badge ====== */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 13px;
+  white-space: nowrap;
+  user-select: none;
+
+  &::before { font-size: 16px; line-height: 1; }
+}
+
+.status-canceled  { color: #b91c1c; background: #fee2e2;  &::before { content: "✖"; } }
+.status-shipping  { color: #0369a1; background: #e0f2fe;  &::before { content: "🚚"; } }
+.status-completed { color: #065f46; background: #d1fae5;  &::before { content: "✔"; } }
+.status-pending   { color: #a16207; background: #fef3c7;  &::before { content: "⏳"; } }
+
+/* ====== Typography nhỏ ====== */
 .section p {
-  color: #374151;
   margin: 6px 0;
-  font-size: 16px;
+  color: #1f2937;
+  font-size: 15.5px;
   line-height: 1.6;
 }
-  
-  .product-item {
-    display: flex;
-    justify-content: space-between;
-    border-bottom: 1px solid #e2e8f0;
-    padding-bottom: 8px;
-    margin-bottom: 8px;
+/* === Hành động trạng thái === */
+.order-actions {
+  margin-left: auto;
+  display: inline-flex;
+  gap: 10px;
+
+  .btn {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .15s ease;
+
+    &:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(2,6,23,.08); }
   }
-  
-  .product-item span {
-    color: #414c62;
+  .btn-confirm { color: #065f46; background: #d1fae5; border-color: #bbf7d0; }
+  .btn-cancel  { color: #b91c1c; background: #fee2e2; border-color: #fecaca; }
+  .btn-print   { color: #1d4ed8; background: #dbeafe; border-color: #bfdbfe; }
+}
+
+/* === Bảng sản phẩm === */
+.table-wrap { width: 100%; overflow: auto; }
+
+.order-items-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: auto; // cho cột linh hoạt
+
+  thead th {
+    background: #f8fafc;
+    color: #0f172a;
+    font-weight: 700;
+    padding: 12px 14px;
+    text-align: left;
+    white-space: nowrap;
+    border-bottom: 1px solid #e5e7eb;
   }
 
-  .khuyenmai {
-    display: flex;
-    justify-content: space-between;
-    border-bottom: 1px solid #e2e8f0;
-    padding-bottom: 8px;
-    margin-bottom: 8px;
+  /* Thu nhỏ cột SL (cột 5) */
+  thead th:nth-child(5),
+  tbody td:nth-child(5),
+  tfoot td:nth-child(5) {
+    width: 64px;
+    min-width: 64px;
+    max-width: 64px;
+    text-align: center;
+    padding-left: 8px;
+    padding-right: 8px;
+    white-space: nowrap;
   }
-  
-  .total {
-    display: flex;
-    justify-content: space-between;
-    font-weight: bold;
-    color: #1f2937;
+
+  tbody td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    text-align: left;            // default trái
   }
-  
-  .payment-success {
-    color: #16a34a;
-    font-weight: bold;
+  tbody tr:last-child td { border-bottom: 0; }
+
+  /* chỉ căn giữa cột SL và ảnh */
+  tbody td.col-qty,
+  tbody td:nth-child(1),   // ảnh
+  tbody td:nth-child(5) {  // SL
+    text-align: center;
   }
-  
+
+  .img-cell {
+    width: 72px;
+    img {
+      width: 56px; height: 56px; object-fit: cover; border-radius: 8px;
+      border: 1px solid #e5e7eb; background: #fff;
+    }
+    .no-img { color: #94a3b8; }
+  }
+
+  /* ====== FOOTER (đừng dùng .tfoot, phải là tfoot) ====== */
+  tfoot {
+    background-color: #f9fafb;
+    border-top: 2px solid #e5e7eb;
+  }
+  tfoot tr { height: 48px; }
+  tfoot td {
+    border: none;
+    padding: 10px 12px;
+    font-size: 15px;
+  }
+  tfoot .label {
+    text-align: right;     // nhãn căn phải
+    font-weight: 500;
+    color: #6b7280;
+    white-space: nowrap;
+  }
+  tfoot .value {
+    text-align: right;     // giá trị căn phải
+    font-weight: 600;
+    color: #111827;
+  }
+  tfoot tr.bold .value {
+    font-weight: 700;
+    font-size: 16px;
+    color: #111827;
+  }
+  tfoot tr.sep td {
+    border-top: 1px dashed #d1d5db;
+    padding-top: 8px;
+  }
+}
+
+
+/* ====== Responsive ====== */
+@media (max-width: 992px) {
+  .order-detail-container { padding: 20px; }
+  .order_details ul li { grid-template-columns: 1fr; row-gap: 4px; }
+  .order-title { flex-direction: column; align-items: flex-start; gap: 6px; }
+}
+
+@media (max-width: 576px) {
+  .order-header { gap: 8px; }
+  .section, .order_details { padding: 16px; }
+  .status-badge { font-size: 12.5px; padding: 6px 10px; }
+}
+
+/* ====== Print (nộp báo cáo là in ra xịn luôn) ====== */
+@media print {
+  .order-detail-container { box-shadow: none; border: 0; padding: 0; }
+  .order-header { display: none !important; }
+  .status-badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .no-print, .order-actions { display: none !important; }
+  .order-items-table { border-color: #ddd; }
+}

@@ -1,371 +1,433 @@
-import { memo, useState, useEffect } from "react";
+import { memo, useEffect, useMemo, useState, useCallback, useRef } from "react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 import "./style.scss";
 import Breadcrumb from "../theme/breadcrumb";
-import { formatter } from "utils/fomatter";
-import { RiErrorWarningLine } from "react-icons/ri";
 import { ROUTERS } from "utils/router";
-import { useNavigate } from "react-router-dom";
+import { formatter } from "utils/fomatter";
 
-const formatTime = (seconds) => {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${m}:${s < 10 ? "0" : ""}${s}`;
+/* ================== BASE URLs ================== */
+const PRODUCT_API = process.env.REACT_APP_PRODUCT_API || `http://${window.location.hostname}:7007`;
+const ORDER_API   = process.env.REACT_APP_ORDER_API   || `http://${window.location.hostname}:7101`;
+const PAYMENT_API = process.env.REACT_APP_PAYMENT_API || `http://${window.location.hostname}:7103`;
+
+/* ================== AUTH HELPERS ================== */
+const normalizeBearer = () => {
+  const raw = localStorage.getItem("token");
+  if (!raw) return null;
+  return raw.startsWith("Bearer ") ? raw : `Bearer ${raw}`;
+};
+const attachAuth = (config) => {
+  config.headers = config.headers ?? {};
+  const bearer = normalizeBearer();
+  if (bearer) config.headers.Authorization = bearer;
+  return config;
 };
 
+/* ================== AXIOS INSTANCES ================== */
+const apiOrder   = axios.create({ baseURL: ORDER_API,   timeout: 15000 });
+const apiPayment = axios.create({ baseURL: PAYMENT_API, timeout: 15000 });
+apiOrder.interceptors.request.use(attachAuth);
+apiPayment.interceptors.request.use(attachAuth);
+
+/* ================== STATUS & HELPERS ================== */
+const ORDER_STATUS = {
+  PENDING:    "Chờ xác nhận",
+  PROCESSING: "Đang xử lý",
+  SHIPPING:   "Đang giao",
+  SUCCESS:    "Thành công",
+  CANCELLED:  "Đã hủy",
+};
+const FLOW = [ORDER_STATUS.PENDING, ORDER_STATUS.PROCESSING, ORDER_STATUS.SHIPPING, ORDER_STATUS.SUCCESS];
+
+const normalizeStatus = (raw) => {
+  const s = String(raw ?? "").trim().toLowerCase();
+  if (/(cancel|đã hủy|da huy)/i.test(s)) return ORDER_STATUS.CANCELLED;
+  if (/(ship|đang giao|in_transit)/i.test(s)) return ORDER_STATUS.SHIPPING;
+  if (/(process|xử lý|processing|confirmed)/i.test(s)) return ORDER_STATUS.PROCESSING;
+  if (/(success|completed|delivered|thành công)/i.test(s)) return ORDER_STATUS.SUCCESS;
+  return ORDER_STATUS.PENDING;
+};
+
+const imgFrom = (p) =>
+  p ? (/^https?:\/\//i.test(p) ? p : `${PRODUCT_API}/images/${String(p).replace(/\\/g, "/").replace(/^\/+/, "")}`) : "/images/placeholder.png";
+
+const toPaidString = (s) => {
+  const low = String(s || "").toLowerCase();
+  if (["paid", "success", "completed", "đã thanh toán", "da thanh toan"].some(k => low.includes(k))) return "Đã thanh toán";
+  if (!s) return "";
+  return s;
+};
+
+/* ================== PAGE ================== */
 const OrderHistoryPage = () => {
+  const { orderId: orderIdParam } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
 
-  const [orders, setOrders] = useState([]);
+  const orderIdQS    = new URLSearchParams(location.search).get("id");
+  const orderIdState = location.state?.orderId;
+  const orderId      = orderIdParam || orderIdQS || orderIdState;
+
+  const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [err, setErr] = useState("");
 
-  // State cho popup QR
-  const [showQrPopup, setShowQrPopup] = useState(false);
-  const [qrCodeUrl, setQrCodeUrl] = useState("");
-  const [qrLoading, setQrLoading] = useState(false);
-  const [qrError, setQrError] = useState("");
-  const [countdown, setCountdown] = useState(0);
+  // QR modal
+  const [qrOpen, setQrOpen] = useState(false);
+  const [qrUrl, setQrUrl] = useState("");
+  const pollRef = useRef(null);
 
-  // State lưu paymentId để check trạng thái thanh toán
-  const [paymentId, setPaymentId] = useState(null);
+  const fetchDetail = useCallback(async () => {
+    setLoading(true);
+    setErr("");
 
-  // Lấy danh sách đơn hàng
-  const fetchOrders = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setOrders([]);
+    if (!orderId) {
+      setErr("Thiếu orderId trên URL. Mở /don-hang/:orderId hoặc /don-hang?id=...");
       setLoading(false);
       return;
     }
 
     try {
-      const response = await axios.get("https://localhost:7033/api/Order/get-orders", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      setOrders(Array.isArray(response.data) ? response.data : []);
-      setError("");
-    } catch (err) {
-      setError("Không thể lấy danh sách đơn hàng. Vui lòng thử lại.");
-      console.error("Lỗi khi lấy đơn hàng:", err);
+      let res;
+      try {
+        res = await apiOrder.get(`/api/Order/${orderId}`);
+      } catch {
+        try {
+          res = await apiOrder.get(`/api/Order/detail/${orderId}`);
+        } catch {
+          res = await apiOrder.get(`/api/Order/get-order`, { params: { orderId } });
+        }
+      }
+      const data = res?.data?.order ?? res?.data ?? null;
+      setOrder(data);
+    } catch (e) {
+      console.error("Fetch detail error:", e?.response?.status, e?.response?.data || e.message);
+      setErr("Không lấy được chi tiết đơn hàng.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [orderId]);
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
+  useEffect(() => { fetchDetail(); }, [fetchDetail]);
 
-  // Hàm gọi API tạo lại mã QR khi bấm "Thanh toán" cho đơn Pending
-  const handleRetryPayment = async (order) => {
-    setQrLoading(true);
-    setQrError("");
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setQrError("Bạn cần đăng nhập để tiếp tục thanh toán.");
-        setQrLoading(false);
-        return;
-      }
+  /* ===== Derived fields ===== */
+  const normStatus = useMemo(() => normalizeStatus(order?.status), [order]);
 
-      // Gọi API payment, giả sử trả về paymentId + qrCodeUrl
-      const response = await axios.post(
-        "https://localhost:7100/api/Payment/process-payment",
-        {
-          BankCode: "VCB", // giả sử bank cố định
-          AccountNumber: "123456789", // giả sử cố định
-          AccountName: "Nguyen Van A",
-          TotalPrice: order.totalCost,
-          Note: `Thanh toán đơn hàng #${order.orderId}`,
-          OrderId: order.orderId,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  const timelineSteps = useMemo(() => ([
+    { step: 1, title: ORDER_STATUS.PENDING,    at: order?.createDate || order?.createdDate || order?.createdAt || order?.orderDate },
+    { step: 2, title: ORDER_STATUS.PROCESSING, at: order?.confirmedAt || null },
+    { step: 3, title: ORDER_STATUS.SHIPPING,   at: order?.shippedAt || null },
+    { step: 4, title: ORDER_STATUS.SUCCESS,    at: order?.deliveredAt || order?.completedAt || null },
+  ]), [order]);
 
-      if (response.status === 200) {
-        // Giả sử response.data có 2 trường paymentId và qrCodeUrl
-        const { paymentId, qrCodeUrl } = response.data;
+  const currentIdx = useMemo(
+    () => (normStatus === ORDER_STATUS.CANCELLED ? -1 : Math.max(0, FLOW.indexOf(normStatus))),
+    [normStatus]
+  );
 
-        if (!paymentId || !qrCodeUrl) {
-          setQrError("Dữ liệu thanh toán không hợp lệ, vui lòng thử lại.");
-          setQrLoading(false);
-          return;
-        }
+  // thời điểm hủy
+  const canceledAt = useMemo(() => {
+  const when =
+    order?.cancelledAt ||
+    order?.canceledAt ||
+    order?.cancelAt ||
+    order?.cancelDate ||
+    (normStatus === ORDER_STATUS.CANCELLED
+      ? (order?.statusUpdatedAt || order?.updatedAt || order?.lastModifiedAt)
+      : null);
+  return when || null;
+}, [order, normStatus]);
 
-        setPaymentId(paymentId); // Lưu paymentId để check trạng thái
-        setQrCodeUrl(qrCodeUrl);
-        setShowQrPopup(true);
-        setCountdown(360); // 6 phút đếm ngược
-      } else {
-        setQrError("Không thể tạo mã QR. Vui lòng thử lại sau.");
-      }
-    } catch (error) {
-      console.error("Lỗi khi tạo mã QR:", error);
-      setQrError("Có lỗi xảy ra khi tạo mã QR. Vui lòng thử lại.");
-    } finally {
-      setQrLoading(false);
+  // logs chuẩn hóa + sort theo thời gian
+  const logs = useMemo(() => {
+  const createdAt = order?.createDate || order?.createdDate || order?.createdAt || order?.orderDate || null;
+  const updatedAt = order?.statusUpdatedAt || order?.updatedAt || order?.lastModifiedAt || null;
+
+  const arr = [];
+  if (createdAt) arr.push({ t: createdAt, m: ORDER_STATUS.PENDING });
+
+  if (normStatus === ORDER_STATUS.CANCELLED) {
+    arr.push({ t: canceledAt || updatedAt, m: ORDER_STATUS.CANCELLED });
+  } else if (normStatus !== ORDER_STATUS.PENDING) {
+    arr.push({ t: updatedAt, m: normStatus });  // PROCESSING / SHIPPING / SUCCESS
+  }
+
+  // sort tăng dần theo thời gian; mục nào không có t thì đẩy xuống cuối
+  arr.sort((a, b) => {
+    if (!a.t && !b.t) return 0;
+    if (!a.t) return 1;
+    if (!b.t) return -1;
+    return new Date(a.t).getTime() - new Date(b.t).getTime();
+  });
+
+  return arr;
+}, [order, normStatus, canceledAt]);
+
+  const addr = useMemo(() => {
+    const a = order?.shippingAddress || order?.address || {};
+    return {
+      name:  a.fullName || a.name || order?.nameReceive || order?.receiverName || "",
+      phone: a.phone || order?.phone || order?.receiverPhone || "",
+      line:  a.addressLine || a.line || order?.address || [a.street, a.ward, a.district, a.city].filter(Boolean).join(", "),
+      email: a.email || order?.email || ""
+    };
+  }, [order]);
+
+  // số liệu
+  const _n = (v) => Number.isFinite(Number(v)) ? Number(v) : 0;
+  const shipFee   = _n(order?.ship ?? order?.shippingFee);
+  const discount  = _n(order?.discount);
+  const total     = _n(order?.totalCost ?? order?.total);
+  const subTotal  = total > 0 ? Math.max(0, total - shipFee + discount) : _n(order?.subTotal ?? order?.totalItems ?? order?.totalBeforeDiscount);
+  const payMethod = String(order?.paymentMethod || order?.paymentType || (order?.method || (order?.isCod ? "COD" : "Online"))).toUpperCase();
+  const payStatus = toPaidString(order?.paymentStatus || "");
+
+  /* ===== Actions ===== */
+  const tryPatch = async (url, body) => { try { return await apiOrder.patch(url, body); } catch { return null; } };
+  const tryPost  = async (url, body) => { try { return await apiOrder.post(url, body); } catch { return null; } };
+
+  const handleCancel = async () => {
+    if (!order) return;
+    if (!window.confirm("Bạn muốn hủy đơn này?")) return;
+
+    const oid = order.orderId || order.id;
+    let res =
+      await tryPatch(`/api/Order/update-status/${oid}`, { status: "Cancelled" }) ||
+      await tryPost (`/api/Order/update-status/${oid}`, { status: "Cancelled" }) ||
+      await tryPatch(`/api/Order/${oid}/status`,        { status: "Cancelled" }) ||
+      await tryPost (`/api/Order/${oid}/cancel`,        {}) ;
+
+    if (res && (res.status === 200 || res.status === 204)) {
+      await fetchDetail();
+      alert("Đã hủy đơn hàng.");
+    } else {
+      alert("Hủy đơn không thành công.");
     }
   };
 
-  // Countdown tự động đóng popup sau 6 phút
-  useEffect(() => {
-    if (!showQrPopup || countdown <= 0) return;
+  // Đã nhận hàng → Success; nếu COD → mark paid
+  const handleReceive = async () => {
+    if (!order) return;
+    const oid = order.orderId || order.id;
 
-    const timerId = setInterval(() => {
-      setCountdown((prev) => prev - 1);
-    }, 1000);
+    let res =
+      await tryPatch(`/api/Order/update-status/${oid}`, { status: "Success" }) ||
+      await tryPost (`/api/Order/update-status/${oid}`, { status: "Success" }) ||
+      await tryPatch(`/api/Order/${oid}/status`,        { status: "Success" }) ||
+      await tryPost (`/api/Order/${oid}/complete`,      {}) ||
+      await tryPost (`/api/Order/${oid}/delivered`,     {}) ;
 
-    return () => clearInterval(timerId);
-  }, [showQrPopup, countdown]);
+    if (!res || (res.status !== 200 && res.status !== 204)) {
+      alert("Cập nhật trạng thái không thành công.");
+      return;
+    }
 
-  // Poll trạng thái thanh toán theo paymentId và showQrPopup
-  useEffect(() => {
-    if (!paymentId || !showQrPopup) return;
+    if (payMethod === "COD") {
+      const tryPayPatch = async (url, body) => { try { return await apiPayment.patch(url, body); } catch { return null; } };
+      const tryPayPost  = async (url, body) => { try { return await apiPayment.post(url, body); } catch { return null; } };
 
-    const interval = setInterval(async () => {
+      await (
+        await tryPayPost ("/api/Payment/mark-paid",            { orderId: oid }) ||
+        await tryPayPatch(`/api/Payment/${oid}/status`,        { status: "Paid" }) ||
+        await tryPayPost ("/api/Order/update-payment-status",  { orderId: oid, status: "Paid" }) ||
+        await tryPayPost ("/api/Payment/complete",             { orderId: oid })
+      );
+    }
+
+    await fetchDetail();
+    alert("Đã xác nhận đã nhận hàng.");
+  };
+
+  // QR & polling
+  const clearPoll = () => { if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; } };
+  const openQrAndPoll = (qrLink, paymentId) => {
+    setQrUrl(qrLink);
+    setQrOpen(true);
+    clearPoll();
+    pollRef.current = setInterval(async () => {
       try {
-        const token = localStorage.getItem("token");
-
-        // Gọi kiểm tra trạng thái thanh toán
-        const res = await axios.get(
-          `https://localhost:7100/api/Payment/check-payment?paymentId=${paymentId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (res.status === 200 && res.data.status === "Completed") {
-          clearInterval(interval);
-
-          // Đồng bộ trạng thái đơn hàng lên backend (có thể gọi api sync riêng)
-          try {
-            await axios.get("https://localhost:7033/api/Order/sync-order-payment-status", {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            });
-            console.log("Đã cập nhật trạng thái đơn hàng.");
-          } catch (orderSyncError) {
-            console.error("Lỗi khi cập nhật trạng thái đơn hàng:", orderSyncError);
-          }
-
-          setShowQrPopup(false);
-          setPaymentId(null);
-
-          // Refresh lại danh sách đơn hàng để cập nhật trạng thái mới
-          fetchOrders();
-
-          // Thông báo thành công và chuyển hướng hoặc cuộn lên đầu trang
+        const r = await apiPayment.get("/api/Payment/check-payment-by-user");
+        const status = String(r?.data?.status || r?.data?.transactionStatus || "").toLowerCase();
+        if (status === "completed" || status === "paid" || status === "success") {
+          clearPoll();
+          setQrOpen(false);
           alert("Thanh toán thành công!");
-          navigate(ROUTERS.USER.MESSAGE);
-          window.scrollTo(0, 0);
+          await fetchDetail();
         }
-      } catch (error) {
-        console.error("Lỗi kiểm tra trạng thái thanh toán:", error);
-      }
-    }, 5000);
+      } catch {}
+    }, 3000);
+  };
+  const handlePay = async () => {
+    try {
+      const resp = await apiPayment.post(`/api/Payment/process-payment`, {
+        TotalPrice: Math.round(total || 0),
+        Note: `Thanh toán đơn hàng #${order?.orderId || order?.id}`,
+      });
+      const url = resp?.data?.qrCodeUrl || resp?.data?.payUrl || resp?.data?.qr || "";
+      const paymentId = resp?.data?.paymentId;
+      if (url) openQrAndPoll(url, paymentId);
+      else alert("Không tạo được thanh toán.");
+    } catch (e) {
+      console.error(e?.response?.data || e.message);
+      alert("Thanh toán lỗi.");
+    }
+  };
+  useEffect(() => () => clearPoll(), []);
 
-    return () => clearInterval(interval);
-  }, [paymentId, showQrPopup]);
-
+  /* ================== UI ================== */
   if (loading) {
     return (
       <>
-        <Breadcrumb name="Lịch sử đơn hàng" />
-        <div className="order-history-page">
-          <h2>Danh sách đơn hàng</h2>
-          <p>Đang tải đơn hàng...</p>
-        </div>
+        <Breadcrumb name="Chi tiết đơn hàng" />
+        <div className="order-detail container full"><p>Đang tải...</p></div>
       </>
     );
   }
-
-    // Thêm hàm handleDelete để gọi API hủy (update status) hoặc xóa đơn
-    const handleCancel = async (orderId) => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-        alert("Bạn cần đăng nhập để thực hiện thao tác này.");
-        return;
-    }
-
-    try {
-        // Gọi API cập nhật trạng thái thành Cancelled
-        const res = await axios.patch(
-        `https://localhost:7033/api/Order/update-status/${orderId}`,
-        { status: "Cancelled" },
-        {
-            headers: {
-            Authorization: `Bearer ${token}`,
-            },
-        }
-        );
-
-        if (res.status === 200) {
-        // Cập nhật lại trạng thái trong local state orders
-        setOrders((prevOrders) =>
-            prevOrders.map((order) =>
-            order.orderId === orderId ? { ...order, status: "Cancelled" } : order
-            )
-        );
-        alert("Đã hủy đơn thành công!");
-        } else {
-        alert("Hủy đơn không thành công, thử lại sau.");
-        }
-    } catch (error) {
-        console.error("Lỗi khi hủy đơn:", error);
-        alert("Có lỗi xảy ra khi hủy đơn.");
-    }
-    };
-
-    // Thực hiện xóa đơn hàng 
-    const handleDelete = async (orderId) => {
-        const confirmDelete = window.confirm(`Bạn có chắc muốn xóa đơn hàng #${orderId}?`);
-        if (!confirmDelete) return;
-
-        try {
-            const token = localStorage.getItem("token");
-            await axios.delete(`https://localhost:7033/api/Order/delete/${orderId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            alert("Xóa đơn hàng thành công!");
-            // Gọi lại API để load danh sách đơn hàng mới
-            fetchOrders();
-        } catch (err) {
-            alert("Không thể xóa đơn hàng!");
-            console.error(err);
-        }
-    };
-
-
-  if (error) {
+  if (err || !order) {
     return (
       <>
-        <Breadcrumb name="Lịch sử đơn hàng" />
-        <div className="order-history-page">
-          <h2>Danh sách đơn hàng</h2>
-          <p style={{ color: "red" }}>{error}</p>
+        <Breadcrumb name="Chi tiết đơn hàng" />
+        <div className="order-detail container full">
+          <p className="error">{err || "Không tìm thấy đơn hàng."}</p>
+          <button className="btn-outline" onClick={() => navigate(ROUTERS.USER.MY_ORDERS)}>Về danh sách đơn</button>
         </div>
       </>
     );
   }
+
+  const showPayBtn     = payMethod !== "COD" && !["đã thanh toán","paid"].includes(String(payStatus).toLowerCase()) && normStatus !== ORDER_STATUS.CANCELLED;
+  const showCancelBtn  = normStatus === ORDER_STATUS.PENDING;
+  const showReceiveBtn = normStatus === ORDER_STATUS.SHIPPING;
+  const showTimeline   = normStatus !== ORDER_STATUS.CANCELLED;
+  const displayPayStt  = payStatus;
 
   return (
     <>
-      <Breadcrumb name="Lịch sử đơn hàng" />
-      <div className="container">
-        <div className="order-history-page">
-          <h2>Danh sách đơn hàng</h2>
-          <table className="order-table">
-            <thead>
-              <tr>
-                <th>Mã đơn</th>
-                <th>Sản phẩm</th>
-                <th>Ngày đặt</th>
-                <th>Thành tiền</th>
-                <th>Trạng thái</th>
-                <th>Hành động</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.length > 0 ? (
-                orders.map((order) => (
-                  <tr key={order.orderId}>
-                    <td>#{order.orderId}</td>
-                    <td>
-                      {Array.isArray(order.items) && order.items.length > 0 ? (
-                        order.items.map((item, idx) => (
-                          <div className="product-info" key={idx}>
-                            <img
-                              src={`https://localhost:7007/images/${item.imageProduct}`}
-                              alt={item.name}
-                            />
-                            <div>
-                              <p className="product-name">{item.name}</p>
-                              <p className="product-qty">x{item.soLuong}</p>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <p>Không có sản phẩm</p>
-                      )}
-                    </td>
-                    <td>{new Date(order.createdDate).toLocaleDateString()}</td>
-                    <td>{formatter(order.totalCost)}</td>
-                    <td>
-                      {order.status === "Pending"
-                        ? "Chờ thanh toán"
-                        : order.status === "Completed"
-                        ? "Đã thanh toán"
-                        : order.status === "Cancelled"
-                        ? "Đã hủy"
-                        : order.status}
-                    </td>
-                    <td>
-                        <div className="order-actions">
-                            {order.status === "Pending" && (
-                            <button
-                                className="btn-primary"
-                                onClick={() => handleRetryPayment(order)}
-                                disabled={qrLoading}
-                            >
-                                {qrLoading ? "Đang xử lý..." : "Thanh toán"}
-                            </button>
-                            )}
-                            {(order.status === "Pending" || order.status === "Chờ xác nhận") && (
-                            <button className="btn-outline ml-2" onClick={() => handleCancel(order.orderId)}>
-                                Hủy
-                            </button>
-                            )}
-                            {order.status === "Cancelled" && (
-                            <button className="btn-outline ml-2" onClick={() => handleDelete(order.orderId)}>
-                                Xóa
-                            </button>
-                            )}
-                        </div>
-                        </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={6} style={{ textAlign: "center" }}>
-                    Chưa có đơn hàng nào.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <Breadcrumb name="Chi tiết đơn hàng" />
+      <div className="order-detail container full">
+  {/* Header */}
+  <div className="od-header">
+    <h2>Mã đơn hàng: <span>#{order.orderId || order.id}</span></h2>
 
-      {/* Popup mã QR */}
-      {showQrPopup && (
-        <div className="qr-popup">
-          <div className="qr-popup-content">
-            <h3>Quét mã QR để thanh toán</h3>
-            <img src={qrCodeUrl} alt="QR Code Thanh Toán" className="qr-image" />
-            <p className="qr-expire">
-              <RiErrorWarningLine size={24} color="#FFC107" /> Hết hạn sau: {formatTime(countdown)}
-            </p>
-            <div className="qr-popup-actions">
-              <button className="btn-outline" onClick={() => setShowQrPopup(false)}>
-                Đóng
-              </button>
-            </div>
+    {normStatus === ORDER_STATUS.CANCELLED && (
+      <div className="od-head-badges">
+        <span className="cancel-badge" role="status" aria-label="Đơn đã hủy">
+          Đã hủy
+        </span>
+        {canceledAt ? (
+          <span className="cancel-time">{new Date(canceledAt).toLocaleString()}</span>
+        ) : null}
+      </div>
+    )}
+  </div>
+
+  {/* Timeline: ẩn nếu đã hủy */}
+  {normStatus !== ORDER_STATUS.CANCELLED && (
+    <div className="od-steps">
+      {timelineSteps.map((t, i) => {
+        const active = i <= currentIdx;
+        return (
+          <div key={t.step} className={`step ${active ? "active" : ""}`}>
+            <div className="dot">{t.step}</div>
+            <div className="label">{t.title}</div>
+            <div className="time">{t.at ? new Date(t.at).toLocaleString() : ""}</div>
+            {i < timelineSteps.length - 1 && <div className="bar" />}
+          </div>
+        );
+      })}
+    </div>
+  )}
+
+
+        {/* Address + Log */}
+        <div className="od-grid">
+          <div className="card">
+            <h3>ĐỊA CHỈ GIAO HÀNG</h3>
+            <p className="addr-name">{addr.name || "-"}</p>
+            <p>{addr.phone || "-"}</p>
+            <p>{addr.email || ""}</p>
+            <p>{addr.line || "-"}</p>
+          </div>
+
+          
+        </div>
+
+        {/* Items + totals */}
+        <div className="card items-card">
+          <h3>THÔNG TIN ĐƠN HÀNG</h3>
+
+          <div className="items-table-wrap">
+            <table className="items-table">
+              <thead>
+                <tr>
+                  <th className="col-product">Tên sản phẩm</th>
+                  <th className="col-price">Giá</th>
+                  <th className="col-qty">Số lượng</th>
+                  <th className="col-total">Thành tiền</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(order?.items ?? []).map((it, i) => {
+                  const name  = it.name || it.productName || `SP#${it.productId}`;
+                  const img   = imgFrom(it.imageProduct || it.image || it.imageUrl);
+                  const price = _n(it.price ?? it.unitPrice);
+                  const qty   = _n(it.soLuong ?? it.quantity) || 1;
+                  const line  = _n(it.totalCost ?? it.total ?? (price * qty));
+
+                  return (
+                    <tr key={i}>
+                      <td className="col-product">
+                        <div className="pi">
+                          <img src={img} alt={name} />
+                          <div className="meta">
+                            <div className="name">{name}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="col-price">{formatter(price)}</td>
+                      <td className="col-qty">x{qty}</td>
+                      <td className="col-total">{formatter(line)}</td>
+                    </tr>
+                  );
+                })}
+                {(!order?.items || order.items.length === 0) && (
+                  <tr><td colSpan={4} style={{textAlign:"center", padding:"16px"}}>Không có sản phẩm.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Tổng tiền */}
+          <div className="totals">
+            <div><span>Tổng tiền hàng:</span><b>{formatter(subTotal)}</b></div>
+            <div><span>Phí vận chuyển:</span><b>{formatter(shipFee)}</b></div>
+            {discount ? <div><span>Giảm giá:</span><b>- {formatter(discount)}</b></div> : null}
+            <div className="grand"><span>Thành tiền:</span><b>{formatter(total)}</b></div>
+            <div><span>Phương thức thanh toán:</span><b>{String(payMethod || "").toUpperCase()}</b></div>
+            {displayPayStt ? <div><span>Trạng thái thanh toán:</span><b>{displayPayStt}</b></div> : null}
           </div>
         </div>
-      )}
+
+        {/* Actions */}
+        <div className="od-actions">
+          {showPayBtn     && <button className="btn-primary" onClick={handlePay}>Thanh toán</button>}
+          {showCancelBtn  && <button className="btn-outline" onClick={handleCancel}>Hủy đơn</button>}
+          {showReceiveBtn && <button className="btn-success" onClick={handleReceive}>Đã nhận hàng</button>}
+        </div>
+
+        {/* QR MODAL */}
+        {qrOpen && (
+          <div className="qr-overlay" onClick={() => { setQrOpen(false); clearPoll(); }}>
+            <div className="qr-modal" onClick={(e) => e.stopPropagation()}>
+              <h3>Quét mã để thanh toán</h3>
+              <img src={qrUrl} alt="QR" />
+              <p className="qr-note">Hệ thống sẽ tự cập nhật sau khi thanh toán thành công.</p>
+              <button className="btn-outline" onClick={() => { setQrOpen(false); clearPoll(); }}>Đóng</button>
+            </div>
+          </div>
+        )}
+      </div>
     </>
   );
 };

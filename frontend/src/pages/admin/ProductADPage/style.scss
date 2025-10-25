@@ -224,15 +224,16 @@
         text-align: center;
     }
     
-    /* Trạng thái: Hết hàng*/
-    .het-hang {
-        color: #dc3545;
-        background-color: #f8d7da;
-    }
-
-    /* Trạng thái: Còn hàng */
-    .con-hang {
-        color: #17a2b8;
-        background-color: #d1ecf1;
-    }
+    /* Hàng sản phẩm đang ẩn */
+.orders_table tr.row-inactive {
+  background: #c5c5c5;
+}
+.orders_table tr.row-inactive td {
+  color: #d4d4d4;
+}
+.orders_table tr.row-inactive img {
+  filter: grayscale(100%);
+  opacity: 0.7;
+}
+    
 }

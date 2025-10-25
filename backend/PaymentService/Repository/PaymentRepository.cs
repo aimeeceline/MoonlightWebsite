@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PaymentService.Model;
+using System.Linq;
 using System;
 
 namespace PaymentService.Repository
@@ -26,6 +27,15 @@ namespace PaymentService.Repository
                            .FirstOrDefault();
             }
             
+        }
+        // trong PaymentRepository.cs (pseudo)
+        public Payment? GetByTransactionId(string tx)
+        {
+            // ➜ THỐNG NHẤT CÁCH TRUY CẬP DB: dùng context cục bộ giống 2 hàm trên
+            using (var context = new PaymentDBContext())
+            {
+                return context.Payments.FirstOrDefault(p => p.TransactionId == tx);
+            }
         }
     }
 }

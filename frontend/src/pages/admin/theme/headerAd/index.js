@@ -1,71 +1,111 @@
+// src/pages/Admin/theme/HeaderAD/index.jsx
 import React, { useState, useEffect } from "react";
-import { AiOutlineBell, AiOutlineMail, AiOutlineSearch, AiOutlineSetting, AiOutlineUser } from "react-icons/ai";
+import {
+  AiOutlineBell,
+  AiOutlineMail,
+  AiOutlineSearch,
+  AiOutlineSetting,
+  AiOutlineUser,
+} from "react-icons/ai";
 import { FaBars } from "react-icons/fa";
-import axios from 'axios'; // Sử dụng axios để gọi API
+import axios from "axios";
 import "./style.scss";
 
-const HeaderAD = ({ toggleSidebar }) => {
-    const [username, setUsername] = useState("");  // State để lưu tên người dùng
+/* ===== BASE URL (ưu tiên .env, khớp protocol/host hiện tại) ===== */
+const USER_API =
+  process.env.REACT_APP_USER_API ||
+  `${window.location.protocol}//${window.location.hostname}:7200`;
 
-    // Hàm gọi API để lấy thông tin người dùng
+/* ===== Auth axios ===== */
+const normalizeBearer = () => {
+  const raw = localStorage.getItem("token");
+  if (!raw) return null;
+  return raw.startsWith("Bearer ") ? raw : `Bearer ${raw}`;
+};
+
+const authAxios = axios.create();
+authAxios.interceptors.request.use((config) => {
+  const bearer = normalizeBearer();
+  if (bearer) {
+    config.headers = { ...(config.headers || {}), Authorization: bearer };
+  }
+  return config;
+});
+
+const HeaderAD = ({ toggleSidebar }) => {
+  const [username, setUsername] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  // Gọi API lấy thông tin người dùng
+  useEffect(() => {
+    const controller = new AbortController();
+
     const getUserInfo = async () => {
-        try {
-            const token = localStorage.getItem("token");  // Lấy token từ localStorage
-            const response = await axios.get("https://localhost:7200/api/Auth/me", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-    
-            console.log(response.data);  // In ra dữ liệu trả về từ API để kiểm tra
-            setUsername(response.data.username);  // Cập nhật state với username
-        } catch (error) {
-            console.error("Error fetching user info", error);
+      try {
+        const bearer = normalizeBearer();
+        if (!bearer) {
+          // Chưa đăng nhập
+          setUsername("Admin");
+          return;
         }
+
+        const res = await authAxios.get(`${USER_API}/api/Auth/me`, {
+          signal: controller.signal,
+        });
+
+        // Phòng trường hợp BE trả các key khác nhau
+        const data = res?.data || {};
+        const name =
+          data.username ||
+          data.fullName ||
+          data.name ||
+          data.email ||
+          "Admin";
+
+        setUsername(name);
+      } catch (err) {
+        if (axios.isCancel(err)) return;
+        console.error("Error fetching user info:", err);
+        setUsername("Admin");
+      } finally {
+        setLoading(false);
+      }
     };
 
-    // Gọi API khi component được render lần đầu
-    useEffect(() => {
-        getUserInfo();
-    }, []);
-    
+    getUserInfo();
+    return () => controller.abort();
+  }, []);
 
-    return (
-        <header className="header">
-            <div className="header-left">
-                {/* Icon mở menu */}
-                <FaBars className="menu-icon" onClick={toggleSidebar} />
+  return (
+    <header className="header">
+      <div className="header-left">
+        <FaBars className="menu-icon" onClick={toggleSidebar} />
+        <div className="logo">MoonlightAdmin</div>
 
-                {/* Logo */}
-                <div className="logo">Moonlight</div>
+        <nav className="nav-search">
+          <input type="text" placeholder="Tìm kiếm..." />
+          <button className="search-btn">
+            <AiOutlineSearch />
+          </button>
+        </nav>
+      </div>
 
-                {/* Navigation */}
-                <nav className="nav-search">
-                    <input type="text" placeholder="Tìm kiếm..." />
-                    <button className="search-btn">
-                        <AiOutlineSearch />
-                    </button>
-                </nav>
-            </div>
+      <div className="header-right">
+        <AiOutlineBell className="icon" />
+        <AiOutlineMail className="icon" />
+        <AiOutlineSetting className="icon" />
 
-            <div className="header-right">
-                {/* Icons */}
-                <AiOutlineBell className="icon" />
-                <AiOutlineMail className="icon" />
-                <AiOutlineSetting className="icon" />
-
-                {/* User Avatar */}
-                <div className="user-info">
-                    <div className="user-avatar"
-                    >
-                        <AiOutlineUser className="icon" />
-                    </div>
-                    {/* Hiển thị tên người dùng */}
-                    <span className="user-name">{username}</span>
-                </div>
-            </div>
-        </header>
-    );
+        <div className="user-info">
+          <div className="user-avatar">
+            <AiOutlineUser className="icon" />
+          </div>
+          <span className="user-name">
+            {loading ? "..." : username}
+          </span>
+        </div>
+      </div>
+    </header>
+  );
 };
 
 export default HeaderAD;

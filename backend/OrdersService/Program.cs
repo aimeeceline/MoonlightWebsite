@@ -73,7 +73,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt["Key"]!)),
             ClockSkew = TimeSpan.Zero,
             NameClaimType = ClaimTypes.NameIdentifier,
-            RoleClaimType = ClaimTypes.Role
+            RoleClaimType = "role"
         };
     });
 
@@ -83,6 +83,13 @@ builder.Services.AddAuthorization(opts =>
     opts.AddPolicy("AdminOnly", p => p.RequireAuthenticatedUser().RequireRole("Admin"));
     opts.AddPolicy("UserOrAdmin", p => p.RequireAuthenticatedUser().RequireRole("User", "Admin"));
     opts.AddPolicy("ActiveUser", p => p.RequireClaim("is_active", "true"));
+    opts.AddPolicy("ActiveUserOrAdmin", p =>
+            p.RequireAuthenticatedUser().RequireAssertion(ctx =>
+                ctx.User.IsInRole("Admin") ||
+                ctx.User.HasClaim(c => (c.Type == "is_active") &&
+                                       (c.Value.Equals("true", StringComparison.OrdinalIgnoreCase) || c.Value == "1"))
+            )
+        );
 });
 
 var app = builder.Build();

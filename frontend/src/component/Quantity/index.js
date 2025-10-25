@@ -52,7 +52,7 @@ const Quantity = ({
 
     const token = getToken();
     if (!token) {
-      alert("Vui lòng đăng nhập! (Không thấy token trong localStorage)");
+      alert("Vui lòng đăng nhập!");
       return;
     }
 

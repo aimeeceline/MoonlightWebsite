@@ -1,4 +1,4 @@
-// src/pages/User/checkout/index.jsx  (CheckoutPage)
+// src/pages/User/checkout/index.jsx
 import { memo, useEffect, useState } from "react";
 import Breadcrumb from "../theme/breadcrumb";
 import "./style.scss";
@@ -30,13 +30,30 @@ const formatTime = (seconds) => {
   return `${m}:${s < 10 ? "0" : ""}${s}`;
 };
 
+// 👉 Convert mọi loại QR URL (HTML hoặc ảnh) -> link ảnh PNG để <img> hiển thị
+const toQrImageSrc = (qrCodeUrl) => {
+  if (!qrCodeUrl) return "";
+  try {
+    const u = new URL(qrCodeUrl);
+    // nếu đã là ảnh (vd. sepay /img, png, svg...) thì dùng luôn
+    if (/\.(png|jpg|jpeg|svg)$/i.test(u.pathname) || u.pathname.endsWith("/img")) {
+      return qrCodeUrl;
+    }
+    // còn lại coi như là 1 URL cần encode vào QR -> render ảnh PNG qua dịch vụ tạo mã QR
+    return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrCodeUrl)}`;
+  } catch {
+    // nếu không phải URL hợp lệ, encode nguyên chuỗi
+    return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrCodeUrl)}`;
+  }
+};
+
 const CheckoutPage = () => {
   const navigate = useNavigate();
 
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
   const [productCart, setProductCart] = useState(null);
 
-  const [qrCodeUrl, setQrCodeUrl] = useState("");
+  const [qrCodeUrl, setQrCodeUrl] = useState(""); // có thể là URL mock-bank (HTML) hoặc ảnh
   const [countdown, setCountdown] = useState(0);
   const [paymentId, setPaymentId] = useState("");
   const [orderId, setOrderId] = useState(null);
@@ -231,7 +248,6 @@ const CheckoutPage = () => {
       }
       return true;
     } catch (err) {
-      // Nếu lỗi 500/401 v.v… ta cho phép tiếp tục tạo đơn để tránh kẹt UX.
       console.warn("Không kiểm tra được đơn pending, cho phép tiếp tục:", err);
       return true;
     }
@@ -264,10 +280,10 @@ const CheckoutPage = () => {
       return alert("Giỏ hàng rỗng, vui lòng thêm sản phẩm!");
 
     const ok = await checkPendingOrder();
-if (!ok) {
-  if (!window.confirm("Bạn đang có đơn chờ thanh toán. Vẫn tiếp tục tạo đơn mới?")) return;
-  setPendingOrderPopup(null);
-}
+    if (!ok) {
+      if (!window.confirm("Bạn đang có đơn chờ thanh toán. Vẫn tiếp tục tạo đơn mới?")) return;
+      setPendingOrderPopup(null);
+    }
 
     setLoading(true);
     setMessage("");
@@ -289,7 +305,7 @@ if (!ok) {
           ProductId: item.productId,
           CategoryName: item.categoryName ?? item.category ?? "",
           Name: item.productName ?? item.name ?? `SP #${item.productId}`,
-          ImageProduct: item.imageUrl ?? item.image ?? "",
+          ImageProduct: item.productImage ?? item.imageProduct ?? item.imageUrl ?? item.image ?? "",
           Quantity: item.quantity,
           Price: Number(item.price ?? item.unitPrice ?? 0),
           Note: item.note ?? ""
@@ -300,59 +316,55 @@ if (!ok) {
       const orderRes = await authAxios.post(`${ORDER_API}/api/Order/create`, orderPayload, {
         headers: { "Content-Type": "application/json" },
       });
-      if (orderRes.status !== 200 && orderRes.status !== 201) { 
-        alert("Tạo đơn hàng thất bại."); 
-        return; 
+      if (orderRes.status !== 200 && orderRes.status !== 201) {
+        alert("Tạo đơn hàng thất bại.");
+        return;
       }
 
       const newOrderId = orderRes.data?.orderId ?? orderRes.data?.id;
       const newOrderTotal = orderRes.data?.totalCost ?? productCart?.totalCartPrice ?? 0;
       setOrderId(newOrderId);
+      if (newOrderId) localStorage.setItem("lastOrderId", String(newOrderId));
 
       if (selectedPaymentMethod !== "VietQR") {
-      alert(`Đơn hàng đã được tạo! Mã đơn hàng: ${newOrderId}`);
-      await clearCart();
-      navigate(ROUTERS.USER.MESSAGE);
-      return;
-    }
-
-    // 5.2 Tạo QR (bọc try/catch riêng để không văng ra ngoài)
-    try {
-      const qrRes = await authAxios.post(`${PAYMENT_API}/api/Payment/process-payment`, {
-       
-        TotalPrice: Math.round(newOrderTotal), // nếu BE cần số nguyên
-        Note: `Thanh toán đơn hàng #${newOrderId}`,
-      });
-
-      console.log("QR response:", qrRes.status, qrRes.data);
-
-      if (qrRes.status === 200 || qrRes.status === 201) {
-        setMessage("Đã tạo mã QR cho thanh toán!");
-        setQrCodeUrl(qrRes.data?.qrCodeUrl || qrRes.data?.qr || "");
-        setPaymentId(qrRes.data?.paymentId || qrRes.data?.id || "");
-        setCountdown(360);
-        setShowQrPopup(true);          // ← bật popup QR
-      } else {
-        alert("Tạo đơn thành công nhưng không tạo được mã QR.");
+        alert(`Đơn hàng đã được tạo! Mã đơn hàng: ${newOrderId}`);
+        await clearCart();
+        navigate(ROUTERS.USER.MESSAGE, { state: { orderId: newOrderId } });
+        return;
       }
-    } catch (e) {
-      console.error("Payment error:", e?.response?.status, e?.response?.data || e.message);
-      // Cho người dùng biết lỗi cụ thể từ backend (nếu có)
-      alert(
-        e?.response?.data?.message ||
-        e?.response?.data?.error ||
-        "Tạo đơn thành công nhưng tạo mã QR thất bại."
-      );
-      // Có thể điều hướng người dùng đến trang chi tiết đơn để thanh toán lại
-      // navigate(`${ROUTERS.USER.ORDERDETAIL}/${newOrderId}`);
-    }
 
-  } catch (error) {
-    console.error("Lỗi xử lý đơn hàng:", error?.response?.status, error?.response?.data || error.message);
-    alert(error?.response?.data?.message || "Đã xảy ra lỗi khi xử lý đơn hàng.");
-  } finally {
-    setLoading(false);
-  }
+      // 5.2 Tạo QR
+      try {
+        const qrRes = await authAxios.post(`${PAYMENT_API}/api/Payment/process-payment`, {
+          TotalPrice: Math.round(newOrderTotal),
+          Note: `Thanh toán đơn hàng #${newOrderId}`,
+        });
+
+        if (qrRes.status === 200 || qrRes.status === 201) {
+          setMessage("Đã tạo mã QR cho thanh toán!");
+          const rawUrl = qrRes.data?.qrCodeUrl || qrRes.data?.qr || "";
+          setQrCodeUrl(rawUrl); // giữ URL gốc (có thể là confirm HTML hoặc ảnh)
+          setPaymentId(qrRes.data?.paymentId || qrRes.data?.id || "");
+          setCountdown(360);
+          setShowQrPopup(true);
+        } else {
+          alert("Tạo đơn thành công nhưng không tạo được mã QR.");
+        }
+      } catch (e) {
+        console.error("Payment error:", e?.response?.status, e?.response?.data || e.message);
+        alert(
+          e?.response?.data?.message ||
+          e?.response?.data?.error ||
+          "Tạo đơn thành công nhưng tạo mã QR thất bại."
+        );
+      }
+
+    } catch (error) {
+      console.error("Lỗi xử lý đơn hàng:", error?.response?.status, error?.response?.data || error.message);
+      alert(error?.response?.data?.message || "Đã xảy ra lỗi khi xử lý đơn hàng.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Nút Đặt hàng → gọi handleCheckout
@@ -381,14 +393,14 @@ if (!ok) {
       try {
         const res = await authAxios.get(`${PAYMENT_API}/api/Payment/check-payment`, { params: { paymentId } });
         if ((res.status === 200 || res.status === 201) && String(res.data?.status).toLowerCase() === "completed") {
-  clearInterval(interval);
-  // Nếu có API cập nhật đơn, bật dòng dưới:
-  // await authAxios.patch(`${ORDER_API}/api/Order/update-status/${orderId}`, null, { params: { status: "Paid" } });
-  setShowQrPopup(false);          // ĐÓNG popup QR khi đã thanh toán
-  await clearCart();
-  navigate(ROUTERS.USER.MESSAGE);
-  window.scrollTo(0, 0);
-}
+          clearInterval(interval);
+          // Nếu có API cập nhật đơn, bật dòng dưới:
+          // await authAxios.patch(`${ORDER_API}/api/Order/update-status/${orderId}`, null, { params: { status: "Paid" } });
+          setShowQrPopup(false);
+          await clearCart();
+          navigate(ROUTERS.USER.MESSAGE, { state: { orderId } });
+          window.scrollTo(0, 0);
+        }
       } catch (error) {
         console.error("Lỗi kiểm tra trạng thái thanh toán:", error);
       }
@@ -404,6 +416,9 @@ if (!ok) {
     : null;
   const isSelectingSaved = !!selectedAddress;
   const selectedIsDefault = !!selectedAddress?.isDefault;
+
+  // Ảnh QR để hiển thị trong <img>
+  const qrImageSrc = toQrImageSrc(qrCodeUrl);
 
   return (
     <>
@@ -565,8 +580,23 @@ if (!ok) {
         <div className="qr-popup">
           <div className="qr-popup-content">
             <h3>Quét mã QR để thanh toán</h3>
-            {!!qrCodeUrl && <img src={qrCodeUrl} alt="QR Code Thanh Toán" className="qr-image" />}
-            <p className="qr-expire"><RiErrorWarningLine size={24} color="#FFC107" /> Hết hạn sau: {formatTime(countdown)}</p>
+
+            {!!qrImageSrc && (
+              <img src={qrImageSrc} alt="QR Code Thanh Toán" className="qr-image" />
+            )}
+
+            {/* Tuỳ chọn: link mở trang confirm trực tiếp để bấm "Xác nhận" */}
+            {!!qrCodeUrl && (
+              <p style={{ marginTop: 8 }}>
+                <a href={qrCodeUrl} target="_blank" rel="noreferrer">
+                  Mở trang xác nhận (nếu cần)
+                </a>
+              </p>
+            )}
+
+            <p className="qr-expire">
+              <RiErrorWarningLine size={24} color="#FFC107" /> Hết hạn sau: {formatTime(countdown)}
+            </p>
             <div className="qr-popup-actions">
               <button className="btn-outline" onClick={() => setShowQrPopup(false)}>Đóng</button>
             </div>
@@ -583,8 +613,12 @@ if (!ok) {
             <p>Thành tiền: <strong>{formatter(pendingOrderPopup.totalCost)}</strong></p>
             <div className="order-popup-actions">
               <button className="btn-outline" onClick={() => setPendingOrderPopup(null)}>Đóng</button>
-              <button className="btn-primary" onClick={() => navigate(ROUTERS.USER.ORDERHISTORY)}>Xem đơn hàng</button>
-            </div>
+              <button
+                className="btn-primary"
+                onClick={() => navigate(`${ROUTERS.USER.ORDERHISTORY}?id=${pendingOrderPopup.orderId}`)}
+              >
+                Xem đơn hàng
+              </button>            </div>
           </div>
         </div>
       )}

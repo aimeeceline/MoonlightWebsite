@@ -11,7 +11,7 @@ namespace CartService.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Policy = "ActiveUser")] // chỉ user đang hoạt động mới thao tác giỏ
+    [Authorize(Policy = "ActiveUser")]
     public class CartController : ControllerBase
     {
         private readonly CartDBContext _db;
@@ -25,12 +25,13 @@ namespace CartService.Controllers
             _svc = svc.Value;
         }
 
-        // ==== Helpers ====
+        // ========== Helpers ==========
         private int GetUserId()
         {
             var claim = User.FindFirstValue(ClaimTypes.NameIdentifier)
-                     ?? User.FindFirstValue("uid")
-                     ?? User.FindFirstValue("sub");
+                      ?? User.FindFirstValue("uid")
+                      ?? User.FindFirstValue("sub");
+
             if (int.TryParse(claim, out var id) && id > 0) return id;
 
             if (Request.Headers.TryGetValue("x-user-id", out var h) &&
@@ -74,6 +75,14 @@ namespace CartService.Controllers
             cart.TotalCartPrice = total < 0 ? 0 : total;
         }
 
+        private static string NormalizeImagePath(string? raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw)) return string.Empty;
+            if (Uri.TryCreate(raw, UriKind.Absolute, out var abs))
+                return abs.AbsolutePath.TrimStart('/');
+            return raw.Replace('\\', '/').TrimStart('/');
+        }
+
         private static string? GetString(dynamic? obj, params string[] keys)
         {
             if (obj is null) return null;
@@ -81,7 +90,7 @@ namespace CartService.Controllers
             {
                 try
                 {
-                    var val = obj?.GetProperty(k); // nếu là JsonElement
+                    var val = obj?.GetProperty(k);
                     if (val is JsonElement je)
                     {
                         if (je.ValueKind == JsonValueKind.String) return je.GetString();
@@ -89,7 +98,7 @@ namespace CartService.Controllers
                             return je.ToString();
                     }
                 }
-                catch { /* ignore */ }
+                catch { }
 
                 try
                 {
@@ -103,14 +112,13 @@ namespace CartService.Controllers
                     }
                     return val?.ToString();
                 }
-                catch { /* ignore */ }
+                catch { }
             }
             return null;
         }
 
         private static decimal GetDecimal(dynamic? obj, params string[] keys)
         {
-            // cố gắng đọc số từ JsonElement / number / string
             foreach (var k in keys)
             {
                 try
@@ -118,19 +126,12 @@ namespace CartService.Controllers
                     var token = obj?.GetProperty(k);
                     if (token is JsonElement je)
                     {
-                        switch (je.ValueKind)
-                        {
-                            case JsonValueKind.Number:
-                                if (je.TryGetDecimal(out var dec)) return dec;
-                                if (je.TryGetDouble(out var d)) return Convert.ToDecimal(d);
-                                break;
-                            case JsonValueKind.String:
-                                if (decimal.TryParse(je.GetString(), out var ds)) return ds;
-                                break;
-                        }
+                        if (je.ValueKind == JsonValueKind.Number && je.TryGetDecimal(out var dec)) return dec;
+                        if (je.ValueKind == JsonValueKind.Number && je.TryGetDouble(out var d)) return Convert.ToDecimal(d);
+                        if (je.ValueKind == JsonValueKind.String && decimal.TryParse(je.GetString(), out var ds)) return ds;
                     }
                 }
-                catch { /* ignore */ }
+                catch { }
 
                 try
                 {
@@ -149,12 +150,12 @@ namespace CartService.Controllers
                     if (val is long l) return l;
                     if (decimal.TryParse(val.ToString(), out decimal any)) return any;
                 }
-                catch { /* ignore */ }
+                catch { }
             }
             return 0m;
         }
 
-        private async Task<(string? name, string? image, decimal price)> FetchProductAsync(int productId)
+        private async Task<(string? name, string? image, decimal price)> FetchProductAsync(int productId, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(_svc.ProductService))
                 return (null, null, 0m);
@@ -162,22 +163,23 @@ namespace CartService.Controllers
             var client = _httpFactory.CreateClient();
             try
             {
+                var baseUrl = _svc.ProductService.TrimEnd('/');
                 var urls = new[]
                 {
-            $"{_svc.ProductService.TrimEnd('/')}/api/Product/{productId}",
-            $"{_svc.ProductService.TrimEnd('/')}/api/Products/{productId}",
-            $"{_svc.ProductService.TrimEnd('/')}/api/Product/get/{productId}"
-        };
+                    $"{baseUrl}/api/Product/{productId}",
+                    $"{baseUrl}/api/Products/{productId}",
+                    $"{baseUrl}/api/Product/get/{productId}",
+                    $"{baseUrl}/api/Product/detail/{productId}"
+                };
 
                 foreach (var url in urls)
                 {
-                    var resp = await client.GetAsync(url);
+                    using var resp = await client.GetAsync(url, ct);
                     if (!resp.IsSuccessStatusCode) continue;
 
-                    var root = await resp.Content.ReadFromJsonAsync<JsonElement?>(); // đọc JsonElement để xử lý linh hoạt
+                    var root = await resp.Content.ReadFromJsonAsync<JsonElement?>(cancellationToken: ct);
                     if (root is null || root.Value.ValueKind == JsonValueKind.Undefined) continue;
 
-                    // ✅ hỗ trợ JSON bọc product/data/result
                     var json = root.Value;
                     var payload = json.TryGetProperty("product", out var p) ? p
                                  : json.TryGetProperty("data", out var d) ? d
@@ -185,64 +187,125 @@ namespace CartService.Controllers
                                  : json;
 
                     string? name = GetString(payload, "name", "productName", "title");
-                    string? image = GetString(payload, "image", "productImage", "thumbnail");
+                    string? image = GetString(payload, "imageProduct", "image", "productImage", "thumbnail", "imageUrl");
                     decimal price = GetDecimal(payload, "price", "unitPrice", "sellPrice");
 
                     return (name, image, price);
                 }
             }
-            catch { /* ignore */ }
+            catch { }
 
             return (null, null, 0m);
         }
 
-        // ==== Endpoints ====
+        // Lấy CategoryName theo ProductId từ ProductService
+        private async Task<string?> GetCat(int productId, CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(_svc.ProductService)) return null;
+
+            var client = _httpFactory.CreateClient();
+            var baseUrl = _svc.ProductService.TrimEnd('/');
+            var urls = new[]
+            {
+                $"{baseUrl}/api/Product/{productId}",
+                $"{baseUrl}/api/Products/{productId}",
+                $"{baseUrl}/api/Product/get/{productId}",
+                $"{baseUrl}/api/Product/detail/{productId}"
+            };
+
+            foreach (var url in urls)
+            {
+                try
+                {
+                    using var resp = await client.GetAsync(url, ct);
+                    if (!resp.IsSuccessStatusCode) continue;
+
+                    var root = await resp.Content.ReadFromJsonAsync<JsonElement?>(cancellationToken: ct);
+                    if (root is null || root.Value.ValueKind == JsonValueKind.Undefined) continue;
+
+                    var json = root.Value;
+                    var payload = json.TryGetProperty("product", out var p) ? p
+                                 : json.TryGetProperty("data", out var d) ? d
+                                 : json.TryGetProperty("result", out var r) ? r
+                                 : json;
+
+                    var cat = GetString(payload, "categoryName");
+                    if (!string.IsNullOrWhiteSpace(cat)) return cat;
+
+                    if (payload.TryGetProperty("category", out var cobj))
+                    {
+                        var catName = GetString(cobj, "name", "title", "label");
+                        if (!string.IsNullOrWhiteSpace(catName)) return catName;
+                    }
+                }
+                catch { }
+            }
+            return null;
+        }
+
+        // ========== Endpoints ==========
 
         // GET /api/Cart/me
         [HttpGet("me")]
         public async Task<IActionResult> GetMyCart()
         {
-            int userId = GetUserId();
+            var userId = GetUserId();
             if (userId <= 0) return BadRequest(new { message = "Thiếu userId" });
 
-            var cart = await _db.Carts
-                .Include(c => c.CartItems)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(c => c.UserId == userId);
+            var cart = await _db.Carts.Include(c => c.CartItems)
+                                      .AsNoTracking()
+                                      .FirstOrDefaultAsync(c => c.UserId == userId);
 
-            if (cart is null) return Ok(new
+            if (cart is null)
             {
-                cartId = 0,
-                userId,
-                createDate = DateTime.UtcNow,
-                originalTotal = 0m,
-                discount = 0m,
-                totalCartPrice = 0m,
-                discountCode = (string?)null,
-                quantity = 0,
-                items = Array.Empty<object>()
-            });
+                return Ok(new
+                {
+                    cartId = 0,
+                    userId,
+                    createDate = DateTime.UtcNow,
+                    originalTotal = 0m,
+                    discount = 0m,
+                    totalCartPrice = 0m,
+                    discountCode = (string?)null,
+                    quantity = 0,
+                    items = Array.Empty<object>()
+                });
+            }
 
-            var items = cart.CartItems
-                .OrderByDescending(i => i.CartItemId)
-                .Select(i => new {
-                    i.CartItemId,
-                    i.ProductId,
-                    i.ProductName,
-                    i.ProductImage,
-                    i.Quantity,
-                    price = i.Price ?? 0m,
-                    totalCost = i.TotalCost ?? 0m
-                }).ToList();
+            var items = new List<object>();
+            foreach (var i in cart.CartItems.OrderByDescending(x => x.CartItemId))
+            {
+                var price = i.Price ?? 0m;
+                var qty = Math.Max(1, i.Quantity);
+
+                // 👉 LẤY CATEGORY TỪ PRODUCT SERVICE (vì model không có cột)
+                var category = await GetCat(i.ProductId);   // <<== thay cho i.CategoryName
+
+                items.Add(new
+                {
+                    cartItemId = i.CartItemId,                 // FE cần
+                    productId = i.ProductId,
+                    productName = i.ProductName ?? "",
+                    productImage = i.ProductImage ?? "",
+                    categoryName = category ?? "",               // <<== dùng biến category
+                    quantity = qty,
+                    price = price,
+                    totalCost = i.TotalCost ?? (price * qty)
+                });
+            }
+
+            var subtotal = cart.OriginalTotal ?? cart.CartItems.Sum(x => x.TotalCost ?? 0m);
+            var discount = cart.Discount ?? 0m;
+            var grand = Math.Max(0, subtotal - discount);
 
             return Ok(new
             {
                 cartId = cart.CartId,
                 userId = cart.UserId,
                 createDate = cart.CreateDate,
-                originalTotal = cart.OriginalTotal ?? 0m,
-                discount = cart.Discount ?? 0m,
-                totalCartPrice = cart.TotalCartPrice ?? 0m,
+                originalTotal = subtotal,
+                discount = discount,
+                totalCartPrice = grand,
                 discountCode = cart.DiscountCode,
                 quantity = cart.Quantity,
                 items
@@ -250,9 +313,8 @@ namespace CartService.Controllers
         }
 
         // POST /api/Cart/add
-        // Body: { "items": [ { "productId": 1, "quantity": 2 }, ... ] }
         [HttpPost("add")]
-        public async Task<IActionResult> AddItems([FromBody] AddCartItemRequest req)
+        public async Task<IActionResult> AddItems([FromBody] AddCartItemRequest req, CancellationToken ct)
         {
             int userId = GetUserId();
             if (userId <= 0) return BadRequest(new { message = "Thiếu userId" });
@@ -260,7 +322,7 @@ namespace CartService.Controllers
                 return BadRequest(new { message = "Danh sách rỗng" });
 
             var cart = await GetOrCreateCartAsync(userId);
-            await _db.Entry(cart).Collection(c => c.CartItems).LoadAsync();
+            await _db.Entry(cart).Collection(c => c.CartItems).LoadAsync(ct);
 
             foreach (var i in req.Items)
             {
@@ -275,14 +337,14 @@ namespace CartService.Controllers
                 }
                 else
                 {
-                    // Gọi ProductService để lấy tên/hình/giá (nếu có)
-                    var (name, image, price) = await FetchProductAsync(i.ProductId);
+                    var (name, image, price) = await FetchProductAsync(i.ProductId, ct);
+                    var normalizedImage = NormalizeImagePath(image);
 
                     var newItem = new CartItem
                     {
                         ProductId = i.ProductId,
                         ProductName = name,
-                        ProductImage = image,
+                        ProductImage = normalizedImage,
                         Quantity = i.Quantity,
                         Price = price,
                         TotalCost = price * i.Quantity
@@ -292,21 +354,21 @@ namespace CartService.Controllers
             }
 
             Recalculate(cart);
-            await _db.SaveChangesAsync();
+            await _db.SaveChangesAsync(ct);
 
             return await GetMyCart();
         }
 
         // PUT /api/Cart/update/{itemId}
         [HttpPut("update/{itemId:int}")]
-        public async Task<IActionResult> UpdateItem([FromRoute] int itemId, [FromBody] UpdateCartItemRequest req)
+        public async Task<IActionResult> UpdateItem([FromRoute] int itemId, [FromBody] UpdateCartItemRequest req, CancellationToken ct)
         {
             int userId = GetUserId();
             if (userId <= 0) return BadRequest(new { message = "Thiếu userId" });
             if (req is null || req.Quantity <= 0) return BadRequest(new { message = "Số lượng không hợp lệ" });
 
             var cart = await GetOrCreateCartAsync(userId);
-            await _db.Entry(cart).Collection(c => c.CartItems).LoadAsync();
+            await _db.Entry(cart).Collection(c => c.CartItems).LoadAsync(ct);
 
             var item = cart.CartItems.FirstOrDefault(x => x.CartItemId == itemId);
             if (item is null) return NotFound(new { message = "Không tìm thấy CartItem" });
@@ -316,85 +378,108 @@ namespace CartService.Controllers
             item.TotalCost = price * item.Quantity;
 
             Recalculate(cart);
-            await _db.SaveChangesAsync();
+            await _db.SaveChangesAsync(ct);
 
             return await GetMyCart();
         }
 
         // DELETE /api/Cart/remove/{itemId}
         [HttpDelete("remove/{itemId:int}")]
-        public async Task<IActionResult> RemoveItem([FromRoute] int itemId)
+        public async Task<IActionResult> RemoveItem([FromRoute] int itemId, CancellationToken ct)
         {
             int userId = GetUserId();
             if (userId <= 0) return BadRequest(new { message = "Thiếu userId" });
 
             var cart = await GetOrCreateCartAsync(userId);
-            await _db.Entry(cart).Collection(c => c.CartItems).LoadAsync();
+            await _db.Entry(cart).Collection(c => c.CartItems).LoadAsync(ct);
 
             var item = cart.CartItems.FirstOrDefault(x => x.CartItemId == itemId);
             if (item is null) return NotFound(new { message = "Không tìm thấy CartItem" });
 
             _db.CartItems.Remove(item);
-            await _db.SaveChangesAsync();
+            await _db.SaveChangesAsync(ct);
 
-            // tải lại để tính
-            await _db.Entry(cart).Collection(c => c.CartItems).LoadAsync();
+            await _db.Entry(cart).Collection(c => c.CartItems).LoadAsync(ct);
             Recalculate(cart);
-            await _db.SaveChangesAsync();
+            await _db.SaveChangesAsync(ct);
 
             return await GetMyCart();
         }
-
         // DELETE /api/Cart/clear
         [HttpDelete("clear")]
-        public async Task<IActionResult> Clear()
+        public async Task<IActionResult> Clear(CancellationToken ct)
         {
-            int userId = GetUserId();
+            var userId = GetUserId();
             if (userId <= 0) return BadRequest(new { message = "Thiếu userId" });
 
-            var cart = await GetOrCreateCartAsync(userId);
-            await _db.Entry(cart).Collection(c => c.CartItems).LoadAsync();
+            var cart = await _db.Carts
+                .Include(c => c.CartItems)
+                .FirstOrDefaultAsync(c => c.UserId == userId, ct);
 
+            // Không có giỏ thì coi như đã trống
+            if (cart is null)
+            {
+                return Ok(new
+                {
+                    cartId = 0,
+                    userId,
+                    createDate = DateTime.UtcNow,
+                    originalTotal = 0m,
+                    discount = 0m,
+                    totalCartPrice = 0m,
+                    discountCode = (string?)null,
+                    quantity = 0,
+                    items = Array.Empty<object>()
+                });
+            }
+
+            // Xoá toàn bộ item
             _db.CartItems.RemoveRange(cart.CartItems);
-            await _db.SaveChangesAsync();
+            await _db.SaveChangesAsync(ct);
 
+            // Reset lại các tổng và mã giảm giá
             cart.CartItems.Clear();
-            Recalculate(cart);
-            await _db.SaveChangesAsync();
+            cart.Quantity = 0;
+            cart.OriginalTotal = 0m;
+            cart.Discount = 0m;
+            cart.DiscountCode = null;
+            cart.TotalCartPrice = 0m;
+            await _db.SaveChangesAsync(ct);
 
+            // Trả về trạng thái giỏ sau khi dọn
             return await GetMyCart();
         }
+
         public class ApplyDiscountRequest { public string? Code { get; set; } public decimal OrderTotal { get; set; } }
 
         [HttpPut("discount")]
-        public async Task<IActionResult> ApplyDiscount([FromBody] ApplyDiscountRequest dto)
+        public async Task<IActionResult> ApplyDiscount([FromBody] ApplyDiscountRequest dto, CancellationToken ct)
         {
             int userId = GetUserId();
             if (userId <= 0) return BadRequest(new { message = "Thiếu userId" });
 
             var cart = await GetOrCreateCartAsync(userId);
-            await _db.Entry(cart).Collection(c => c.CartItems).LoadAsync();
+            await _db.Entry(cart).Collection(c => c.CartItems).LoadAsync(ct);
 
             var subtotal = cart.OriginalTotal ?? cart.CartItems.Sum(i => i.TotalCost ?? 0m);
             if (subtotal <= 0) return BadRequest(new { message = "Giỏ hàng trống." });
 
-            // Gọi DiscountService
             var client = _httpFactory.CreateClient();
             var url = $"{_svc.DiscountService!.TrimEnd('/')}/api/Discount/apply-discount";
-            var resp = await client.PostAsJsonAsync(url, new { code = dto.Code, orderTotal = subtotal });
-            if (!resp.IsSuccessStatusCode)
-                return StatusCode((int)resp.StatusCode, await resp.Content.ReadAsStringAsync());
 
-            var result = await resp.Content.ReadFromJsonAsync<dynamic>();
+            using var resp = await client.PostAsJsonAsync(url, new { code = dto.Code, orderTotal = subtotal }, ct);
+            if (!resp.IsSuccessStatusCode)
+                return StatusCode((int)resp.StatusCode, await resp.Content.ReadAsStringAsync(ct));
+
+            var result = await resp.Content.ReadFromJsonAsync<dynamic>(cancellationToken: ct);
             decimal discountAmount = (decimal?)result?.DiscountAmount ?? 0m;
             string code = (string?)result?.DiscountCode ?? dto.Code ?? "";
 
-            // Lưu vào Cart
             cart.DiscountCode = string.IsNullOrWhiteSpace(code) ? null : code;
             cart.Discount = discountAmount;
             cart.OriginalTotal = subtotal;
             cart.TotalCartPrice = Math.Max(0, subtotal - discountAmount);
-            await _db.SaveChangesAsync();
+            await _db.SaveChangesAsync(ct);
 
             return await GetMyCart();
         }

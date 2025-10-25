@@ -22,9 +22,10 @@ namespace CartService.Model
     {
         public int ProductId { get; set; }
         public string? ProductName { get; set; }
-        public string? ProductImage { get; set; }
+        public string? ImageProduct { get; set; }   // FE build url: /images/{path}
+        public string? CategoryName { get; set; }   // enrich từ ProductService
         public int Quantity { get; set; }
-        public decimal? Price { get; set; }
-        public decimal? TotalCost { get; set; }
+        public decimal Price { get; set; }          // đơn giá
+        public string? Note { get; set; }           // tuỳ bạn dùng sau này
     }
 }

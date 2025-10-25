@@ -52,7 +52,8 @@ namespace UserService.Controllers
                 token,
                 userId = user.UserId,
                 username = user.Username,
-                role = string.IsNullOrWhiteSpace(user.TypeUser) ? "User" : user.TypeUser
+                role = string.IsNullOrWhiteSpace(user.TypeUser) ? "User" : user.TypeUser,
+                isActive
             });
         }
 
@@ -71,6 +72,7 @@ namespace UserService.Controllers
                 new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
                 new Claim(ClaimTypes.Name, user.Username ?? string.Empty),
                 new Claim(ClaimTypes.Role, role),
+
 
                 // để policy ActiveUser dùng
                 new Claim("is_active", isActive ? "true" : "false"),

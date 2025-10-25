@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Http.Json;
-using System.Net.Http.Headers;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 using OrdersService.Model;
+using Shared.Contracts;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Security.Claims;
 
 namespace OrdersService.Controllers
 {
@@ -136,18 +137,24 @@ namespace OrdersService.Controllers
 
         // GET /api/Order/detail/{id}
         [HttpGet("detail/{id:int}")]
-        [Authorize(Policy = "ActiveUser")]
+        [Authorize(Policy = "ActiveUserOrAdmin") ]
         public async Task<IActionResult> GetDetail(int id)
         {
-            int userId = GetUserId();
-            if (userId <= 0) return Unauthorized();
+            var isAdmin = User.IsInRole("Admin");
 
-            var order = await _db.Orders
+            int userId = GetUserId();
+            if (!isAdmin && userId <= 0) return Unauthorized();
+
+            var query = _db.Orders
                 .Include(o => o.OrdersItems)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(o => o.OrderId == id && o.UserId == userId);
+                .Where(o => o.OrderId == id);
 
-            if (order is null) return NotFound();
+            if (!isAdmin)
+                query = query.Where(o => o.UserId == userId);
+
+            var order = await query.FirstOrDefaultAsync();
+            if (order == null) return NotFound();
 
             return Ok(new
             {
@@ -226,17 +233,51 @@ namespace OrdersService.Controllers
             return Ok(orders);
         }
 
-        // PATCH /api/Order/update-status/{id}
+        // ===== Helpers: chuẩn hoá status về 4 nhãn TV =====
+        private static string NormalizeStatus(string? s)
+        {
+            var x = (s ?? "").Trim().ToLowerInvariant();
+            if (x.Contains("huy") || x.Contains("cancel")) return "Đã hủy";
+            if (x.Contains("success") || x.Contains("deliver") || x.Contains("complete") || x.Contains("thanh cong"))
+                return "Thành công";
+            if (x.Contains("ship") || x.Contains("giao") || x.Contains("delivering") || x.Contains("transit")
+                || x.Contains("process") || x.Contains("processing") || x.Contains("confirm"))
+                return "Giao hàng";
+            return "Chờ xác nhận";
+        }
+
         [HttpPatch("update-status/{id:int}")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "ActiveUserOrAdmin")]
         public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateStatusRequest req)
         {
+            if (string.IsNullOrWhiteSpace(req?.Status))
+                return BadRequest("Status is required.");
+
             var order = await _db.Orders.FirstOrDefaultAsync(o => o.OrderId == id);
             if (order is null) return NotFound();
-            order.Status = req.Status;
+
+            var newStatus = NormalizeStatus(req.Status);      // "Chờ xác nhận" | "Giao hàng" | "Thành công" | "Đã hủy"
+            var oldStatus = NormalizeStatus(order.Status);
+            if (string.Equals(oldStatus, newStatus, StringComparison.OrdinalIgnoreCase))
+                return NoContent();
+
+            order.Status = newStatus;
+
+            // ⬇️ Nếu là COD và chuyển sang "Thành công" ⇒ mark "Đã thanh toán"
+            var method = (order.PaymentMethod ?? string.Empty).Trim();
+            var isCod = method.Equals("cod", StringComparison.OrdinalIgnoreCase);
+
+            if (newStatus == "Thành công" && isCod)
+            {
+                var cur = (order.PaymentStatus ?? string.Empty).Trim();
+                if (!cur.Equals("Đã thanh toán", StringComparison.OrdinalIgnoreCase))
+                    order.PaymentStatus = "Đã thanh toán"; // hoặc "Paid" nếu bạn muốn đồng nhất tiếng Anh
+            }
+
             await _db.SaveChangesAsync();
             return NoContent();
         }
+
 
         // PUT /api/Order/update-info/{id}
         [HttpPut("update-info/{id:int}")]
@@ -262,6 +303,36 @@ namespace OrdersService.Controllers
             RecalcOrderTotal(order);
             await _db.SaveChangesAsync();
 
+            return NoContent();
+        }
+        // PUT /api/Order/{orderId}/payment-callback
+        // PUT /api/Order/{orderId}/payment-callback
+        [HttpPut("{orderId:int}/payment-callback")]
+        [AllowAnonymous] // callback nội bộ giữa services (xác thực bằng shared-secret)
+        public async Task<IActionResult> PaymentCallback(int orderId, [FromBody] PaymentStatusResponse dto)
+        {
+            // 1) Xác thực shared-secret cho traffic nội bộ
+            var cfgSecret = _cfg["Internal:Secret"] ?? "devsecret";
+            var headerSecret = Request.Headers["x-internal-secret"].ToString();
+            if (string.IsNullOrWhiteSpace(headerSecret) || headerSecret != cfgSecret)
+                return Unauthorized("Invalid internal secret.");
+
+            // 2) Tìm đơn
+            var order = await _db.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
+            if (order is null) return NotFound();
+
+            // 3) Map trạng thái thanh toán Payment -> Order
+            //    Quy ước: Payment "Completed" => Order.PaymentStatus = "Paid"
+            var paymentStatus = (dto?.Status ?? "").Trim();
+            order.PaymentStatus = string.Equals(paymentStatus, "Completed", StringComparison.OrdinalIgnoreCase)
+                                  ? "Paid"
+                                  : (string.IsNullOrWhiteSpace(paymentStatus) ? "Paid" : paymentStatus);
+
+            // 4) Business: sau khi thanh toán, đơn ở "Chờ xác nhận"
+            if (string.IsNullOrWhiteSpace(order.Status) || order.Status == "Chờ xác nhận")
+                order.Status = "Chờ xác nhận";
+
+            await _db.SaveChangesAsync();
             return NoContent();
         }
     }

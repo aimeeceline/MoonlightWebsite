@@ -10,20 +10,13 @@ import CheckoutPage from "pages/User/checkoutPage";
 import LoginPage from "pages/admin/LoginPage";
 import MasterAdminLayout from "pages/admin/theme/masterAdminLayout";
 import OrderPage from "pages/admin/OrderPage/index";
-import OrderADEditPage from "pages/admin/OrderPage/edit";
 import OrderDetail from "pages/admin/OrderPage/orderdetail";
-
-
-
 import UserPage from "pages/admin/UserPage/index";
 import UserADCreatePage from "pages/admin/UserPage/create";
-import UserADEditPage from "pages/admin/UserPage/edit";
 
 
 import CategoryPage from "pages/admin/CategoryPage/index";
 import CategoryCreatePage from "pages/admin/CategoryPage/create";
-import CategoryEditPage from "pages/admin/CategoryPage/edit";
-
 import ProductADPage from "pages/admin/ProductADPage/index";
 import ProductADCreatePage from "pages/admin/ProductADPage/create";
 import ProductADEditPage from "pages/admin/ProductADPage/edit";
@@ -37,7 +30,6 @@ import MyOrderPage from "pages/User/myOrderPage";
 import DashboardPage from "pages/admin/DashboardPage";
 import DiscountPage from "pages/admin/DiscountPage";
 import DiscountADCreatePage from "pages/admin/DiscountPage/create";
-import DiscountADEditPage from "pages/admin/DiscountPage/edit";
 import OrderHistoryPage from "pages/User/orderHistoryPage";
 
 const renderUserRouter = () => {
@@ -124,10 +116,7 @@ const renderAdminRouter = () => {
             path: ROUTERS.ADMIN.USERAD,
             Component: <UserPage/>
         },
-        {
-            path: `${ROUTERS.ADMIN.USERADEDIT}/:userId`,
-            Component: <UserADEditPage/>
-        },
+        
         {
             path: ROUTERS.ADMIN.CATEGORIES,
             Component: <CategoryPage/>
@@ -148,11 +137,7 @@ const renderAdminRouter = () => {
             path: ROUTERS.ADMIN.ORDERS,
             Component: <OrderPage/>
         },
-        {
-            path: `${ROUTERS.ADMIN.EDITORDERS}/:orderId`,
-            Component: <OrderADEditPage/>
-        },
-        {
+                {
             path: `${ROUTERS.ADMIN.DETAILORDERS}/:orderId`,
             Component: <OrderDetail/>
         },
@@ -160,10 +145,7 @@ const renderAdminRouter = () => {
             path: ROUTERS.ADMIN.CREATECATEGORY,
             Component: <CategoryCreatePage/>
         },
-        {
-            path: `${ROUTERS.ADMIN.EDITCATEGORY}/:categoryId`,
-            Component: <CategoryEditPage/>
-        },
+        
         {
             path: ROUTERS.ADMIN.USERADCREATE,
             Component: <UserADCreatePage/>
@@ -180,10 +162,7 @@ const renderAdminRouter = () => {
             path: ROUTERS.ADMIN.DISCOUNTADCREATE,
             Component: <DiscountADCreatePage/>
         },
-        {
-            path: `${ROUTERS.ADMIN.DISCOUNTADEDIT}/:discountId`,
-            Component: <DiscountADEditPage/>
-        },
+        
     ]
     return (
         <MasterAdminLayout>

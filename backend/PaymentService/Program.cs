@@ -15,8 +15,9 @@ var conn =
 builder.Services.AddDbContext<PaymentDBContext>(o => o.UseSqlServer(conn));
 
 /* ============== Settings ============== */
+// 👇 Đúng section names:
 builder.Services.Configure<ServiceUrls>(builder.Configuration.GetSection("Services"));
-builder.Services.Configure<PaymentSettings>(builder.Configuration.GetSection("Payment"));
+builder.Services.Configure<PaymentSettings>(builder.Configuration.GetSection("PaymentSettings"));
 
 /* ============== Infra ============== */
 builder.Services.AddHttpClient();
@@ -79,10 +80,9 @@ builder.Services.AddAuthorization(opts =>
     opts.AddPolicy("UserOnly", p => p.RequireAuthenticatedUser().RequireRole("User"));
     opts.AddPolicy("AdminOnly", p => p.RequireAuthenticatedUser().RequireRole("Admin"));
     opts.AddPolicy("UserOrAdmin", p => p.RequireAuthenticatedUser().RequireRole("User", "Admin"));
-
-    // 👇 THÊM: chỉ tài khoản đang hoạt động (JWT phải có claim is_active=true)
     opts.AddPolicy("ActiveUser", p => p.RequireAuthenticatedUser().RequireClaim("is_active", "true"));
 });
+
 var app = builder.Build();
 
 /* ============== Auto-migrate ============== */
@@ -98,7 +98,6 @@ app.UseSwaggerUI(c =>
 });
 
 app.UseCors("dev");
-// app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -109,16 +108,11 @@ app.MapGet("/healthz", () => new { ok = true, at = DateTime.UtcNow });
 app.Run();
 
 /* ============== Records ============== */
-public record ServiceUrls
+namespace PaymentService.Model
 {
-    public string? OrderService { get; init; }  
-}
-
-public record PaymentSettings
-{
-    public string? SepayApiBase { get; init; }      // mặc định: https://my.sepay.vn
-    public string? SepayApiToken { get; init; }     // token SEPay (đặt trong secrets/env)
-    public string? BankCode { get; init; }          // "970418"
-    public string? AccountNumber { get; init; }     // "962470356635602"
-    public int QrExpireSeconds { get; init; } = 120;
+    // Giữ ServiceUrls ở đây cho gọn; KHÔNG khai báo PaymentSettings ở đây nữa
+    public record ServiceUrls
+    {
+        public string? OrderService { get; init; }
+    }
 }

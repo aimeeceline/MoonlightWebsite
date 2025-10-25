@@ -244,46 +244,7 @@ public class UserController : ControllerBase
         return user is null ? NotFound() : Ok(user);
     }
 
-    public class UpdateSelfDto
-    {
-        [MaxLength(255)] public string? Password { get; set; }
-        [MaxLength(255), EmailAddress] public string? Email { get; set; }
-        [MaxLength(20)] public string? Phone { get; set; }
-    }
+    
 
-    // PUT /api/User/me  → user tự sửa (email/phone/password)
-    [HttpPut("me")]
-    [Authorize(Policy = "ActiveUser")] // chỉ tài khoản đang hoạt động mới cho sửa
-    public async Task<IActionResult> UpdateMe([FromBody] UpdateSelfDto dto)
-    {
-        int id = CurrentUserId();
-        if (id <= 0) return Unauthorized();
-
-        var entity = await _db.Users.FirstOrDefaultAsync(u => u.UserId == id);
-        if (entity is null) return NotFound();
-
-        if (!string.IsNullOrWhiteSpace(dto.Password))
-            entity.Password = dto.Password!.Trim();
-
-        if (!string.IsNullOrWhiteSpace(dto.Email))
-        {
-            bool dup = await _db.Users.AnyAsync(u => u.Email == dto.Email && u.UserId != id);
-            if (dup) return Conflict("Email đã tồn tại.");
-            entity.Email = dto.Email!.Trim();
-        }
-
-        if (!string.IsNullOrWhiteSpace(dto.Phone))
-            entity.Phone = dto.Phone!.Trim();
-
-        await _db.SaveChangesAsync();
-        return Ok(new
-        {
-            entity.UserId,
-            entity.Username,
-            entity.TypeUser,
-            entity.Email,
-            entity.Phone,
-            IsActive = (bool?)(entity.GetType().GetProperty("IsActive")?.GetValue(entity)) ?? true
-        });
-    }
+   
 }

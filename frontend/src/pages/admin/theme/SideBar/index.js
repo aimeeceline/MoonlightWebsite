@@ -24,13 +24,7 @@ const SideBar = ({ isOpen, toggleSidebar }) => {
                 label: "Người dùng",
                 icon: <AiOutlineUser />,
             },
-            {
-                path: ROUTERS.ADMIN.CUSTOMES,
-                onclick: () => navigate(ROUTERS.ADMIN.CUSTOMES),
-                label: "Khách hàng",
-                icon: <AiOutlineCustomerService />,
-            },
-            {
+                        {
                 path: ROUTERS.ADMIN.CATEGORIES,
                 onclick: () => navigate(ROUTERS.ADMIN.CATEGORIES),
                 label: "Danh mục SP",
