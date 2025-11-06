@@ -2,11 +2,11 @@
 @import "./src/styles/pages/all.scss";
 
 .about-page {
-  padding: 4rem 2rem;
+  max-width: 1140px;
   font-family: 'Poppins', sans-serif;
   background-color: #fafafa;
   color: #222;
-  margin-top: 10px;
+  margin: 70px auto;
 
   h1, h2, h4, h5 {
     font-weight: 600;

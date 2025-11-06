@@ -1,4 +1,4 @@
-import { useEffect, useState, memo } from "react";
+import { useEffect, memo } from "react";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import "./style.scss";
@@ -8,71 +8,83 @@ import call1ing from "assets/User/images/about/about_1.jpg";
 import call2ing from "assets/User/images/about/about_2.jpg";
 import call3ing from "assets/User/images/about/about_3.jpg";
 
-
-
-
-
-const collections = [
-    {
-        image: call1ing,
-        title: "Serum Hoa Thảo có tốt không?",
-        desc: "Serum Hoa Thảo sở hữu công thức làm sạch sâu, hỗ trợ giảm bã nhờn, thu nhỏ lỗ chân lông và nuôi dưỡng làn da sáng khỏe từ bên trong – là lựa chọn lý tưởng cho làn da cần detox mỗi ngày.",
-    },
-    {
-        image: call2ing,
-        title: "Tại sao nến của chúng tôi lại kỳ diệu?",
-        desc: "Vì không chỉ là kem dưỡng thể, mà là 'ngọn nến' nuôi dưỡng làn da. Công thức cấp ẩm đột phá, thẩm thấu nhanh và hương thơm thư giãn khiến bạn muốn dùng mãi không thôi.",
-    },
-    {
-        image: call3ing,
-        title: "Quy trình chăm sóc da sẽ như thế nào?",
-        desc: "Bắt đầu với Organic Cream – bước không thể thiếu giúp phục hồi độ ẩm, làm dịu làn da và bảo vệ da khỏi tác nhân môi trường. Dù là routine đơn giản hay phức tạp, đây chính là bước chốt hoàn hảo.",
-    },
+// ===== nhóm bài blog 1 =====
+const blogHighlight = [
+  {
+    image: call1ing,
+    title: "Cách chọn nhẫn cầu hôn chuẩn size",
+    desc: "Chỉ cần đo chu vi ngón áp út hoặc mượn tạm 1 chiếc nhẫn bạn ấy hay đeo, đối chiếu bảng size là bạn đã chọn được chiếc nhẫn vừa tay rồi."
+  },
+  {
+    image: call2ing,
+    title: "Phân biệt vàng trắng và bạc cao cấp",
+    desc: "Vàng trắng có độ bền và giá trị cao hơn, ánh màu ấm nhẹ. Bạc 925 sáng, dễ đeo hằng ngày và giá mềm hơn – phù hợp làm quà tặng."
+  },
+  {
+    image: call3ing,
+    title: "Bí quyết bảo quản trang sức bạc không bị đen",
+    desc: "Tránh hóa chất, cất trong hộp kín, lau lại sau khi đeo và dùng dung dịch chuyên dụng sẽ giúp trang sức của bạn luôn sáng bóng."
+  }
 ];
 
+// ===== nhóm bài blog 2 =====
+const blogTrends = [
+  {
+    image: call2ing,
+    title: "Xu hướng trang sức 2025",
+    desc: "Trang sức bản mảnh, kết hợp đá màu pastel và các mẫu khắc tên cá nhân hóa đang được yêu thích bởi giới trẻ."
+  },
+  {
+    image: call3ing,
+    title: "Gợi ý quà tặng dịp kỷ niệm",
+    desc: "Vòng cổ mặt tròn khắc chữ, vòng tay đôi hoặc nhẫn cặp là 3 lựa chọn an toàn, sang mà vẫn thể hiện được sự trân trọng."
+  },
+  {
+    image: call1ing,
+    title: "Chọn bông tai theo khuôn mặt",
+    desc: "Mặt tròn hợp dáng dài và thẳng; mặt dài nên chọn bông tai tròn hoặc chữ C để tạo cân đối."
+  }
+];
 
 const BlogPage = () => {
+  useEffect(() => {
+    AOS.init({ duration: 1000 });
+  }, []);
 
-    useEffect(() => {
-        AOS.init({ duration: 1000 });
-    }, []);
+  return (
+    <>
+      <Breadcrumb name="Blog" />
+      <div className="about-page">
+        {/* Blog mới nhất */}
+        <section className="collection-section" data-aos="fade-up">
+          <div className="collection-grid">
+            {blogHighlight.map((item, index) => (
+              <div className="collection-card" key={index}>
+                <img src={item.image} alt={item.title} />
+                <h4>{item.title}</h4>
+                <p>{item.desc}</p>
+                <a href="#">XEM BÀI VIẾT</a>
+              </div>
+            ))}
+          </div>
+        </section>
 
-    return (
-        <>
-        <Breadcrumb name ="Blog"/>
-        <div className="about-page">
-            {/* Collection Section */}
-            <section className="collection-section" data-aos="fade-up">
-                
-                <div className="collection-grid">
-                    {collections.map((item, index) => (
-                        <div className="collection-card" key={index}>
-                            <img src={item.image} alt={item.title} />
-                            <h4>{item.title}</h4>
-                            <p>{item.desc}</p>
-                            <a href="#">DISCOVER NOW</a>
-                        </div>
-                    ))}
-                </div>
-            </section>
-            {/* Collection Section */}
-            <section className="collection-section" data-aos="fade-up">
-                
-                <div className="collection-grid">
-                    {collections.map((item, index) => (
-                        <div className="collection-card" key={index}>
-                            <img src={item.image} alt={item.title} />
-                            <h4>{item.title}</h4>
-                            <p>{item.desc}</p>
-                            <a href="#">DISCOVER NOW</a>
-                        </div>
-                    ))}
-                </div>
-            </section>
-            
-        </div>
-        </>
-    );
+        {/* Xu hướng / gợi ý */}
+        <section className="collection-section" data-aos="fade-up">
+          <div className="collection-grid">
+            {blogTrends.map((item, index) => (
+              <div className="collection-card" key={index}>
+                <img src={item.image} alt={item.title} />
+                <h4>{item.title}</h4>
+                <p>{item.desc}</p>
+                <a href="#">XEM BÀI VIẾT</a>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+    </>
+  );
 };
 
 export default memo(BlogPage);
