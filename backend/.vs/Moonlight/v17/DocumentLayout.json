@@ -7,6 +7,10 @@
       "RelativeMoniker": "D:0:0:{766C94F2-3E6C-4985-8E9A-343DB4F2BB1E}|OrdersService\\OrdersService.csproj|solutionrelative:ordersservice\\controllers\\ordercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{3F968452-5FDF-48AF-A95A-F5D260591F44}|CartService\\CartService.csproj|d:\\moonlightwebsite\\backend\\cartservice\\controllers\\cartcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3F968452-5FDF-48AF-A95A-F5D260591F44}|CartService\\CartService.csproj|solutionrelative:cartservice\\controllers\\cartcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{766C94F2-3E6C-4985-8E9A-343DB4F2BB1E}|OrdersService\\OrdersService.csproj|d:\\moonlightwebsite\\backend\\ordersservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{766C94F2-3E6C-4985-8E9A-343DB4F2BB1E}|OrdersService\\OrdersService.csproj|solutionrelative:ordersservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -41,10 +45,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{7734F7C9-4A3F-41C6-96F6-AC765F126258}|PaymentService\\PaymentService.csproj|d:\\moonlightwebsite\\backend\\paymentservice\\controllers\\paymentcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{7734F7C9-4A3F-41C6-96F6-AC765F126258}|PaymentService\\PaymentService.csproj|solutionrelative:paymentservice\\controllers\\paymentcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3F968452-5FDF-48AF-A95A-F5D260591F44}|CartService\\CartService.csproj|d:\\moonlightwebsite\\backend\\cartservice\\controllers\\cartcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3F968452-5FDF-48AF-A95A-F5D260591F44}|CartService\\CartService.csproj|solutionrelative:cartservice\\controllers\\cartcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{766C94F2-3E6C-4985-8E9A-343DB4F2BB1E}|OrdersService\\OrdersService.csproj|d:\\moonlightwebsite\\backend\\ordersservice\\model\\orderrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -259,40 +259,14 @@
               "RelativeDocumentMoniker": "OrdersService\\Controllers\\OrderController.cs",
               "ToolTip": "D:\\MoonlightWebsite\\backend\\OrdersService\\Controllers\\OrderController.cs",
               "RelativeToolTip": "OrdersService\\Controllers\\OrderController.cs",
-              "ViewState": "AgIAAOQAAAAAAAAAAAAswPYAAAAJAAAAAAAAAA==",
+              "ViewState": "AgIAACYAAAAAAAAAAAAQwC8AAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-17T02:37:08.659Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Program.cs",
-              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\OrdersService\\Program.cs",
-              "RelativeDocumentMoniker": "OrdersService\\Program.cs",
-              "ToolTip": "D:\\MoonlightWebsite\\backend\\OrdersService\\Program.cs",
-              "RelativeToolTip": "OrdersService\\Program.cs",
-              "ViewState": "AgIAAEIAAAAAAAAAAAAYwFUAAAAlAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-13T17:24:03.88Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "ProductController.cs",
-              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\ProductService\\Controllers\\ProductController.cs",
-              "RelativeDocumentMoniker": "ProductService\\Controllers\\ProductController.cs",
-              "ToolTip": "D:\\MoonlightWebsite\\backend\\ProductService\\Controllers\\ProductController.cs",
-              "RelativeToolTip": "ProductService\\Controllers\\ProductController.cs",
-              "ViewState": "AgIAAGIAAAAAAAAAAAAqwHAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-12T03:33:05.556Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "UserController.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\UserService\\Controllers\\UserController.cs",
               "RelativeDocumentMoniker": "UserService\\Controllers\\UserController.cs",
@@ -300,12 +274,11 @@
               "RelativeToolTip": "UserService\\Controllers\\UserController.cs",
               "ViewState": "AgIAAOAAAAAAAAAAAAAmwPgAAAADAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-17T14:16:47.456Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-17T14:16:47.456Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "Product.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\ProductService\\Model\\Product.cs",
               "RelativeDocumentMoniker": "ProductService\\Model\\Product.cs",
@@ -313,12 +286,11 @@
               "RelativeToolTip": "ProductService\\Model\\Product.cs",
               "ViewState": "AgIAAA0AAAAAAAAAAAA/wAwAAAAyAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-12T08:17:54.915Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-12T08:17:54.915Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "AuthController.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\UserService\\Controllers\\AuthController.cs",
               "RelativeDocumentMoniker": "UserService\\Controllers\\AuthController.cs",
@@ -326,12 +298,11 @@
               "RelativeToolTip": "UserService\\Controllers\\AuthController.cs",
               "ViewState": "AgIAADYAAAAAAAAAAAAmwDkAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-12T16:16:26.007Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-12T16:16:26.007Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "Program.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\PaymentService\\Program.cs",
               "RelativeDocumentMoniker": "PaymentService\\Program.cs",
@@ -339,12 +310,11 @@
               "RelativeToolTip": "PaymentService\\Program.cs",
               "ViewState": "AgIAADYAAAAAAAAAAAAwwG8AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-13T17:32:14.505Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-13T17:32:14.505Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "UpdateOrderInfoRequest.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\OrdersService\\Model\\UpdateOrderInfoRequest.cs",
               "RelativeDocumentMoniker": "OrdersService\\Model\\UpdateOrderInfoRequest.cs",
@@ -352,12 +322,48 @@
               "RelativeToolTip": "OrdersService\\Model\\UpdateOrderInfoRequest.cs",
               "ViewState": "AgIAAAoAAAAAAAAAAAAkwAoAAAA6AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-17T15:05:43.903Z",
+              "WhenOpened": "2025-10-17T15:05:43.903Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "CartController.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\CartService\\Controllers\\CartController.cs",
+              "RelativeDocumentMoniker": "CartService\\Controllers\\CartController.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\CartService\\Controllers\\CartController.cs",
+              "RelativeToolTip": "CartService\\Controllers\\CartController.cs",
+              "ViewState": "AgIAADIBAAAAAAAAAAAowGcBAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-13T18:27:12.498Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 5,
+              "Title": "ProductController.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\ProductService\\Controllers\\ProductController.cs",
+              "RelativeDocumentMoniker": "ProductService\\Controllers\\ProductController.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\ProductService\\Controllers\\ProductController.cs",
+              "RelativeToolTip": "ProductService\\Controllers\\ProductController.cs",
+              "ViewState": "AgIAAGIAAAAAAAAAAAAqwHAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T03:33:05.556Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\OrdersService\\Program.cs",
+              "RelativeDocumentMoniker": "OrdersService\\Program.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\OrdersService\\Program.cs",
+              "RelativeToolTip": "OrdersService\\Program.cs",
+              "ViewState": "AgIAAEIAAAAAAAAAAAAYwFUAAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-13T17:24:03.88Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
               "Title": "PaymentSettings.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\PaymentService\\Model\\PaymentSettings.cs",
               "RelativeDocumentMoniker": "PaymentService\\Model\\PaymentSettings.cs",
@@ -365,8 +371,7 @@
               "RelativeToolTip": "PaymentService\\Model\\PaymentSettings.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-19T15:53:35.121Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-19T15:53:35.121Z"
             },
             {
               "$type": "Document",
@@ -407,18 +412,6 @@
             {
               "$type": "Document",
               "DocumentIndex": 10,
-              "Title": "CartController.cs",
-              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\CartService\\Controllers\\CartController.cs",
-              "RelativeDocumentMoniker": "CartService\\Controllers\\CartController.cs",
-              "ToolTip": "D:\\MoonlightWebsite\\backend\\CartService\\Controllers\\CartController.cs",
-              "RelativeToolTip": "CartService\\Controllers\\CartController.cs",
-              "ViewState": "AgIAALMBAAAAAAAAAAAIwLkBAAAeAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-13T18:27:12.498Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
               "Title": "PaymentController.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\PaymentService\\Controllers\\PaymentController.cs",
               "RelativeDocumentMoniker": "PaymentService\\Controllers\\PaymentController.cs",

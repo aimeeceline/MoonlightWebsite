@@ -3,16 +3,44 @@
   "WorkspaceRootPath": "D:\\MoonlightWebsite\\backend\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{766C94F2-3E6C-4985-8E9A-343DB4F2BB1E}|OrdersService\\OrdersService.csproj|d:\\moonlightwebsite\\backend\\ordersservice\\controllers\\ordercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{766C94F2-3E6C-4985-8E9A-343DB4F2BB1E}|OrdersService\\OrdersService.csproj|solutionrelative:ordersservice\\controllers\\ordercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{766C94F2-3E6C-4985-8E9A-343DB4F2BB1E}|OrdersService\\OrdersService.csproj|d:\\moonlightwebsite\\backend\\ordersservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{766C94F2-3E6C-4985-8E9A-343DB4F2BB1E}|OrdersService\\OrdersService.csproj|solutionrelative:ordersservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9B52D58A-BEA8-4644-B2AE-837C76E01A61}|UserService\\UserService.csproj|d:\\moonlightwebsite\\backend\\userservice\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9B52D58A-BEA8-4644-B2AE-837C76E01A61}|UserService\\UserService.csproj|solutionrelative:userservice\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7734F7C9-4A3F-41C6-96F6-AC765F126258}|PaymentService\\PaymentService.csproj|d:\\moonlightwebsite\\backend\\paymentservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7734F7C9-4A3F-41C6-96F6-AC765F126258}|PaymentService\\PaymentService.csproj|solutionrelative:paymentservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|d:\\moonlightwebsite\\backend\\productservice\\controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|solutionrelative:productservice\\controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|d:\\moonlightwebsite\\backend\\productservice\\model\\product.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|solutionrelative:productservice\\model\\product.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9B52D58A-BEA8-4644-B2AE-837C76E01A61}|UserService\\UserService.csproj|d:\\moonlightwebsite\\backend\\userservice\\controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9B52D58A-BEA8-4644-B2AE-837C76E01A61}|UserService\\UserService.csproj|solutionrelative:userservice\\controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{766C94F2-3E6C-4985-8E9A-343DB4F2BB1E}|OrdersService\\OrdersService.csproj|d:\\moonlightwebsite\\backend\\ordersservice\\model\\updateorderinforequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{766C94F2-3E6C-4985-8E9A-343DB4F2BB1E}|OrdersService\\OrdersService.csproj|solutionrelative:ordersservice\\model\\updateorderinforequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{7734F7C9-4A3F-41C6-96F6-AC765F126258}|PaymentService\\PaymentService.csproj|d:\\moonlightwebsite\\backend\\paymentservice\\model\\paymentsettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{7734F7C9-4A3F-41C6-96F6-AC765F126258}|PaymentService\\PaymentService.csproj|solutionrelative:paymentservice\\model\\paymentsettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{7734F7C9-4A3F-41C6-96F6-AC765F126258}|PaymentService\\PaymentService.csproj|d:\\moonlightwebsite\\backend\\paymentservice\\controllers\\paymentcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{7734F7C9-4A3F-41C6-96F6-AC765F126258}|PaymentService\\PaymentService.csproj|solutionrelative:paymentservice\\controllers\\paymentcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{766C94F2-3E6C-4985-8E9A-343DB4F2BB1E}|OrdersService\\OrdersService.csproj|d:\\moonlightwebsite\\backend\\ordersservice\\controllers\\ordercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{766C94F2-3E6C-4985-8E9A-343DB4F2BB1E}|OrdersService\\OrdersService.csproj|solutionrelative:ordersservice\\controllers\\ordercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{3F968452-5FDF-48AF-A95A-F5D260591F44}|CartService\\CartService.csproj|d:\\moonlightwebsite\\backend\\cartservice\\controllers\\cartcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -58,10 +86,6 @@
       "RelativeMoniker": "D:0:0:{3F968452-5FDF-48AF-A95A-F5D260591F44}|CartService\\CartService.csproj|solutionrelative:cartservice\\repository\\apiclienthelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{7734F7C9-4A3F-41C6-96F6-AC765F126258}|PaymentService\\PaymentService.csproj|d:\\moonlightwebsite\\backend\\paymentservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7734F7C9-4A3F-41C6-96F6-AC765F126258}|PaymentService\\PaymentService.csproj|solutionrelative:paymentservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{7734F7C9-4A3F-41C6-96F6-AC765F126258}|PaymentService\\PaymentService.csproj|d:\\moonlightwebsite\\backend\\paymentservice\\repository\\paymentrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{7734F7C9-4A3F-41C6-96F6-AC765F126258}|PaymentService\\PaymentService.csproj|solutionrelative:paymentservice\\repository\\paymentrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -70,20 +94,8 @@
       "RelativeMoniker": "D:0:0:{3F968452-5FDF-48AF-A95A-F5D260591F44}|CartService\\CartService.csproj|solutionrelative:cartservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{766C94F2-3E6C-4985-8E9A-343DB4F2BB1E}|OrdersService\\OrdersService.csproj|d:\\moonlightwebsite\\backend\\ordersservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{766C94F2-3E6C-4985-8E9A-343DB4F2BB1E}|OrdersService\\OrdersService.csproj|solutionrelative:ordersservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{9B52D58A-BEA8-4644-B2AE-837C76E01A61}|UserService\\UserService.csproj|d:\\moonlightwebsite\\backend\\userservice\\controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{9B52D58A-BEA8-4644-B2AE-837C76E01A61}|UserService\\UserService.csproj|solutionrelative:userservice\\controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{9B52D58A-BEA8-4644-B2AE-837C76E01A61}|UserService\\UserService.csproj|d:\\moonlightwebsite\\backend\\userservice\\controllers\\addresscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{9B52D58A-BEA8-4644-B2AE-837C76E01A61}|UserService\\UserService.csproj|solutionrelative:userservice\\controllers\\addresscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{9B52D58A-BEA8-4644-B2AE-837C76E01A61}|UserService\\UserService.csproj|d:\\moonlightwebsite\\backend\\userservice\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{9B52D58A-BEA8-4644-B2AE-837C76E01A61}|UserService\\UserService.csproj|solutionrelative:userservice\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{F42CA269-32A4-47ED-A914-8B0465BE178F}|DiscountService\\DiscountService.csproj|d:\\moonlightwebsite\\backend\\discountservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -154,10 +166,6 @@
       "RelativeMoniker": "D:0:0:{766C94F2-3E6C-4985-8E9A-343DB4F2BB1E}|OrdersService\\OrdersService.csproj|solutionrelative:ordersservice\\model\\updatestatusrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{766C94F2-3E6C-4985-8E9A-343DB4F2BB1E}|OrdersService\\OrdersService.csproj|d:\\moonlightwebsite\\backend\\ordersservice\\model\\updateorderinforequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{766C94F2-3E6C-4985-8E9A-343DB4F2BB1E}|OrdersService\\OrdersService.csproj|solutionrelative:ordersservice\\model\\updateorderinforequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{766C94F2-3E6C-4985-8E9A-343DB4F2BB1E}|OrdersService\\OrdersService.csproj|d:\\moonlightwebsite\\backend\\ordersservice\\model\\order.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{766C94F2-3E6C-4985-8E9A-343DB4F2BB1E}|OrdersService\\OrdersService.csproj|solutionrelative:ordersservice\\model\\order.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -176,10 +184,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{9B52D58A-BEA8-4644-B2AE-837C76E01A61}|UserService\\UserService.csproj|d:\\moonlightwebsite\\backend\\userservice\\model\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{9B52D58A-BEA8-4644-B2AE-837C76E01A61}|UserService\\UserService.csproj|solutionrelative:userservice\\model\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|d:\\moonlightwebsite\\backend\\productservice\\controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|solutionrelative:productservice\\controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|d:\\moonlightwebsite\\backend\\productservice\\model\\category.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -204,10 +208,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|d:\\moonlightwebsite\\backend\\productservice\\controllers\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|solutionrelative:productservice\\controllers\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|d:\\moonlightwebsite\\backend\\productservice\\model\\product.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|solutionrelative:productservice\\model\\product.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{FE81E881-EB24-40E7-8A36-6513581556DA}|ProductService\\ProductService.csproj|d:\\moonlightwebsite\\backend\\productservice\\data\\dbseeder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -236,8 +236,8 @@
       "VerticalTabListWidth": 256,
       "DocumentGroups": [
         {
-          "DockedHeight": 317,
-          "SelectedChildIndex": 6,
+          "DockedHeight": 469,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Bookmark",
@@ -253,13 +253,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 0,
               "Title": "OrderController.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\OrdersService\\Controllers\\OrderController.cs",
               "RelativeDocumentMoniker": "OrdersService\\Controllers\\OrderController.cs",
               "ToolTip": "D:\\MoonlightWebsite\\backend\\OrdersService\\Controllers\\OrderController.cs",
               "RelativeToolTip": "OrdersService\\Controllers\\OrderController.cs",
-              "ViewState": "AgIAABcBAAAAAAAAAAAAACsBAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAOQAAAAAAAAAAAAswPYAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-17T02:37:08.659Z",
               "EditorCaption": ""
@@ -267,32 +267,97 @@
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "PaymentController.cs",
-              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\PaymentService\\Controllers\\PaymentController.cs",
-              "RelativeDocumentMoniker": "PaymentService\\Controllers\\PaymentController.cs",
-              "ToolTip": "D:\\MoonlightWebsite\\backend\\PaymentService\\Controllers\\PaymentController.cs",
-              "RelativeToolTip": "PaymentService\\Controllers\\PaymentController.cs",
-              "ViewState": "AgIAABQAAAAAAAAAAAAxwBoAAAAAAAAAAAAAAA==",
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\OrdersService\\Program.cs",
+              "RelativeDocumentMoniker": "OrdersService\\Program.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\OrdersService\\Program.cs",
+              "RelativeToolTip": "OrdersService\\Program.cs",
+              "ViewState": "AgIAAEIAAAAAAAAAAAAYwFUAAAAlAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-17T16:37:50.446Z",
+              "WhenOpened": "2025-10-13T17:24:03.88Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ProductController.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\ProductService\\Controllers\\ProductController.cs",
+              "RelativeDocumentMoniker": "ProductService\\Controllers\\ProductController.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\ProductService\\Controllers\\ProductController.cs",
+              "RelativeToolTip": "ProductService\\Controllers\\ProductController.cs",
+              "ViewState": "AgIAAGIAAAAAAAAAAAAqwHAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T03:33:05.556Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "UserController.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\UserService\\Controllers\\UserController.cs",
+              "RelativeDocumentMoniker": "UserService\\Controllers\\UserController.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\UserService\\Controllers\\UserController.cs",
+              "RelativeToolTip": "UserService\\Controllers\\UserController.cs",
+              "ViewState": "AgIAAOAAAAAAAAAAAAAmwPgAAAADAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-17T14:16:47.456Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Product.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\ProductService\\Model\\Product.cs",
+              "RelativeDocumentMoniker": "ProductService\\Model\\Product.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\ProductService\\Model\\Product.cs",
+              "RelativeToolTip": "ProductService\\Model\\Product.cs",
+              "ViewState": "AgIAAA0AAAAAAAAAAAA/wAwAAAAyAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T08:17:54.915Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\UserService\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "UserService\\Controllers\\AuthController.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\UserService\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "UserService\\Controllers\\AuthController.cs",
+              "ViewState": "AgIAADYAAAAAAAAAAAAmwDkAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T16:16:26.007Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "CartController.cs",
-              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\CartService\\Controllers\\CartController.cs",
-              "RelativeDocumentMoniker": "CartService\\Controllers\\CartController.cs",
-              "ToolTip": "D:\\MoonlightWebsite\\backend\\CartService\\Controllers\\CartController.cs",
-              "RelativeToolTip": "CartService\\Controllers\\CartController.cs",
-              "ViewState": "AgIAALMBAAAAAAAAAAAIwLkBAAAeAAAAAAAAAA==",
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\PaymentService\\Program.cs",
+              "RelativeDocumentMoniker": "PaymentService\\Program.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\PaymentService\\Program.cs",
+              "RelativeToolTip": "PaymentService\\Program.cs",
+              "ViewState": "AgIAADYAAAAAAAAAAAAwwG8AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-13T18:27:12.498Z",
+              "WhenOpened": "2025-10-13T17:32:14.505Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 7,
+              "Title": "UpdateOrderInfoRequest.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\OrdersService\\Model\\UpdateOrderInfoRequest.cs",
+              "RelativeDocumentMoniker": "OrdersService\\Model\\UpdateOrderInfoRequest.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\OrdersService\\Model\\UpdateOrderInfoRequest.cs",
+              "RelativeToolTip": "OrdersService\\Model\\UpdateOrderInfoRequest.cs",
+              "ViewState": "AgIAAAoAAAAAAAAAAAAkwAoAAAA6AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-17T15:05:43.903Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
               "Title": "PaymentSettings.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\PaymentService\\Model\\PaymentSettings.cs",
               "RelativeDocumentMoniker": "PaymentService\\Model\\PaymentSettings.cs",
@@ -305,31 +370,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "CartItemRepository.cs",
-              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\CartService\\Repository\\CartItemRepository.cs",
-              "RelativeDocumentMoniker": "CartService\\Repository\\CartItemRepository.cs",
-              "ToolTip": "D:\\MoonlightWebsite\\backend\\CartService\\Repository\\CartItemRepository.cs",
-              "RelativeToolTip": "CartService\\Repository\\CartItemRepository.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACwAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-13T16:21:52.852Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "OrdersItem.cs",
-              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\OrdersService\\Model\\OrdersItem.cs",
-              "RelativeDocumentMoniker": "OrdersService\\Model\\OrdersItem.cs",
-              "ToolTip": "D:\\MoonlightWebsite\\backend\\OrdersService\\Model\\OrdersItem.cs",
-              "RelativeToolTip": "OrdersService\\Model\\OrdersItem.cs",
-              "ViewState": "AgIAAAQAAAAAAAAAAAAmwA4AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-17T15:04:21.262Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 13,
               "Title": "OrderDBContext.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\OrdersService\\Model\\OrderDBContext.cs",
               "RelativeDocumentMoniker": "OrdersService\\Model\\OrderDBContext.cs",
@@ -341,7 +382,55 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 12,
+              "Title": "OrdersItem.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\OrdersService\\Model\\OrdersItem.cs",
+              "RelativeDocumentMoniker": "OrdersService\\Model\\OrdersItem.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\OrdersService\\Model\\OrdersItem.cs",
+              "RelativeToolTip": "OrdersService\\Model\\OrdersItem.cs",
+              "ViewState": "AgIAAAQAAAAAAAAAAAAmwA4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-17T15:04:21.262Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "CartItemRepository.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\CartService\\Repository\\CartItemRepository.cs",
+              "RelativeDocumentMoniker": "CartService\\Repository\\CartItemRepository.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\CartService\\Repository\\CartItemRepository.cs",
+              "RelativeToolTip": "CartService\\Repository\\CartItemRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-13T16:21:52.852Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "CartController.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\CartService\\Controllers\\CartController.cs",
+              "RelativeDocumentMoniker": "CartService\\Controllers\\CartController.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\CartService\\Controllers\\CartController.cs",
+              "RelativeToolTip": "CartService\\Controllers\\CartController.cs",
+              "ViewState": "AgIAALMBAAAAAAAAAAAIwLkBAAAeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-13T18:27:12.498Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "PaymentController.cs",
+              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\PaymentService\\Controllers\\PaymentController.cs",
+              "RelativeDocumentMoniker": "PaymentService\\Controllers\\PaymentController.cs",
+              "ToolTip": "D:\\MoonlightWebsite\\backend\\PaymentService\\Controllers\\PaymentController.cs",
+              "RelativeToolTip": "PaymentService\\Controllers\\PaymentController.cs",
+              "ViewState": "AgIAABQAAAAAAAAAAAAxwBoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-17T16:37:50.446Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
               "Title": "OrderRequestDto.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\OrdersService\\Model\\OrderRequestDto.cs",
               "RelativeDocumentMoniker": "OrdersService\\Model\\OrderRequestDto.cs",
@@ -353,7 +442,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 14,
               "Title": "AddCartItemRequest.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\CartService\\Model\\AddCartItemRequest.cs",
               "RelativeDocumentMoniker": "CartService\\Model\\AddCartItemRequest.cs",
@@ -365,7 +454,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 16,
               "Title": "Microsoft.PackageDependencyResolution.targets",
               "DocumentMoniker": "C:\\Program Files\\dotnet\\sdk\\9.0.305\\Sdks\\Microsoft.NET.Sdk\\targets\\Microsoft.PackageDependencyResolution.targets",
               "ToolTip": "C:\\Program Files\\dotnet\\sdk\\9.0.305\\Sdks\\Microsoft.NET.Sdk\\targets\\Microsoft.PackageDependencyResolution.targets",
@@ -375,7 +464,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 17,
               "Title": "Cart.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\CartService\\Model\\Cart.cs",
               "RelativeDocumentMoniker": "CartService\\Model\\Cart.cs",
@@ -387,7 +476,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 18,
               "Title": "CartDBContext.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\CartService\\Model\\CartDBContext.cs",
               "RelativeDocumentMoniker": "CartService\\Model\\CartDBContext.cs",
@@ -399,7 +488,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 19,
               "Title": "CartItem.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\CartService\\Model\\CartItem.cs",
               "RelativeDocumentMoniker": "CartService\\Model\\CartItem.cs",
@@ -411,19 +500,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
-              "Title": "Program.cs",
-              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\PaymentService\\Program.cs",
-              "RelativeDocumentMoniker": "PaymentService\\Program.cs",
-              "ToolTip": "D:\\MoonlightWebsite\\backend\\PaymentService\\Program.cs",
-              "RelativeToolTip": "PaymentService\\Program.cs",
-              "ViewState": "AgIAAF0AAAAAAAAAAAAwwG8AAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-13T17:32:14.505Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 20,
               "Title": "ApiClientHelper.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\CartService\\Repository\\ApiClientHelper.cs",
               "RelativeDocumentMoniker": "CartService\\Repository\\ApiClientHelper.cs",
@@ -435,7 +512,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 21,
               "Title": "PaymentRepository.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\PaymentService\\Repository\\PaymentRepository.cs",
               "RelativeDocumentMoniker": "PaymentService\\Repository\\PaymentRepository.cs",
@@ -447,31 +524,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
-              "Title": "Program.cs",
-              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\OrdersService\\Program.cs",
-              "RelativeDocumentMoniker": "OrdersService\\Program.cs",
-              "ToolTip": "D:\\MoonlightWebsite\\backend\\OrdersService\\Program.cs",
-              "RelativeToolTip": "OrdersService\\Program.cs",
-              "ViewState": "AgIAAEUAAAAAAAAAAAAAAFcAAAAaAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-13T17:24:03.88Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 18,
-              "Title": "UserController.cs",
-              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\UserService\\Controllers\\UserController.cs",
-              "RelativeDocumentMoniker": "UserService\\Controllers\\UserController.cs",
-              "ToolTip": "D:\\MoonlightWebsite\\backend\\UserService\\Controllers\\UserController.cs",
-              "RelativeToolTip": "UserService\\Controllers\\UserController.cs",
-              "ViewState": "AgIAAAkAAAAAAAAAAAAAABwAAABMAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-17T14:16:47.456Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 23,
               "Title": "AddressController.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\UserService\\Controllers\\AddressController.cs",
               "RelativeDocumentMoniker": "UserService\\Controllers\\AddressController.cs",
@@ -483,7 +536,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 22,
               "Title": "Program.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\CartService\\Program.cs",
               "RelativeDocumentMoniker": "CartService\\Program.cs",
@@ -495,19 +548,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
-              "Title": "AuthController.cs",
-              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\UserService\\Controllers\\AuthController.cs",
-              "RelativeDocumentMoniker": "UserService\\Controllers\\AuthController.cs",
-              "ToolTip": "D:\\MoonlightWebsite\\backend\\UserService\\Controllers\\AuthController.cs",
-              "RelativeToolTip": "UserService\\Controllers\\AuthController.cs",
-              "ViewState": "AgIAADMAAAAAAAAAAAAmwHQAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-12T16:16:26.007Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 24,
               "Title": "Program.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\DiscountService\\Program.cs",
               "RelativeDocumentMoniker": "DiscountService\\Program.cs",
@@ -519,7 +560,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 22,
+              "DocumentIndex": 25,
               "Title": "Program.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\UserService\\Program.cs",
               "RelativeDocumentMoniker": "UserService\\Program.cs",
@@ -531,7 +572,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 23,
+              "DocumentIndex": 26,
               "Title": "CartRepository.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\CartService\\Repository\\CartRepository.cs",
               "RelativeDocumentMoniker": "CartService\\Repository\\CartRepository.cs",
@@ -543,7 +584,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 24,
+              "DocumentIndex": 27,
               "Title": "OrderRepository.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\OrdersService\\Repository\\OrderRepository.cs",
               "RelativeDocumentMoniker": "OrdersService\\Repository\\OrderRepository.cs",
@@ -555,7 +596,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 25,
+              "DocumentIndex": 28,
               "Title": "PaymentDBContext.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\PaymentService\\Model\\PaymentDBContext.cs",
               "RelativeDocumentMoniker": "PaymentService\\Model\\PaymentDBContext.cs",
@@ -567,7 +608,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 26,
+              "DocumentIndex": 29,
               "Title": "DiscountController.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\DiscountService\\Controllers\\DiscountController.cs",
               "RelativeDocumentMoniker": "DiscountService\\Controllers\\DiscountController.cs",
@@ -579,7 +620,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 27,
+              "DocumentIndex": 30,
               "Title": "EmailService.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\OrdersService\\Repository\\EmailService.cs",
               "RelativeDocumentMoniker": "OrdersService\\Repository\\EmailService.cs",
@@ -591,7 +632,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 28,
+              "DocumentIndex": 31,
               "Title": "ApiClientHelper.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\OrdersService\\Repository\\ApiClientHelper.cs",
               "RelativeDocumentMoniker": "OrdersService\\Repository\\ApiClientHelper.cs",
@@ -603,7 +644,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 29,
+              "DocumentIndex": 32,
               "Title": "OrdersItemRepository.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\OrdersService\\Repository\\OrdersItemRepository.cs",
               "RelativeDocumentMoniker": "OrdersService\\Repository\\OrdersItemRepository.cs",
@@ -615,7 +656,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 30,
+              "DocumentIndex": 33,
               "Title": "GenericRepository.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\OrdersService\\Repository\\GenericRepository.cs",
               "RelativeDocumentMoniker": "OrdersService\\Repository\\GenericRepository.cs",
@@ -627,7 +668,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 31,
+              "DocumentIndex": 34,
               "Title": "IOrderRepository.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\OrdersService\\Repository\\IOrderRepository.cs",
               "RelativeDocumentMoniker": "OrdersService\\Repository\\IOrderRepository.cs",
@@ -639,7 +680,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 32,
+              "DocumentIndex": 35,
               "Title": "GenericRepository.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\CartService\\Repository\\GenericRepository.cs",
               "RelativeDocumentMoniker": "CartService\\Repository\\GenericRepository.cs",
@@ -651,7 +692,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 33,
+              "DocumentIndex": 36,
               "Title": "ICartRepository.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\CartService\\Repository\\ICartRepository.cs",
               "RelativeDocumentMoniker": "CartService\\Repository\\ICartRepository.cs",
@@ -663,7 +704,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 34,
+              "DocumentIndex": 37,
               "Title": "UserRepository.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\UserService\\Repository\\UserRepository.cs",
               "RelativeDocumentMoniker": "UserService\\Repository\\UserRepository.cs",
@@ -675,7 +716,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 36,
+              "DocumentIndex": 39,
               "Title": "IUserRepository.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\UserService\\Repository\\IUserRepository.cs",
               "RelativeDocumentMoniker": "UserService\\Repository\\IUserRepository.cs",
@@ -687,7 +728,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 35,
+              "DocumentIndex": 38,
               "Title": "GenericRepository.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\UserService\\Repository\\GenericRepository.cs",
               "RelativeDocumentMoniker": "UserService\\Repository\\GenericRepository.cs",
@@ -699,7 +740,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 37,
+              "DocumentIndex": 40,
               "Title": "UpdateStatusRequest.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\OrdersService\\Model\\UpdateStatusRequest.cs",
               "RelativeDocumentMoniker": "OrdersService\\Model\\UpdateStatusRequest.cs",
@@ -711,19 +752,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 38,
-              "Title": "UpdateOrderInfoRequest.cs",
-              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\OrdersService\\Model\\UpdateOrderInfoRequest.cs",
-              "RelativeDocumentMoniker": "OrdersService\\Model\\UpdateOrderInfoRequest.cs",
-              "ToolTip": "D:\\MoonlightWebsite\\backend\\OrdersService\\Model\\UpdateOrderInfoRequest.cs",
-              "RelativeToolTip": "OrdersService\\Model\\UpdateOrderInfoRequest.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAABDAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-17T15:05:43.903Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 39,
+              "DocumentIndex": 41,
               "Title": "Order.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\OrdersService\\Model\\Order.cs",
               "RelativeDocumentMoniker": "OrdersService\\Model\\Order.cs",
@@ -735,7 +764,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 41,
+              "DocumentIndex": 43,
               "Title": "UserDBContext.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\UserService\\Model\\UserDBContext.cs",
               "RelativeDocumentMoniker": "UserService\\Model\\UserDBContext.cs",
@@ -747,7 +776,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 42,
+              "DocumentIndex": 44,
               "Title": "Adrress.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\UserService\\Model\\Adrress.cs",
               "RelativeDocumentMoniker": "UserService\\Model\\Adrress.cs",
@@ -759,7 +788,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 43,
+              "DocumentIndex": 45,
               "Title": "User.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\UserService\\Model\\User.cs",
               "RelativeDocumentMoniker": "UserService\\Model\\User.cs",
@@ -771,19 +800,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 44,
-              "Title": "ProductController.cs",
-              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\ProductService\\Controllers\\ProductController.cs",
-              "RelativeDocumentMoniker": "ProductService\\Controllers\\ProductController.cs",
-              "ToolTip": "D:\\MoonlightWebsite\\backend\\ProductService\\Controllers\\ProductController.cs",
-              "RelativeToolTip": "ProductService\\Controllers\\ProductController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAkAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-12T03:33:05.556Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 40,
+              "DocumentIndex": 42,
               "Title": "DbSeeder.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\UserService\\Data\\DbSeeder.cs",
               "RelativeDocumentMoniker": "UserService\\Data\\DbSeeder.cs",
@@ -795,7 +812,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 45,
+              "DocumentIndex": 46,
               "Title": "Category.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\ProductService\\Model\\Category.cs",
               "RelativeDocumentMoniker": "ProductService\\Model\\Category.cs",
@@ -807,7 +824,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 46,
+              "DocumentIndex": 47,
               "Title": "appsettings.json",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\UserService\\appsettings.json",
               "RelativeDocumentMoniker": "UserService\\appsettings.json",
@@ -819,7 +836,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 47,
+              "DocumentIndex": 48,
               "Title": "ProductService.csproj",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\ProductService\\ProductService.csproj",
               "RelativeDocumentMoniker": "ProductService\\ProductService.csproj",
@@ -831,7 +848,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 48,
+              "DocumentIndex": 49,
               "Title": "Program.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\ProductService\\Program.cs",
               "RelativeDocumentMoniker": "ProductService\\Program.cs",
@@ -843,7 +860,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 49,
+              "DocumentIndex": 50,
               "Title": "ProductRepository.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\ProductService\\Repository\\ProductRepository.cs",
               "RelativeDocumentMoniker": "ProductService\\Repository\\ProductRepository.cs",
@@ -855,7 +872,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 50,
+              "DocumentIndex": 51,
               "Title": "CategoryController.cs",
               "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\ProductService\\Controllers\\CategoryController.cs",
               "RelativeDocumentMoniker": "ProductService\\Controllers\\CategoryController.cs",
@@ -888,18 +905,6 @@
               "ViewState": "AgIAAGUAAAAAAAAAAADwv5oAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-11T16:57:32.166Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 51,
-              "Title": "Product.cs",
-              "DocumentMoniker": "D:\\MoonlightWebsite\\backend\\ProductService\\Model\\Product.cs",
-              "RelativeDocumentMoniker": "ProductService\\Model\\Product.cs",
-              "ToolTip": "D:\\MoonlightWebsite\\backend\\ProductService\\Model\\Product.cs",
-              "RelativeToolTip": "ProductService\\Model\\Product.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAIBJwAwAAAAyAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-12T08:17:54.915Z"
             },
             {
               "$type": "Document",
@@ -940,7 +945,7 @@
           ]
         },
         {
-          "DockedHeight": 192,
+          "DockedHeight": 40,
           "SelectedChildIndex": -1,
           "Children": [
             {
