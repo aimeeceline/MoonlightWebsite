@@ -1,25 +1,33 @@
 {
   "format": 1,
   "restore": {
-    "/src/UserService/UserService.csproj": {}
+    "D:\\MoonlightWebsite\\backend\\UserService\\UserService.csproj": {}
   },
   "projects": {
-    "/src/UserService/UserService.csproj": {
+    "D:\\MoonlightWebsite\\backend\\UserService\\UserService.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/src/UserService/UserService.csproj",
+        "projectUniqueName": "D:\\MoonlightWebsite\\backend\\UserService\\UserService.csproj",
         "projectName": "UserService",
-        "projectPath": "/src/UserService/UserService.csproj",
-        "packagesPath": "/root/.nuget/packages/",
-        "outputPath": "/src/UserService/obj/",
+        "projectPath": "D:\\MoonlightWebsite\\backend\\UserService\\UserService.csproj",
+        "packagesPath": "C:\\Users\\lelan\\.nuget\\packages\\",
+        "outputPath": "D:\\MoonlightWebsite\\backend\\UserService\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "/root/.nuget/NuGet/NuGet.Config"
+          "D:\\MoonlightWebsite\\NuGet.Config",
+          "C:\\Users\\lelan\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -37,7 +45,8 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        }
+        },
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net8.0": {
@@ -85,7 +94,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.414/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

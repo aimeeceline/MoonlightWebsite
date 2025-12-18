@@ -86,9 +86,15 @@ builder.Services.AddAuthorization(opts =>
 var app = builder.Build();
 
 // ===== Auto-migrate =====
-using (var scope = app.Services.CreateScope())
-    await scope.ServiceProvider.GetRequiredService<CartDBContext>().Database.MigrateAsync();
-
+// Không chạy migrate khi chạy Integration Test (WebApplicationFactory)
+if (!app.Environment.IsEnvironment("Test"))
+{
+    using var scope = app.Services.CreateScope();
+    await scope.ServiceProvider
+        .GetRequiredService<CartDBContext>()
+        .Database
+        .MigrateAsync();
+}
 // ===== Pipeline =====
 app.UseSwagger();
 app.UseSwaggerUI(c =>
@@ -127,3 +133,4 @@ public record ServiceUrls
     public string? ProductService { get; init; }
     public string? DiscountService { get; init; }
 }
+public partial class Program { }
